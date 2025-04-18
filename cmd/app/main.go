@@ -1,14 +1,13 @@
 package main
 
-import "github.com/prince272/konabra/internal/app"
+import "github.com/gin-gonic/gin"
 
 func main() {
-	// Initialize the application configuration and dependencies
-	app.Init()
-
-	// Set up routes and request handlers
-	app.MapHandlers()
-
-	// Start the application server
-	app.Run()
+	router := gin.Default()
+	router.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
+	router.Run() // listen and serve on 0.0.0.0:8080
 }
