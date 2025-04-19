@@ -29,9 +29,6 @@ func New() *App {
 	}
 }
 
-func (app *App) MapHandler() {
-}
-
 func (app *App) Run() {
 	app.Router.Run()
 }
