@@ -1,13 +1,14 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/prince272/konabra/internal/app"
+	"github.com/prince272/konabra/internal/handlers"
+	"github.com/prince272/konabra/internal/services"
+)
 
 func main() {
-	router := gin.Default()
-	router.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-	router.Run() // listen and serve on 0.0.0.0:8080
+	myApp := app.New()
+	myApp.Container.Register(services.NewWeatherService)
+	myApp.Container.Handle(handlers.NewWeatherForecastHandler)
+	myApp.Run()
 }
