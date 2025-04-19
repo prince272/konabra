@@ -1,0 +1,52 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a sample server using Gin and Swagger. CLI =\u003e swag init -g cmd/app/main.go -o ./docs/swagger",
+        "title": "Example API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/weatherforecast": {
+            "get": {
+                "description": "Returns a list of weather forecasts.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Weather"
+                ],
+                "summary": "Get Weather Forecasts",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/services.WeatherForecast"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "services.WeatherForecast": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "summary": {
+                    "type": "string"
+                },
+                "temperatureC": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}
