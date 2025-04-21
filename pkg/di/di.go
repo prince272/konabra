@@ -17,11 +17,11 @@ func New() *Container {
 	}
 }
 
-func (c *Container) Register(constructor interface{}) error {
+func (c *Container) Register(constructor any) error {
 	return c.inner.Provide(constructor)
 }
 
-func (c *Container) Handle(constructor interface{}) error {
+func (c *Container) Handle(constructor any) error {
 	// Step 1: Register the constructor
 	if err := c.inner.Provide(constructor); err != nil {
 		return fmt.Errorf("failed to register constructor: %w", err)
@@ -69,7 +69,7 @@ func Get[T any](c *Container) (T, error) {
 func MustGet[T any](c *Container) T {
 	service, err := Get[T](c)
 	if err != nil {
-		panic(fmt.Sprintf("failed to get service: %v", err))
+		panic(fmt.Errorf("failed to get service: %w", err))
 	}
 	return service
 }

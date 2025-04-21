@@ -17,11 +17,11 @@ func main() {
 	myApp := app.New()
 
 	// Register services in the application's container
-	myApp.Container.Register(services.NewWeatherService)
+	myApp.Register(services.NewWeatherService)
 
 	// Register handlers in the application's container
-	myApp.Container.Handle(handlers.NewSwaggerHandler)
-	myApp.Container.Handle(handlers.NewWeatherForecastHandler)
+	myApp.Handle(handlers.NewSwaggerHandler)
+	myApp.Handle(handlers.NewWeatherForecastHandler)
 
 	// Run the application (starts the server and handles requests)
 	myApp.Run()
