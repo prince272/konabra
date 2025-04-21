@@ -17,47 +17,77 @@ func New() *Container {
 	}
 }
 
+// Register a constructor without a key
 func (c *Container) Register(constructor any) error {
 	return c.inner.Provide(constructor)
 }
 
+// RegisterWithKey registers a constructor with a specific key
+func (c *Container) RegisterWithKey(key string, constructor any) error {
+	return c.inner.Provide(constructor, dig.Name(key))
+}
+
+// Handle registers and verifies a constructor without a key
 func (c *Container) Handle(constructor any) error {
-	// Step 1: Register the constructor
-	if err := c.inner.Provide(constructor); err != nil {
+	if err := c.Register(constructor); err != nil {
 		return fmt.Errorf("failed to register constructor: %w", err)
 	}
 
-	// Step 2: Dynamically invoke the constructor to verify it works
+	return c.verifyConstructor(constructor, "")
+}
+
+// HandleWithKey registers and verifies a constructor with a key
+func (c *Container) HandleWithKey(key string, constructor any) error {
+	if err := c.RegisterWithKey(key, constructor); err != nil {
+		return fmt.Errorf("failed to register constructor: %w", err)
+	}
+
+	return c.verifyConstructor(constructor, key)
+}
+
+// verifyConstructor checks if the constructor can be invoked
+func (c *Container) verifyConstructor(constructor any, key string) error {
 	constructorType := reflect.TypeOf(constructor)
 	if constructorType.Kind() != reflect.Func {
 		return fmt.Errorf("constructor must be a function")
 	}
 
-	// Ensure the constructor returns exactly one value
 	if constructorType.NumOut() != 1 {
 		return fmt.Errorf("constructor must return exactly one value")
 	}
 
-	// Create a function that consumes the constructor's return type
 	returnType := constructorType.Out(0)
-	consumerFunc := reflect.New(reflect.FuncOf(
-		[]reflect.Type{returnType},
-		[]reflect.Type{},
-		false,
-	)).Elem()
 
-	// Set a dummy consumer that does nothing (just verifies construction)
-	consumerFunc.Set(reflect.MakeFunc(
-		consumerFunc.Type(),
-		func(args []reflect.Value) []reflect.Value {
-			return nil
-		},
-	))
+	// Create a parameter struct with optional name tag
+	paramFields := []reflect.StructField{{
+		Name:      "In",
+		Type:      reflect.TypeOf(dig.In{}),
+		Anonymous: true,
+	}}
+	serviceField := reflect.StructField{
+		Name: "Service",
+		Type: returnType,
+	}
+	if key != "" {
+		serviceField.Tag = reflect.StructTag(fmt.Sprintf(`name:"%s"`, key))
+	}
+	paramFields = append(paramFields, serviceField)
 
-	// Invoke the consumer to trigger dependency resolution
-	return c.inner.Invoke(consumerFunc.Interface())
+	paramStruct := reflect.StructOf(paramFields)
+	consumerType := reflect.FuncOf([]reflect.Type{paramStruct}, nil, false)
+
+	// Create a dummy consumer
+	consumer := reflect.MakeFunc(consumerType, func(args []reflect.Value) []reflect.Value {
+		return nil
+	})
+
+	if err := c.inner.Invoke(consumer.Interface()); err != nil {
+		return fmt.Errorf("verification failed: %w", err)
+	}
+	return nil
 }
 
+// Get retrieves a service by type without a key
 func Get[T any](c *Container) (T, error) {
 	var service T
 	err := c.inner.Invoke(func(s T) {
@@ -66,10 +96,51 @@ func Get[T any](c *Container) (T, error) {
 	return service, err
 }
 
+// GetWithKey retrieves a service by type and key
+func GetWithKey[T any](c *Container, key string) (T, error) {
+	var result T
+
+	// Dynamically create parameter struct with name tag
+	paramStruct := reflect.StructOf([]reflect.StructField{
+		{
+			Name:      "In",
+			Type:      reflect.TypeOf(dig.In{}),
+			Anonymous: true,
+		},
+		{
+			Name: "Service",
+			Type: reflect.TypeOf(result),
+			Tag:  reflect.StructTag(fmt.Sprintf(`name:"%s"`, key)),
+		},
+	})
+
+	// Create function to extract the service
+	fnType := reflect.FuncOf([]reflect.Type{paramStruct}, nil, false)
+	fn := reflect.MakeFunc(fnType, func(args []reflect.Value) []reflect.Value {
+		result = args[0].Field(1).Interface().(T)
+		return nil
+	})
+
+	if err := c.inner.Invoke(fn.Interface()); err != nil {
+		return result, err
+	}
+	return result, nil
+}
+
+// MustGet retrieves a service without a key, panicking on error
 func MustGet[T any](c *Container) T {
 	service, err := Get[T](c)
 	if err != nil {
 		panic(fmt.Errorf("failed to get service: %w", err))
+	}
+	return service
+}
+
+// MustGetWithKey retrieves a service by key, panicking on error
+func MustGetWithKey[T any](c *Container, key string) T {
+	service, err := GetWithKey[T](c, key)
+	if err != nil {
+		panic(fmt.Errorf("failed to get service with key '%s': %w", key, err))
 	}
 	return service
 }

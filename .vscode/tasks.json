@@ -1,0 +1,16 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Go: Build",
+      "type": "shell",
+      "command": "go build -o ${workspaceFolder}/bin/app.exe ${workspaceFolder}/cmd/app",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$go"],
+      "detail": "Build the Go application"
+    }
+  ]
+}
