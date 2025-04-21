@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/prince272/konabra/internal/services"
+	"github.com/prince272/konabra/pkg/di"
 )
 
 // WeatherForecastHandler handles weather forecast endpoints.
@@ -18,8 +19,9 @@ type WeatherForecastHandler struct {
 // @Produce      json
 // @Success      200  {array}  services.WeatherForecast
 // @Router       /weatherforecast [get]
-func NewWeatherForecastHandler(router *gin.Engine, weatherForecastService *services.WeatherService) *WeatherForecastHandler {
+func NewWeatherForecastHandler(router *gin.Engine, container *di.Container) *WeatherForecastHandler {
 	router.GET("/weatherforecast", func(c *gin.Context) {
+		weatherForecastService := di.MustGet[*services.WeatherService](container)
 		c.JSON(http.StatusOK, weatherForecastService.GetForecasts(10))
 	})
 
