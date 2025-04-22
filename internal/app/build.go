@@ -2,8 +2,6 @@ package app
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -33,7 +31,7 @@ func buildConfig() func() *Config {
 	return func() *Config {
 		v := viper.New()
 
-		paths := getPossiblePaths(".env")
+		paths := utils.GetPossiblePaths(".env")
 		if len(paths) > 0 {
 			v.SetConfigFile(paths[0])
 			v.SetConfigType("env")
@@ -61,43 +59,13 @@ func buildValidate() func() *validator.Validate {
 	}
 }
 
-func getPossiblePaths(relPath string) []string {
-	// Get the working directory
-	wd, err := os.Getwd()
-	if err != nil {
-		panic(fmt.Errorf("failed to get working directory: %w", err))
-	}
-
-	// Get the application directory
-	// Assuming the application directory is the directory containing the executable
-	appDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		panic(fmt.Errorf("failed to get application directory: %w", err))
-	}
-
-	// List of possible paths: relative path, working directory path, and application directory path
-	candidates := []string{
-		filepath.Join(wd, relPath),
-		filepath.Join(appDir, relPath),
-	}
-
-	var validPaths []string
-	for _, path := range candidates {
-		if info, err := os.Stat(path); err == nil && !info.IsDir() {
-			validPaths = append(validPaths, path)
-		}
-	}
-
-	return validPaths
-}
-
 // Default DB constructor
 func buildDefaultDB(container *di.Container) func() *gorm.DB {
 	return func() *gorm.DB {
 		config := di.MustGet[*Config](container)
 
 		// Get the possible paths for the database file
-		paths := getPossiblePaths(config.Databases.Default)
+		paths := utils.GetPossiblePaths(config.Databases.Default)
 
 		if len(paths) <= 0 {
 			panic(fmt.Errorf("failed to find database file: %s", config.Databases.Default))

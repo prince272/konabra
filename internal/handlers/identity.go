@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -36,8 +35,11 @@ func createAccount(ctx *gin.Context, cnt *di.Container) {
 	var form *services.CreateAccountForm
 
 	if err := ctx.ShouldBindBodyWithJSON(&form); err != nil {
-		log.Printf("[WARN] Failed to bind request body: %v | Path: %s", err, ctx.Request.URL.Path)
-		ctx.JSON(http.StatusBadRequest, problems.NewProblem(http.StatusBadRequest, "Invalid request body.", ctx.Request.URL.Path))
+		ctx.JSON(http.StatusBadRequest, problems.NewProblem(
+			http.StatusBadRequest,
+			"Invalid request body.",
+			ctx.Request.URL.Path,
+		))
 		return
 	}
 
