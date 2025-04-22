@@ -1,35 +1,78 @@
 basePath: /
 definitions:
-  services.WeatherForecast:
+  problems.Problem:
     properties:
-      date:
+      detail:
+        description: Human-readable explanation
         type: string
-      summary:
+      instance:
+        description: Request path or unique error ID
         type: string
-      temperatureC:
+      status:
+        description: HTTP status code
         type: integer
+      title:
+        description: Short summary of the problem
+        type: string
+      type:
+        description: A URI reference to the problem type
+        type: string
+    type: object
+  services.CreateAccountForm:
+    properties:
+      firstName:
+        maxLength: 256
+        type: string
+      lastName:
+        maxLength: 256
+        type: string
+      password:
+        type: string
+      username:
+        maxLength: 256
+        type: string
+    required:
+    - firstName
+    - lastName
+    - password
+    - username
     type: object
 host: localhost:8080
 info:
   contact: {}
-  description: This is a sample server using Gin and Swagger. CLI => swag init -g
-    cmd/app/main.go -o ./docs/swagger
+  description: This is a sample server using Gin and Swagger.
   title: Example API
   version: "1.0"
 paths:
-  /weatherforecast:
-    get:
-      description: Returns a list of weather forecasts.
+  /account/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account with the provided information
+      parameters:
+      - description: Account creation details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateAccountForm'
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Account created successfully
           schema:
-            items:
-              $ref: '#/definitions/services.WeatherForecast'
-            type: array
-      summary: Get Weather Forecasts
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/problems.Problem'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/problems.Problem'
+      summary: Create a new account
       tags:
-      - Weather
+      - account
 swagger: "2.0"

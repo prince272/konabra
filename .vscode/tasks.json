@@ -11,6 +11,20 @@
       },
       "problemMatcher": ["$go"],
       "detail": "Build the Go application"
+    },
+    {
+      "label": "Swagger: generate docs",
+      "type": "shell",
+      "command": "swag",
+      "args": [
+        "init",
+        "-g", "cmd/app/main.go", 
+        "-o", "docs/swagger"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
     }
   ]
 }

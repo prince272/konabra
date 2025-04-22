@@ -15,24 +15,48 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/weatherforecast": {
-            "get": {
-                "description": "Returns a list of weather forecasts.",
+        "/account/create": {
+            "post": {
+                "description": "Create a new user account with the provided information",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Weather"
+                    "account"
                 ],
-                "summary": "Get Weather Forecasts",
+                "summary": "Create a new account",
+                "parameters": [
+                    {
+                        "description": "Account creation details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.CreateAccountForm"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Account created successfully",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/services.WeatherForecast"
-                            }
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/problems.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/problems.Problem"
                         }
                     }
                 }
@@ -40,17 +64,54 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "services.WeatherForecast": {
+        "problems.Problem": {
             "type": "object",
             "properties": {
-                "date": {
+                "detail": {
+                    "description": "Human-readable explanation",
                     "type": "string"
                 },
-                "summary": {
+                "instance": {
+                    "description": "Request path or unique error ID",
                     "type": "string"
                 },
-                "temperatureC": {
+                "status": {
+                    "description": "HTTP status code",
                     "type": "integer"
+                },
+                "title": {
+                    "description": "Short summary of the problem",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "A URI reference to the problem type",
+                    "type": "string"
+                }
+            }
+        },
+        "services.CreateAccountForm": {
+            "type": "object",
+            "required": [
+                "firstName",
+                "lastName",
+                "password",
+                "username"
+            ],
+            "properties": {
+                "firstName": {
+                    "type": "string",
+                    "maxLength": 256
+                },
+                "lastName": {
+                    "type": "string",
+                    "maxLength": 256
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 256
                 }
             }
         }
@@ -64,7 +125,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Example API",
-	Description:      "This is a sample server using Gin and Swagger. CLI => swag init -g cmd/app/main.go -o ./docs/swagger",
+	Description:      "This is a sample server using Gin and Swagger.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

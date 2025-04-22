@@ -6,7 +6,9 @@ import (
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/prince272/konabra/pkg/di"
+	"github.com/prince272/konabra/utils"
 	"github.com/spf13/viper"
 	"gorm.io/driver/sqlite"
 	_ "gorm.io/driver/sqlite"
@@ -48,6 +50,14 @@ func buildConfig() func() *Config {
 		}
 
 		return &config
+	}
+}
+
+func buildValidate() func() *validator.Validate {
+	return func() *validator.Validate {
+		validate := validator.New()
+		validate.RegisterValidation("password", utils.ValidatePassword)
+		return validate
 	}
 }
 
@@ -119,6 +129,10 @@ func New() *App {
 	}
 
 	if err := container.Register(buildRouter()); err != nil {
+		panic(err)
+	}
+
+	if err := container.Register(buildValidate()); err != nil {
 		panic(err)
 	}
 
