@@ -2,15 +2,25 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch Go API",
+      "name": "Launch Web App (source)",
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/cmd/app/main.go",
-      "cwd": "${workspaceFolder}",
-      "env": {},
+      "program": "${workspaceFolder}/cmd/app",
+      "envFile": "${workspaceFolder}/.env",
       "args": [],
-     "preLaunchTask": "Swagger: generate docs"
+      "cwd": "${workspaceFolder}",
+      "buildFlags": ""
+    },
+    {
+      "name": "Launch Web App (binary)",
+      "type": "go",
+      "request": "launch",
+      "mode": "exec",
+      "program": "${workspaceFolder}/bin/app/konabra.exe",
+      "envFile": "${workspaceFolder}/.env",
+      "args": [],
+      "cwd": "${workspaceFolder}/bin/app"
     }
   ]
 }

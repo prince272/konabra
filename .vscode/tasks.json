@@ -2,28 +2,20 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Go: Build",
+      "label": "Build Web App",
       "type": "shell",
-      "command": "go build -o ${workspaceFolder}/bin/app.exe ${workspaceFolder}/cmd/app",
+      "command": "make build",
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "problemMatcher": ["$go"],
-      "detail": "Build the Go application"
+      "problemMatcher": []
     },
     {
-      "label": "Swagger: generate docs",
+      "label": "Clean Web App",
       "type": "shell",
-      "command": "swag",
-      "args": [
-        "init",
-        "-g", "cmd/app/main.go", 
-        "-o", "docs/swagger"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
+      "command": "make clean",
+      "group": "build",
       "problemMatcher": []
     }
   ]

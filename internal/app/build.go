@@ -31,51 +31,10 @@ type Config struct {
 	Databases struct {
 		Default string `mapstructure:"DB_DEFAULT"`
 	} `mapstructure:",squash"`
-}
-
-// Logger constructor with Lumberjack file rotation
-func buildLogger() func() *zap.Logger {
-	return func() *zap.Logger {
-		// Lumberjack logger for rotating file output
-		lumberjackLogger := &lumberjack.Logger{
-			Filename:   "app.log", // log file name
-			MaxSize:    10,        // megabytes (maximum size before rotation)
-			MaxBackups: 5,         // number of old files to keep
-			MaxAge:     28,        // days (how long to retain old files)
-			Compress:   true,      // compress old logs
-		}
-
-		// Console encoder (colorized for development)
-		consoleCfg := zap.NewDevelopmentEncoderConfig()
-		consoleCfg.EncodeLevel = zapcore.CapitalColorLevelEncoder
-		consoleCfg.EncodeTime = zapcore.ISO8601TimeEncoder
-		consoleEncoder := zapcore.NewConsoleEncoder(consoleCfg)
-
-		// File encoder (structured JSON)
-		fileCfg := zap.NewProductionEncoderConfig()
-		fileCfg.EncodeTime = zapcore.ISO8601TimeEncoder
-		fileEncoder := zapcore.NewJSONEncoder(fileCfg)
-
-		// Tie encoders to outputs
-		consoleWS := zapcore.Lock(os.Stdout)
-		fileWS := zapcore.AddSync(lumberjackLogger)
-
-		// Combine cores (console + file output)
-		core := zapcore.NewTee(
-			zapcore.NewCore(consoleEncoder, consoleWS, zapcore.InfoLevel),
-			zapcore.NewCore(fileEncoder, fileWS, zapcore.InfoLevel),
-		)
-
-		return zap.New(core, zap.AddCaller())
-	}
-}
-
-// Router constructor
-func buildRouter() func() *gin.Engine {
-	return func() *gin.Engine {
-		router := gin.New()
-		return router
-	}
+	Logging struct {
+		Level  string `mapstructure:"LOG_LEVEL"`
+		Output string `mapstructure:"LOG_OUTPUT"`
+	} `mapstructure:",squash"`
 }
 
 // Config constructor
@@ -97,6 +56,54 @@ func buildConfig() func() *Config {
 			panic(fmt.Errorf("failed to unmarshal config: %w", err))
 		}
 		return &config
+	}
+}
+
+// Logger constructor (depends on Config)
+func buildLogger(container *di.Container) func() *zap.Logger {
+	return func() *zap.Logger {
+		config := di.MustGet[*Config](container)
+
+		// Determine log level
+		var level zapcore.Level
+		if err := level.UnmarshalText([]byte(config.Logging.Level)); err != nil {
+			level = zapcore.InfoLevel // fallback default
+		}
+
+		// Determine log output
+		lumberjackLogger := &lumberjack.Logger{
+			Filename:   config.Logging.Output,
+			MaxSize:    10, // MB
+			MaxBackups: 5,
+			MaxAge:     28, // days
+			Compress:   true,
+		}
+		fileWS := zapcore.AddSync(lumberjackLogger)
+
+		// Encoders
+		consoleCfg := zap.NewDevelopmentEncoderConfig()
+		consoleCfg.EncodeLevel = zapcore.CapitalColorLevelEncoder
+		consoleCfg.EncodeTime = zapcore.ISO8601TimeEncoder
+		consoleEncoder := zapcore.NewConsoleEncoder(consoleCfg)
+
+		fileCfg := zap.NewProductionEncoderConfig()
+		fileCfg.EncodeTime = zapcore.ISO8601TimeEncoder
+		fileEncoder := zapcore.NewJSONEncoder(fileCfg)
+
+		core := zapcore.NewTee(
+			zapcore.NewCore(consoleEncoder, zapcore.Lock(os.Stdout), level), // always to console
+			zapcore.NewCore(fileEncoder, fileWS, level),                     // to file
+		)
+
+		return zap.New(core, zap.AddCaller())
+	}
+}
+
+// Router constructor
+func buildRouter() func() *gin.Engine {
+	return func() *gin.Engine {
+		router := gin.New()
+		return router
 	}
 }
 
@@ -136,15 +143,17 @@ func New() *App {
 		panic(err)
 	}
 
-	// Logger
-	if err := container.Register(buildLogger()); err != nil {
-		panic(err)
-	}
-
-	// Config, Router, Validator, DB
+	// Config first (because Logger needs it)
 	if err := container.Register(buildConfig()); err != nil {
 		panic(err)
 	}
+
+	// Logger (after config)
+	if err := container.Register(buildLogger(container)); err != nil {
+		panic(err)
+	}
+
+	// Router, Validator, DB
 	if err := container.Register(buildRouter()); err != nil {
 		panic(err)
 	}
@@ -177,11 +186,11 @@ func (app *App) Run() {
 	router := di.MustGet[*gin.Engine](app.container)
 	logger := di.MustGet[*zap.Logger](app.container)
 
-	// Attach zap middleware for logging and panic recovery
+	// Attach zap middleware
 	router.Use(ginzap.Ginzap(logger, time.RFC3339, true))
 	router.Use(ginzap.RecoveryWithZap(logger, true))
 
-	logger.Info("Starting HTTP server on default port...")
+	logger.Info("Starting HTTP server...")
 	if err := router.Run(); err != nil {
 		logger.Fatal("Server failed to start", zap.Error(err))
 	}
