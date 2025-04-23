@@ -1,13 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is a sample server using Gin and Swagger.",
-        "title": "Example API",
-        "contact": {},
-        "version": "1.0"
+        "contact": {}
     },
-    "host": "localhost:8080",
-    "basePath": "/",
     "paths": {
         "/account/create": {
             "post": {
