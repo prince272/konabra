@@ -1,4 +1,4 @@
-package app
+package builds
 
 import (
 	"fmt"
@@ -18,12 +18,12 @@ import (
 	"gorm.io/gorm"
 )
 
-type App struct {
+type Api struct {
 	container *di.Container
 }
 
 type Config struct {
-	App struct {
+	Api struct {
 		Name string `mapstructure:"APP_NAME"`
 		Env  string `mapstructure:"APP_ENV"`
 		Port int    `mapstructure:"APP_PORT"`
@@ -132,8 +132,8 @@ func buildDefaultDB(container *di.Container) func() *gorm.DB {
 	}
 }
 
-// New creates the application and registers core dependencies
-func New() *App {
+// NewApi creates the application and registers core dependencies
+func NewApi() *Api {
 	container := di.New()
 
 	// Self
@@ -164,33 +164,34 @@ func New() *App {
 		panic(err)
 	}
 
-	return &App{container: container}
+	return &Api{container: container}
 }
 
 // Register additional constructors
-func (app *App) Register(constructor any) {
-	if err := app.container.Register(constructor); err != nil {
+func (api *Api) Register(constructor any) {
+	if err := api.container.Register(constructor); err != nil {
 		panic(err)
 	}
 }
 
 // Handle registers handlers
-func (app *App) Handle(handler any) {
-	if err := app.container.Handle(handler); err != nil {
+func (api *Api) Handle(handler any) {
+	if err := api.container.Handle(handler); err != nil {
 		panic(err)
 	}
 }
 
 // Run starts the HTTP server with request-logging middleware
-func (app *App) Run() {
-	router := di.MustGet[*gin.Engine](app.container)
-	logger := di.MustGet[*zap.Logger](app.container)
+func (api *Api) Run(...string) {
+	router := di.MustGet[*gin.Engine](api.container)
+	logger := di.MustGet[*zap.Logger](api.container)
 
 	// Attach zap middleware
 	router.Use(ginzap.Ginzap(logger, time.RFC3339, true))
 	router.Use(ginzap.RecoveryWithZap(logger, true))
 
 	logger.Info("Starting HTTP server...")
+
 	if err := router.Run(); err != nil {
 		logger.Fatal("Server failed to start", zap.Error(err))
 	}

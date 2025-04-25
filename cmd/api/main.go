@@ -2,13 +2,13 @@ package main
 
 import (
 	_ "github.com/prince272/konabra/docs/swagger"
-	"github.com/prince272/konabra/internal/app"
+	"github.com/prince272/konabra/internal/builds"
 	"github.com/prince272/konabra/internal/handlers"
 	"github.com/prince272/konabra/internal/repositories"
 	"github.com/prince272/konabra/internal/services"
 )
 
-var myApp *app.App
+var api *builds.Api
 
 // @title       Example API
 // @version     1.0
@@ -18,20 +18,20 @@ var myApp *app.App
 
 func init() {
 	// Initialize the application with a new container
-	myApp = app.New()
+	api = builds.NewApi()
 }
 
 func main() {
 	// Register repositories in the application's container
-	myApp.Register(repositories.NewIdentityRepository)
+	api.Register(repositories.NewIdentityRepository)
 
 	// Register services in the application's container
-	myApp.Register(services.NewIdentityService)
+	api.Register(services.NewIdentityService)
 
 	// Register handlers in the application's container
-	myApp.Handle(handlers.NewSwaggerHandler)
-	myApp.Handle(handlers.NewIdentityHandler)
+	api.Handle(handlers.NewSwaggerHandler)
+	api.Handle(handlers.NewIdentityHandler)
 
 	// Run the application (starts the server and handles requests)
-	myApp.Run()
+	api.Run()
 }

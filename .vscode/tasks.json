@@ -2,9 +2,10 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Build Web App",
+      "label": "Build API",
       "type": "shell",
-      "command": "make build",
+      "command": "./scripts/api.sh",
+      "args": ["build"],
       "group": {
         "kind": "build",
         "isDefault": true
@@ -12,10 +13,10 @@
       "problemMatcher": []
     },
     {
-      "label": "Clean Web App",
+      "label": "Clean API",
       "type": "shell",
-      "command": "make clean",
-      "group": "build",
+      "command": "./scripts/api.sh",
+      "args": ["clean"],
       "problemMatcher": []
     }
   ]

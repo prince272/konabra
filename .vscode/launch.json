@@ -2,25 +2,21 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch Web App (source)",
-      "type": "go",
-      "request": "launch",
-      "mode": "auto",
-      "program": "${workspaceFolder}/cmd/app",
-      "envFile": "${workspaceFolder}/.env",
-      "args": [],
-      "cwd": "${workspaceFolder}",
-      "buildFlags": ""
-    },
-    {
-      "name": "Launch Web App (binary)",
+      "name": "Launch API",
       "type": "go",
       "request": "launch",
       "mode": "exec",
-      "program": "${workspaceFolder}/bin/app/konabra.exe",
-      "envFile": "${workspaceFolder}/.env",
-      "args": [],
-      "cwd": "${workspaceFolder}/bin/app"
+      "program": "${workspaceFolder}/bin/api.exe",
+      "envFile": "${workspaceFolder}/bin/.env",
+      "preLaunchTask": "Build API",
+      "serverReadyAction": {
+        // Adjust the regex to match whatever Gin logs when it starts.
+        // Gin’s default is: "Listening and serving HTTP on :8080"
+        "pattern": "Listening and serving HTTP on :?(\\d+)",
+        // This will substitute the captured port into the URL:
+        "uriFormat": "http://localhost:%s/swagger/index.html",
+        "action": "openExternally"
+      }
     }
   ]
 }
