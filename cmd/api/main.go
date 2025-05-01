@@ -19,7 +19,7 @@ var api *builds.Api
 
 func init() {
 	// Initialize the application with a new container
-	api = builds.NewApi()
+
 }
 
 // ListAllPaths returns a slice of all file and directory paths starting from root
