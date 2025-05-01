@@ -3,15 +3,17 @@ package builds
 import (
 	"fmt"
 	"os"
-	"strings"
 	"time"
 
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/knadh/koanf/parsers/dotenv"
+	"github.com/knadh/koanf/providers/env"
+	"github.com/knadh/koanf/providers/file"
+	"github.com/knadh/koanf/v2"
 	"github.com/prince272/konabra/pkg/di"
 	"github.com/prince272/konabra/utils"
-	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -24,100 +26,107 @@ type Api struct {
 }
 
 type Config struct {
-	Api struct {
-		Name string `mapstructure:"APP_NAME"`
-		Env  string `mapstructure:"APP_ENV"`
-		Port int    `mapstructure:"APP_PORT"`
-	}
-	Databases struct {
-		Default string `mapstructure:"DB_DEFAULT"`
-	} `mapstructure:",squash"`
-	Logging struct {
-		Level  string `mapstructure:"LOG_LEVEL"`
-		Output string `mapstructure:"LOG_OUTPUT"`
-	} `mapstructure:",squash"`
+	DBPath   string `koanf:"DB_DEFAULT"`
+	LogLevel string `koanf:"LOG_LEVEL"`
+	LogFile  string `koanf:"LOG_OUTPUT"`
 }
 
-// Config constructor
 func buildConfig() func() *Config {
 	return func() *Config {
-		v := viper.New()
-		envFilePath := ".env"
+		k := koanf.New(".")
 
-		v.SetConfigFile(envFilePath)
-		v.SetConfigType("env")
-
-		// Try to read the .env file but don't panic if it doesn't exist
-		if err := v.ReadInConfig(); err != nil {
-			fmt.Fprintf(os.Stderr, "warning: could not load .env file: %v\n", err)
+		// Try loading .env file (optional)
+		if _, err := os.Stat(".env"); err == nil {
+			if err := k.Load(file.Provider(".env"), dotenv.Parser()); err != nil {
+				panic(fmt.Errorf("error loading .env file: %w", err))
+			}
 		}
 
-		v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-		v.AutomaticEnv()
-
-		var config Config
-		if err := v.Unmarshal(&config); err != nil {
-			panic(fmt.Errorf("failed to unmarshal config: %w", err))
+		// Load environment variables
+		if err := k.Load(env.Provider("", ".", func(s string) string {
+			return s
+		}), nil); err != nil {
+			panic(fmt.Errorf("error loading env vars: %w", err))
 		}
 
-		// log all v.keys and values
-		for _, key := range v.AllKeys() {
-			value := v.Get(key)
-			fmt.Printf("Config: %s = %v\n", key, value)
+		var cfg Config
+		if err := k.Unmarshal("", &cfg); err != nil {
+			panic(fmt.Errorf("error unmarshaling config: %w", err))
 		}
-		return &config
+
+		return &cfg
 	}
 }
 
-// Logger constructor (depends on Config)
 func buildLogger(container *di.Container) func() *zap.Logger {
 	return func() *zap.Logger {
-		config := di.MustGet[*Config](container)
+		cfg, err := di.Get[*Config](container)
+		if err != nil {
+			panic(fmt.Errorf("failed to get config: %w", err))
+		}
 
 		var level zapcore.Level
-		if err := level.UnmarshalText([]byte(config.Logging.Level)); err != nil {
-			level = zapcore.InfoLevel // default
+		if err := level.UnmarshalText([]byte(cfg.LogLevel)); err != nil {
+			level = zapcore.InfoLevel
 		}
 
-		// Set up file logging with rotation
-		lumberjackLogger := &lumberjack.Logger{
-			Filename:   config.Logging.Output,
-			MaxSize:    10, // MB
-			MaxBackups: 5,
-			MaxAge:     28, // days
-			Compress:   true,
+		cores := []zapcore.Core{
+			zapcore.NewCore(
+				zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig()),
+				zapcore.AddSync(os.Stdout),
+				level,
+			),
 		}
-		fileWS := zapcore.AddSync(lumberjackLogger)
 
-		// Encoders
-		consoleCfg := zap.NewDevelopmentEncoderConfig()
-		consoleCfg.EncodeLevel = zapcore.CapitalColorLevelEncoder
-		consoleCfg.EncodeTime = zapcore.ISO8601TimeEncoder
-		consoleEncoder := zapcore.NewConsoleEncoder(consoleCfg)
+		if cfg.LogFile != "" {
+			fileWS := zapcore.AddSync(&lumberjack.Logger{
+				Filename:   cfg.LogFile,
+				MaxSize:    10, // MB
+				MaxBackups: 5,
+				MaxAge:     28, // days
+				Compress:   true,
+			})
+			cores = append(cores, zapcore.NewCore(
+				zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+				fileWS,
+				level,
+			))
+		}
 
-		fileCfg := zap.NewProductionEncoderConfig()
-		fileCfg.EncodeTime = zapcore.ISO8601TimeEncoder
-		fileEncoder := zapcore.NewJSONEncoder(fileCfg)
-
-		core := zapcore.NewTee(
-			zapcore.NewCore(consoleEncoder, zapcore.Lock(os.Stdout), level), // console
-			zapcore.NewCore(fileEncoder, fileWS, level),                     // file
-		)
-
-		return zap.New(core, zap.AddCaller())
+		return zap.New(zapcore.NewTee(cores...), zap.AddCaller())
 	}
 }
 
-// Router constructor
-func buildRouter() func() *gin.Engine {
-	return func() *gin.Engine {
-		router := gin.New()
-		return router
+func buildDefaultDB(container *di.Container) func() *gorm.DB {
+	return func() *gorm.DB {
+		cfg, err := di.Get[*Config](container)
+		if err != nil {
+			panic(fmt.Errorf("failed to get config: %w", err))
+		}
+
+		if cfg.DBPath == "" {
+			panic("database path not configured")
+		}
+
+		db, err := gorm.Open(sqlite.Open(cfg.DBPath), &gorm.Config{})
+		if err != nil {
+			panic(fmt.Errorf("failed to open database: %w", err))
+		}
+
+		sqlDB, err := db.DB()
+		if err != nil {
+			panic(fmt.Errorf("failed to get sql.DB: %w", err))
+		}
+
+		sqlDB.SetMaxIdleConns(5)
+		sqlDB.SetMaxOpenConns(10)
+		sqlDB.SetConnMaxLifetime(time.Hour)
+
+		return db
 	}
 }
 
-// Validator constructor
-func buildValidate() func() *validator.Validate {
+func buildValidator() func() *validator.Validate {
 	return func() *validator.Validate {
 		validate := validator.New()
 		validate.RegisterValidation("password", utils.ValidatePassword)
@@ -125,76 +134,62 @@ func buildValidate() func() *validator.Validate {
 	}
 }
 
-// Default DB constructor
-func buildDefaultDB(container *di.Container) func() *gorm.DB {
-	return func() *gorm.DB {
-
-		dbPath := di.MustGet[*Config](container).Databases.Default
-
-		if dbPath == "" {
-			panic("no default database path provided in configuration")
-		}
-
-		db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
-		if err != nil {
-			panic(fmt.Errorf("failed to connect to database at %s: %w", dbPath, err))
-		}
-
-		return db
-	}
-}
-
-// NewApi creates the application and registers core dependencies
 func NewApi() *Api {
 	container := di.New()
 
+	// Register Gin engine
 	if err := container.Register(func() *di.Container {
 		return container
 	}); err != nil {
-		panic(err)
+		panic(fmt.Errorf("failed to register container: %w", err))
 	}
 
+	// Register config
 	if err := container.Register(buildConfig()); err != nil {
-		panic(err)
+		panic(fmt.Errorf("failed to register config: %w", err))
 	}
 
+	// Register logger
 	if err := container.Register(buildLogger(container)); err != nil {
-		panic(err)
+		panic(fmt.Errorf("failed to register logger: %w", err))
 	}
 
-	if err := container.Register(buildRouter()); err != nil {
-		panic(err)
+	// Register Gin engine
+	if err := container.Register(func() *gin.Engine {
+		return gin.New()
+	}); err != nil {
+		panic(fmt.Errorf("failed to register Gin engine: %w", err))
 	}
 
-	if err := container.Register(buildValidate()); err != nil {
-		panic(err)
+	// Register validator
+	if err := container.Register(buildValidator()); err != nil {
+		panic(fmt.Errorf("failed to register validator: %w", err))
 	}
 
+	// Register default DB
 	if err := container.RegisterWithKey("DefaultDB", buildDefaultDB(container)); err != nil {
-		panic(err)
+		panic(fmt.Errorf("failed to register default DB: %w", err))
 	}
 
 	return &Api{container: container}
 }
 
-// Register additional constructors
 func (api *Api) Register(constructor any) {
 	if err := api.container.Register(constructor); err != nil {
-		panic(err)
+		panic(fmt.Errorf("failed to register constructor: %w", err))
 	}
 }
 
-// Run starts the HTTP server with request-logging middleware
-func (api *Api) Run(...string) {
+// Run starts the HTTP server
+func (api *Api) Run() {
 	router := di.MustGet[*gin.Engine](api.container)
 	logger := di.MustGet[*zap.Logger](api.container)
 
+	// Add middleware
 	router.Use(ginzap.Ginzap(logger, time.RFC3339, true))
 	router.Use(ginzap.RecoveryWithZap(logger, true))
 
-	logger.Info("Starting HTTP server...")
-
 	if err := router.Run(); err != nil {
-		logger.Fatal("Server failed to start", zap.Error(err))
+		panic(fmt.Errorf("server failed: %w", err))
 	}
 }
