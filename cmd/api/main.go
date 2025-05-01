@@ -8,18 +8,14 @@ import (
 	"github.com/prince272/konabra/internal/services"
 )
 
-var api *builds.Api
-
 // @title       Konabra API
 // @version     1.0
 // @description Konabra is a smart, community-powered transport and road safety platform for Ghana. This API supports live incident reporting, road condition updates, and data analytics integration.
 // @BasePath    /
-func init() {
-	// Initialize the application with a new container
-	api = builds.NewApi()
-}
-
 func main() {
+	// Initialize the API application
+	api := builds.NewApi()
+
 	// Register repositories in the application's container
 	api.Register(repositories.NewIdentityRepository)
 

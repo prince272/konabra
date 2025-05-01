@@ -26,9 +26,9 @@ type Api struct {
 }
 
 type Config struct {
-	DBPath   string `koanf:"DB_DEFAULT"`
-	LogLevel string `koanf:"LOG_LEVEL"`
-	LogFile  string `koanf:"LOG_OUTPUT"`
+	DbDefault string `koanf:"DB_DEFAULT"`
+	LogLevel  string `koanf:"LOG_LEVEL"`
+	LogFile   string `koanf:"LOG_OUTPUT"`
 }
 
 func buildConfig() func() *Config {
@@ -40,6 +40,7 @@ func buildConfig() func() *Config {
 			if err := k.Load(file.Provider(".env"), dotenv.Parser()); err != nil {
 				panic(fmt.Errorf("error loading .env file: %w", err))
 			}
+			fmt.Println("Loaded .env file")
 		}
 
 		// Load environment variables
@@ -48,6 +49,8 @@ func buildConfig() func() *Config {
 		}), nil); err != nil {
 			panic(fmt.Errorf("error loading env vars: %w", err))
 		}
+
+		fmt.Println("Loaded environment variables")
 
 		var cfg Config
 		if err := k.Unmarshal("", &cfg); err != nil {
@@ -99,16 +102,14 @@ func buildLogger(container *di.Container) func() *zap.Logger {
 
 func buildDefaultDB(container *di.Container) func() *gorm.DB {
 	return func() *gorm.DB {
-		cfg, err := di.Get[*Config](container)
-		if err != nil {
-			panic(fmt.Errorf("failed to get config: %w", err))
+
+		cfg := di.MustGet[*Config](container)
+
+		if cfg.DbDefault == "" {
+			panic("default database path not configured")
 		}
 
-		if cfg.DBPath == "" {
-			panic("database path not configured")
-		}
-
-		db, err := gorm.Open(sqlite.Open(cfg.DBPath), &gorm.Config{})
+		db, err := gorm.Open(sqlite.Open(cfg.DbDefault), &gorm.Config{})
 		if err != nil {
 			panic(fmt.Errorf("failed to open database: %w", err))
 		}
