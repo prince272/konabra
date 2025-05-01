@@ -63,10 +63,7 @@ func buildConfig() func() *Config {
 
 func buildLogger(container *di.Container) func() *zap.Logger {
 	return func() *zap.Logger {
-		cfg, err := di.Get[*Config](container)
-		if err != nil {
-			panic(fmt.Errorf("failed to get config: %w", err))
-		}
+		cfg := di.MustGet[*Config](container)
 
 		var level zapcore.Level
 		if err := level.UnmarshalText([]byte(cfg.LogLevel)); err != nil {
@@ -155,13 +152,6 @@ func NewApi() *Api {
 		panic(fmt.Errorf("failed to register logger: %w", err))
 	}
 
-	// Register Gin engine
-	if err := container.Register(func() *gin.Engine {
-		return gin.New()
-	}); err != nil {
-		panic(fmt.Errorf("failed to register Gin engine: %w", err))
-	}
-
 	// Register validator
 	if err := container.Register(buildValidator()); err != nil {
 		panic(fmt.Errorf("failed to register validator: %w", err))
@@ -170,6 +160,13 @@ func NewApi() *Api {
 	// Register default DB
 	if err := container.RegisterWithKey("DefaultDB", buildDefaultDB(container)); err != nil {
 		panic(fmt.Errorf("failed to register default DB: %w", err))
+	}
+
+	// Register Gin engine
+	if err := container.Register(func() *gin.Engine {
+		return gin.New()
+	}); err != nil {
+		panic(fmt.Errorf("failed to register Gin engine: %w", err))
 	}
 
 	return &Api{container: container}

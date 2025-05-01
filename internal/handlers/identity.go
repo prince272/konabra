@@ -45,7 +45,6 @@ func (handler *IdentityHandler) CreateAccount(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, problems.NewProblem(
 			http.StatusBadRequest,
 			"Invalid request body.",
-			ctx.Request.URL.Path,
 		))
 		return
 	}
