@@ -124,9 +124,8 @@ func buildValidate() func() *validator.Validate {
 // Default DB constructor
 func buildDefaultDB(container *di.Container) func() *gorm.DB {
 	return func() *gorm.DB {
-		config := di.MustGet[*Config](container)
 
-		dbPath := config.Databases.Default
+		dbPath := os.Getenv("DB_DEFAULT")
 		if dbPath == "" {
 			panic("no default database path provided in configuration")
 		}
