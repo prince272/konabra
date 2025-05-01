@@ -3,6 +3,7 @@ package builds
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	ginzap "github.com/gin-contrib/zap"
@@ -48,9 +49,11 @@ func buildConfig() func() *Config {
 
 		// Try to read the .env file but don't panic if it doesn't exist
 		if err := v.ReadInConfig(); err != nil {
-			fmt.Fprintf(os.Stderr, "Warning: could not load .env file: %v\n", err)
+			fmt.Fprintf(os.Stderr, "warning: could not load .env file: %v\n", err)
 		}
 
+		// Replace dots with underscores in env keys (e.g., db.host -> DB_HOST)
+		v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 		v.AutomaticEnv()
 
 		var config Config
