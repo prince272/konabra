@@ -39,7 +39,6 @@ definitions:
     - password
     - username
     type: object
-host: localhost:8080
 info:
   contact: {}
   description: Konabra is a smart, community-powered transport and road safety platform

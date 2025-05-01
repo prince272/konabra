@@ -13,7 +13,6 @@ var api *builds.Api
 // @title       Konabra API
 // @version     1.0
 // @description Konabra is a smart, community-powered transport and road safety platform for Ghana. This API supports live incident reporting, road condition updates, and data analytics integration.
-// @host        localhost:8080
 // @BasePath    /
 func init() {
 	// Initialize the application with a new container

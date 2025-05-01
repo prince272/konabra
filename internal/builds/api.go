@@ -137,7 +137,7 @@ func buildValidator() func() *validator.Validate {
 func NewApi() *Api {
 	container := di.New()
 
-	// Register Gin engine
+	// Register container itself
 	if err := container.Register(func() *di.Container {
 		return container
 	}); err != nil {
