@@ -41,7 +41,8 @@ type Config struct {
 func buildConfig() func() *Config {
 	return func() *Config {
 		v := viper.New()
-		paths := utils.GetPossiblePaths(".env")
+		paths := [...]string{".env"}
+
 		if len(paths) > 0 {
 			v.SetConfigFile(paths[0])
 			v.SetConfigType("env")
@@ -55,6 +56,9 @@ func buildConfig() func() *Config {
 		if err := v.Unmarshal(&config); err != nil {
 			panic(fmt.Errorf("failed to unmarshal config: %w", err))
 		}
+
+		// log
+		fmt.Printf("Config: %+v\n", config)
 		return &config
 	}
 }
@@ -120,14 +124,18 @@ func buildValidate() func() *validator.Validate {
 func buildDefaultDB(container *di.Container) func() *gorm.DB {
 	return func() *gorm.DB {
 		config := di.MustGet[*Config](container)
-		paths := utils.GetPossiblePaths(config.Databases.Default)
-		if len(paths) == 0 {
-			panic(fmt.Errorf("failed to find database file: %s", config.Databases.Default))
+
+		dbPath := config.Databases.Default
+		if dbPath == "" {
+			panic("no default database path provided in configuration")
 		}
-		db, err := gorm.Open(sqlite.Open(paths[0]), &gorm.Config{})
+
+		db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
+
 		if err != nil {
-			panic(fmt.Errorf("failed to connect to database: %w", err))
+			panic(fmt.Errorf("failed to connect to database at %s: %w", dbPath, err))
 		}
+
 		return db
 	}
 }
