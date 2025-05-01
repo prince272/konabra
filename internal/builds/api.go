@@ -127,7 +127,13 @@ func buildDefaultDB(container *di.Container) func() *gorm.DB {
 func buildValidator() func() *validator.Validate {
 	return func() *validator.Validate {
 		validate := validator.New()
-		validate.RegisterValidation("password", utils.ValidatePassword)
+		if err := validate.RegisterValidation("username", utils.ValidateUsername); err != nil {
+			panic(fmt.Errorf("failed to register username validator: %w", err))
+		}
+
+		if err := validate.RegisterValidation("password", utils.ValidatePassword); err != nil {
+			panic(fmt.Errorf("failed to register password validator: %w", err))
+		}
 		return validate
 	}
 }

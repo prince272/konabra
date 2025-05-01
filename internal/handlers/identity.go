@@ -10,16 +10,16 @@ import (
 )
 
 type IdentityHandler struct {
-	router  *gin.Engine
-	service *services.IdentityService
+	router          *gin.Engine
+	identityService *services.IdentityService
 }
 
 func NewIdentityHandler(cnt *di.Container) *IdentityHandler {
 	router := di.MustGet[*gin.Engine](cnt)
 
 	handler := &IdentityHandler{
-		router:  router,
-		service: di.MustGet[*services.IdentityService](cnt),
+		router:          router,
+		identityService: di.MustGet[*services.IdentityService](cnt),
 	}
 
 	router.POST("/account/create", handler.CreateAccount)
@@ -49,7 +49,7 @@ func (handler *IdentityHandler) CreateAccount(ctx *gin.Context) {
 		return
 	}
 
-	data, problem := handler.service.CreateAccount(form)
+	data, problem := handler.identityService.CreateAccount(form)
 
 	if problem != nil {
 		ctx.JSON(problem.Status, problem)

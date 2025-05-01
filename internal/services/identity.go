@@ -10,7 +10,7 @@ import (
 type CreateAccountForm struct {
 	FirstName string `json:"firstName" validate:"required,max=256"`
 	LastName  string `json:"lastName" validate:"required,max=256"`
-	Username  string `json:"username" validate:"required,max=256"`
+	Username  string `json:"username" validate:"required,max=256,username"`
 	Password  string `json:"password" validate:"required,password"`
 }
 
