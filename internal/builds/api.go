@@ -56,8 +56,6 @@ func buildConfig() func() *Config {
 			panic(fmt.Errorf("failed to unmarshal config: %w", err))
 		}
 
-		// log
-		fmt.Printf("Config: %+v\n", config)
 		return &config
 	}
 }
