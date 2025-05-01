@@ -56,6 +56,11 @@ func buildConfig() func() *Config {
 		v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 		v.AutomaticEnv()
 
+		for _, key := range v.AllKeys() {
+			val := v.Get(key)
+			v.Set(key, val)
+		}
+
 		var config Config
 		if err := v.Unmarshal(&config); err != nil {
 			panic(fmt.Errorf("failed to unmarshal config: %w", err))
@@ -125,7 +130,8 @@ func buildValidate() func() *validator.Validate {
 func buildDefaultDB(container *di.Container) func() *gorm.DB {
 	return func() *gorm.DB {
 
-		dbPath := os.Getenv("DB_DEFAULT")
+		dbPath := di.MustGet[*Config](container).Databases.Default
+
 		if dbPath == "" {
 			panic("no default database path provided in configuration")
 		}
