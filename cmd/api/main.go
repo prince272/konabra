@@ -17,9 +17,13 @@ var api *builds.Api
 // @host        localhost:8080
 // @BasePath    /
 
-func init() {
-	// Initialize the application with a new container
-
+// GetExecutablePath returns the absolute path of the current executable
+func GetExecutablePath() (string, error) {
+	exePath, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+	return filepath.EvalSymlinks(exePath)
 }
 
 // ListAllPaths returns a slice of all file and directory paths starting from root
@@ -36,6 +40,14 @@ func ListAllPaths(root string) ([]string, error) {
 }
 
 func main() {
+	// Print the path of the current executable
+	if exePath, err := GetExecutablePath(); err == nil {
+		fmt.Println("Current Executable Path:", exePath)
+		fmt.Println("Executable Directory:", filepath.Dir(exePath))
+	} else {
+		fmt.Println("Error getting executable path:", err)
+	}
+
 	// Optional: list all files and directories (for debugging or logging)
 	if paths, err := ListAllPaths("."); err == nil {
 		fmt.Println("Application Files and Directories:")
