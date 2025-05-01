@@ -52,20 +52,15 @@ func buildConfig() func() *Config {
 			fmt.Fprintf(os.Stderr, "warning: could not load .env file: %v\n", err)
 		}
 
-		// Replace dots with underscores in env keys (e.g., db.host -> DB_HOST)
 		v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 		v.AutomaticEnv()
-
-		for _, key := range v.AllKeys() {
-			val := v.Get(key)
-			v.Set(key, val)
-		}
 
 		var config Config
 		if err := v.Unmarshal(&config); err != nil {
 			panic(fmt.Errorf("failed to unmarshal config: %w", err))
 		}
 
+		fmt.Printf("Config: %+v\n", config)
 		return &config
 	}
 }
