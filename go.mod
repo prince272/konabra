@@ -1,6 +1,6 @@
 module github.com/prince272/konabra
 
-go 1.24.1
+go 1.23.0
 
 require (
 	github.com/gobeam/stringy v0.0.7
