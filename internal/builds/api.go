@@ -41,15 +41,14 @@ type Config struct {
 func buildConfig() func() *Config {
 	return func() *Config {
 		v := viper.New()
-		paths := [...]string{".env"}
+		envFilePath := ".env"
 
-		if len(paths) > 0 {
-			v.SetConfigFile(paths[0])
-			v.SetConfigType("env")
-			if err := v.ReadInConfig(); err != nil {
-				panic(fmt.Errorf("failed to read .env file: %w", err))
-			}
+		v.SetConfigFile(envFilePath)
+		v.SetConfigType("env")
+		if err := v.ReadInConfig(); err != nil {
+			panic(fmt.Errorf("failed to read .env file: %w", err))
 		}
+
 		v.AutomaticEnv()
 
 		var config Config
