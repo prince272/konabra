@@ -17,28 +17,18 @@ func New() *Container {
 	}
 }
 
-// Register a constructor without a key
+// Register registers and verifies a constructor without a key
 func (c *Container) Register(constructor any) error {
-	return c.inner.Provide(constructor)
-}
-
-// RegisterWithKey registers a constructor with a specific key
-func (c *Container) RegisterWithKey(key string, constructor any) error {
-	return c.inner.Provide(constructor, dig.Name(key))
-}
-
-// Handle registers and verifies a constructor without a key
-func (c *Container) Handle(constructor any) error {
-	if err := c.Register(constructor); err != nil {
+	if err := c.inner.Provide(constructor); err != nil {
 		return fmt.Errorf("failed to register constructor: %w", err)
 	}
 
 	return c.verifyConstructor(constructor, "")
 }
 
-// HandleWithKey registers and verifies a constructor with a key
-func (c *Container) HandleWithKey(key string, constructor any) error {
-	if err := c.RegisterWithKey(key, constructor); err != nil {
+// RegisterWithKey registers and verifies a constructor with a key
+func (c *Container) RegisterWithKey(key string, constructor any) error {
+	if err := c.inner.Provide(constructor, dig.Name(key)); err != nil {
 		return fmt.Errorf("failed to register constructor: %w", err)
 	}
 

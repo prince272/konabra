@@ -25,7 +25,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "account"
+                    "Identity"
                 ],
                 "summary": "Create a new account",
                 "parameters": [
@@ -71,9 +71,12 @@ const docTemplate = `{
                     "description": "Human-readable explanation",
                     "type": "string"
                 },
-                "instance": {
-                    "description": "Request path or unique error ID",
-                    "type": "string"
+                "errors": {
+                    "description": "Field validation errors",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "status": {
                     "description": "HTTP status code",
@@ -124,8 +127,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "Example API",
-	Description:      "This is a sample server using Gin and Swagger.",
+	Title:            "Konabra API",
+	Description:      "Konabra is a smart, community-powered transport and road safety platform for Ghana. This API supports live incident reporting, road condition updates, and data analytics integration.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

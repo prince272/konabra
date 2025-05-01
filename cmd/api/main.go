@@ -10,9 +10,9 @@ import (
 
 var api *builds.Api
 
-// @title       Example API
+// @title       Konabra API
 // @version     1.0
-// @description This is a sample server using Gin and Swagger.
+// @description Konabra is a smart, community-powered transport and road safety platform for Ghana. This API supports live incident reporting, road condition updates, and data analytics integration.
 // @host        localhost:8080
 // @BasePath    /
 
@@ -29,8 +29,8 @@ func main() {
 	api.Register(services.NewIdentityService)
 
 	// Register handlers in the application's container
-	api.Handle(handlers.NewSwaggerHandler)
-	api.Handle(handlers.NewIdentityHandler)
+	api.Register(handlers.NewSwaggerHandler)
+	api.Register(handlers.NewIdentityHandler)
 
 	// Run the application (starts the server and handles requests)
 	api.Run()

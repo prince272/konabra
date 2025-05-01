@@ -174,13 +174,6 @@ func (api *Api) Register(constructor any) {
 	}
 }
 
-// Handle registers handlers
-func (api *Api) Handle(handler any) {
-	if err := api.container.Handle(handler); err != nil {
-		panic(err)
-	}
-}
-
 // Run starts the HTTP server with request-logging middleware
 func (api *Api) Run(...string) {
 	router := di.MustGet[*gin.Engine](api.container)

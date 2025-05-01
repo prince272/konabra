@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is a sample server using Gin and Swagger.",
-        "title": "Example API",
+        "description": "Konabra is a smart, community-powered transport and road safety platform for Ghana. This API supports live incident reporting, road condition updates, and data analytics integration.",
+        "title": "Konabra API",
         "contact": {},
         "version": "1.0"
     },
@@ -19,7 +19,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "account"
+                    "Identity"
                 ],
                 "summary": "Create a new account",
                 "parameters": [
@@ -65,9 +65,12 @@
                     "description": "Human-readable explanation",
                     "type": "string"
                 },
-                "instance": {
-                    "description": "Request path or unique error ID",
-                    "type": "string"
+                "errors": {
+                    "description": "Field validation errors",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "status": {
                     "description": "HTTP status code",

@@ -10,20 +10,27 @@ import (
 )
 
 type IdentityHandler struct {
+	router  *gin.Engine
+	service *services.IdentityService
 }
 
 func NewIdentityHandler(cnt *di.Container) *IdentityHandler {
 	router := di.MustGet[*gin.Engine](cnt)
 
-	router.POST("/account/create", func(ctx *gin.Context) { createAccount(ctx, cnt) })
+	handler := &IdentityHandler{
+		router:  router,
+		service: di.MustGet[*services.IdentityService](cnt),
+	}
 
-	return &IdentityHandler{}
+	router.POST("/account/create", handler.CreateAccount)
+
+	return handler
 }
 
 // CreateAccount godoc
 // @Summary Create a new account
 // @Description Create a new user account with the provided information
-// @Tags account
+// @Tags Identity
 // @Accept json
 // @Produce json
 // @Param request body services.CreateAccountForm true "Account creation details"
@@ -31,7 +38,7 @@ func NewIdentityHandler(cnt *di.Container) *IdentityHandler {
 // @Failure 400 {object} problems.Problem "Invalid request body"
 // @Failure 500 {object} problems.Problem "Internal server error"
 // @Router /account/create [post]
-func createAccount(ctx *gin.Context, cnt *di.Container) {
+func (handler *IdentityHandler) CreateAccount(ctx *gin.Context) {
 	var form *services.CreateAccountForm
 
 	if err := ctx.ShouldBindBodyWithJSON(&form); err != nil {
@@ -43,5 +50,12 @@ func createAccount(ctx *gin.Context, cnt *di.Container) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{})
+	data, problem := handler.service.CreateAccount(form)
+
+	if problem != nil {
+		ctx.JSON(problem.Status, problem)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, data)
 }

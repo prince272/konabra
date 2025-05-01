@@ -3,6 +3,7 @@ module github.com/prince272/konabra
 go 1.24.1
 
 require (
+	github.com/gobeam/stringy v0.0.7
 	github.com/spf13/viper v1.20.1
 	github.com/swaggo/swag v1.16.4
 	go.uber.org/dig v1.18.1

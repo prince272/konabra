@@ -11,9 +11,18 @@ declare -A FILES_TO_COPY=(
   ["data/default.db"]="$BIN_DIR/data/default.db"
 )
 
+# Check if swag is installed
+if ! command -v swag &> /dev/null
+then
+    echo "❌ swag command could not be found. Please install it first."
+    exit 1
+fi
+
 build() {
   echo -e "🔄 Generating Swagger docs..."
+
   swag init -g ./cmd/api/main.go -o ./docs/swagger
+
   echo -e "✅ Swagger docs generated."
 
   echo -e "🔨 Building the project..."

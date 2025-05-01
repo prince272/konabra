@@ -5,9 +5,11 @@ definitions:
       detail:
         description: Human-readable explanation
         type: string
-      instance:
-        description: Request path or unique error ID
-        type: string
+      errors:
+        additionalProperties:
+          type: string
+        description: Field validation errors
+        type: object
       status:
         description: HTTP status code
         type: integer
@@ -40,8 +42,10 @@ definitions:
 host: localhost:8080
 info:
   contact: {}
-  description: This is a sample server using Gin and Swagger.
-  title: Example API
+  description: Konabra is a smart, community-powered transport and road safety platform
+    for Ghana. This API supports live incident reporting, road condition updates,
+    and data analytics integration.
+  title: Konabra API
   version: "1.0"
 paths:
   /account/create:
@@ -74,5 +78,5 @@ paths:
             $ref: '#/definitions/problems.Problem'
       summary: Create a new account
       tags:
-      - account
+      - Identity
 swagger: "2.0"
