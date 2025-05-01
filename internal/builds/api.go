@@ -60,7 +60,11 @@ func buildConfig() func() *Config {
 			panic(fmt.Errorf("failed to unmarshal config: %w", err))
 		}
 
-		fmt.Printf("Config: %+v\n", config)
+		// log all v.keys and values
+		for _, key := range v.AllKeys() {
+			value := v.Get(key)
+			fmt.Printf("Config: %s = %v\n", key, value)
+		}
 		return &config
 	}
 }
