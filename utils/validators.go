@@ -33,11 +33,11 @@ func ValidatePassword(fl validator.FieldLevel) bool {
 // ValidateUsername determines whether input is a valid phone or email
 func ValidateUsername(fl validator.FieldLevel) bool {
 	username := fl.Field().String()
-	return isPhoneNumber(username) || isEmail(username)
+	return IsPhoneNumber(username) || IsEmail(username)
 }
 
 // Helper: Check if input is phone number using phonenumbers lib
-func isPhoneNumber(input string) bool {
+func IsPhoneNumber(input string) bool {
 	num, err := phonenumbers.Parse(input, "") // Adjust default region as needed
 	if err != nil {
 		return false
@@ -46,7 +46,7 @@ func isPhoneNumber(input string) bool {
 }
 
 // Helper: Check if input is email
-func isEmail(input string) bool {
+func IsEmail(input string) bool {
 	emailPattern := regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
 	return emailPattern.MatchString(input)
 }
@@ -57,7 +57,7 @@ func maybePhoneNumber(input string) bool {
 }
 
 // ProcessValidationErrors builds user-friendly error messages
-func ProcessValidationErrors(errs validator.ValidationErrors) map[string]string {
+func GetProcessValidationErrors(errs validator.ValidationErrors) map[string]string {
 	errors := make(map[string]string)
 	for _, fieldError := range errs {
 		var errorMessage string

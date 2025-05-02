@@ -25,19 +25,23 @@ func NewProblem(status int, title string) *Problem {
 	}
 }
 
-func NewValidationProblem(err error) *Problem {
-	status := http.StatusBadRequest
+func NewBadRequestProblem(err error) *Problem {
 	var errors map[string]string
 
 	if errs, ok := err.(validator.ValidationErrors); ok {
-		errors = utils.ProcessValidationErrors(errs) // Use the new method to process validation errors
+		errors = utils.GetProcessValidationErrors(errs)
 	}
 
+	return NewBadRequestWithErrorsProblem(errors)
+}
+
+func NewBadRequestWithErrorsProblem(errors map[string]string) *Problem {
+	status := http.StatusBadRequest
 	return &Problem{
 		Type:   buildTypeURL(status),
 		Title:  "One or more validation errors occurred.",
-		Detail: getProblemDetail(status),
 		Status: status,
+		Detail: getProblemDetail(status),
 		Errors: errors,
 	}
 }

@@ -2,9 +2,12 @@ package services
 
 import (
 	"github.com/go-playground/validator/v10"
+	"github.com/jinzhu/copier"
+	models "github.com/prince272/konabra/internal/models/identity"
 	"github.com/prince272/konabra/internal/repositories"
 	"github.com/prince272/konabra/pkg/di"
 	"github.com/prince272/konabra/pkg/problems"
+	"github.com/prince272/konabra/utils"
 )
 
 type CreateAccountForm struct {
@@ -14,7 +17,26 @@ type CreateAccountForm struct {
 	Password  string `json:"password" validate:"required,password"`
 }
 
+func (form *CreateAccountForm) GetEmail() string {
+	if utils.IsEmail(form.Username) {
+		return form.Username
+	}
+	return ""
+}
+
+func (form *CreateAccountForm) GetPhoneNumber() string {
+	if utils.IsPhoneNumber(form.Username) {
+		return form.Username
+	}
+	return ""
+}
+
 type CreateAccountData struct {
+	FirstName   string `json:"firstName"`
+	LastName    string `json:"lastName"`
+	UserName    string `json:"userName"`
+	Email       string `json:"email"`
+	PhoneNumber string `json:"phoneNumber"`
 }
 
 type IdentityService struct {
@@ -31,10 +53,29 @@ func NewIdentityService(container *di.Container) *IdentityService {
 	}
 }
 
-func (identityService *IdentityService) CreateAccount(form *CreateAccountForm) (data *CreateAccountData, problem *problems.Problem) {
+func (identityService *IdentityService) CreateAccount(form *CreateAccountForm) (*CreateAccountData, *problems.Problem) {
+	// Validate form input
 	if err := identityService.validate.Struct(form); err != nil {
-		return nil, problems.NewValidationProblem(err)
+		return nil, problems.NewBadRequestProblem(err)
 	}
 
-	return nil, nil
+	identityRepository := identityService.identityRepository
+
+	// Check if username exists
+	if usernameExists := identityRepository.CheckIfUsernameExists(form.Username); usernameExists {
+		return nil, problems.NewBadRequestWithErrorsProblem(map[string]string{"username": "Username already exists."})
+	}
+
+	user := &models.User{
+		FirstName:   form.FirstName,
+		LastName:    form.LastName,
+		Email:       form.GetEmail(),
+		PhoneNumber: form.GetPhoneNumber(),
+		UserName:    identityRepository.GenerateName(form.FirstName, form.LastName),
+	}
+
+	data := &CreateAccountData{}
+	copier.Copy(data, user)
+
+	return data, nil
 }

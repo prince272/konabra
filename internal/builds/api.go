@@ -2,6 +2,7 @@ package builds
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
@@ -12,7 +13,9 @@ import (
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
+	models "github.com/prince272/konabra/internal/models/identity"
 	"github.com/prince272/konabra/pkg/di"
+	"github.com/prince272/konabra/pkg/problems"
 	"github.com/prince272/konabra/utils"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -99,7 +102,6 @@ func buildLogger(container *di.Container) func() *zap.Logger {
 
 func buildDefaultDB(container *di.Container) func() *gorm.DB {
 	return func() *gorm.DB {
-
 		cfg := di.MustGet[*Config](container)
 
 		if cfg.DbDefault == "" {
@@ -109,6 +111,10 @@ func buildDefaultDB(container *di.Container) func() *gorm.DB {
 		db, err := gorm.Open(sqlite.Open(cfg.DbDefault), &gorm.Config{})
 		if err != nil {
 			panic(fmt.Errorf("failed to open database: %w", err))
+		}
+
+		if err := db.AutoMigrate(&models.User{}, &models.Role{}); err != nil {
+			panic(fmt.Errorf("auto migration failed: %w", err))
 		}
 
 		sqlDB, err := db.DB()
@@ -135,6 +141,36 @@ func buildValidator() func() *validator.Validate {
 			panic(fmt.Errorf("failed to register password validator: %w", err))
 		}
 		return validate
+	}
+}
+
+func buildEngine(container *di.Container) func() *gin.Engine {
+	return func() *gin.Engine {
+		router := gin.New()
+		logger := di.MustGet[*zap.Logger](container)
+
+		// Add middleware
+		router.Use(ginzap.Ginzap(logger, time.RFC3339, true))
+		router.Use(ginzap.RecoveryWithZap(logger, true))
+		router.Use(gin.CustomRecovery(func(c *gin.Context, unknownErr any) {
+			var err error
+			switch e := unknownErr.(type) {
+			case error:
+				err = e
+			default:
+				err = fmt.Errorf("%v", unknownErr)
+			}
+
+			logger.Error("Panic recovered",
+				zap.Any("error", err),
+				zap.String("method", c.Request.Method),
+				zap.String("path", c.Request.URL.Path),
+				zap.Int("status_code", http.StatusInternalServerError),
+			)
+			c.JSON(http.StatusInternalServerError, problems.NewInternalServerProblem(err))
+		}))
+
+		return router
 	}
 }
 
@@ -169,9 +205,7 @@ func NewApi() *Api {
 	}
 
 	// Register Gin engine
-	if err := container.Register(func() *gin.Engine {
-		return gin.New()
-	}); err != nil {
+	if err := container.Register(buildEngine(container)); err != nil {
 		panic(fmt.Errorf("failed to register Gin engine: %w", err))
 	}
 
@@ -187,12 +221,6 @@ func (api *Api) Register(constructor any) {
 // Run starts the HTTP server
 func (api *Api) Run() {
 	router := di.MustGet[*gin.Engine](api.container)
-	logger := di.MustGet[*zap.Logger](api.container)
-
-	// Add middleware
-	router.Use(ginzap.Ginzap(logger, time.RFC3339, true))
-	router.Use(ginzap.RecoveryWithZap(logger, true))
-
 	if err := router.Run(); err != nil {
 		panic(fmt.Errorf("server failed: %w", err))
 	}
