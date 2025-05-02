@@ -47,7 +47,7 @@ func (identityRepository *IdentityRepository) GetUserByUsername(username string)
 
 func (identityRepository *IdentityRepository) CheckIfUsernameExists(username string) bool {
 	var count int64
-	result := identityRepository.defaultDB.Model(&models.User{}).Where("LOWER(email)ss = LOWER(?) OR LOWER(phone_number) = LOWER(?)", username, username).Count(&count)
+	result := identityRepository.defaultDB.Model(&models.User{}).Where("LOWER(email) = LOWER(?) OR LOWER(phone_number) = LOWER(?)", username, username).Count(&count)
 
 	if result.Error != nil {
 		panic(result.Error)
