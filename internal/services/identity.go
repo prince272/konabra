@@ -56,14 +56,14 @@ func NewIdentityService(container *di.Container) *IdentityService {
 func (identityService *IdentityService) CreateAccount(form *CreateAccountForm) (*CreateAccountData, *problems.Problem) {
 	// Validate form input
 	if err := identityService.validate.Struct(form); err != nil {
-		return nil, problems.NewBadRequestProblemFromError(err)
+		return nil, problems.NewBadRequestProblem(err)
 	}
 
 	identityRepository := identityService.identityRepository
 
 	// Check if username exists
 	if usernameExists := identityRepository.CheckIfUsernameExists(form.Username); usernameExists {
-		return nil, problems.NewBadRequestProblemFromErrors(map[string]string{"username": "Username already exists."})
+		return nil, problems.NewCustomBadRequestProblem(map[string]string{"username": "Username already exists."})
 	}
 
 	user := &models.User{

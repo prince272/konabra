@@ -166,6 +166,8 @@ func buildRouter(container *di.Container) func() *gin.Engine {
 		logger := di.MustGet[*zap.Logger](container)
 
 		// Add middleware
+		router.Use(ginzap.Ginzap(logger, time.RFC3339, true))
+		router.Use(ginzap.RecoveryWithZap(logger, true))
 		router.Use(gin.CustomRecovery(func(c *gin.Context, unknownErr any) {
 			var err error
 			switch e := unknownErr.(type) {
@@ -181,10 +183,8 @@ func buildRouter(container *di.Container) func() *gin.Engine {
 				zap.String("path", c.Request.URL.Path),
 				zap.Int("status_code", http.StatusInternalServerError),
 			)
-			c.JSON(http.StatusInternalServerError, problems.NewInternalServerProblemFromError(err))
+			c.JSON(http.StatusInternalServerError, problems.NewInternalServerProblem(err))
 		}))
-		router.Use(ginzap.Ginzap(logger, time.RFC3339, true))
-		router.Use(ginzap.RecoveryWithZap(logger, true))
 
 		return router
 	}

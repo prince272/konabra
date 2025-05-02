@@ -22,20 +22,21 @@ func NewProblem(status int, title string) *Problem {
 		Title:  title,
 		Status: status,
 		Detail: getProblemDetail(status),
+		Errors: map[string]string{},
 	}
 }
 
-func NewBadRequestProblemFromError(err error) *Problem {
+func NewBadRequestProblem(err error) *Problem {
 	var errors map[string]string
 
 	if errs, ok := err.(validator.ValidationErrors); ok {
 		errors = utils.GetProcessValidationErrors(errs)
 	}
 
-	return NewBadRequestProblemFromErrors(errors)
+	return NewCustomBadRequestProblem(errors)
 }
 
-func NewBadRequestProblemFromErrors(errors map[string]string) *Problem {
+func NewCustomBadRequestProblem(errors map[string]string) *Problem {
 	status := http.StatusBadRequest
 	return &Problem{
 		Type:   buildTypeURL(status),
@@ -46,13 +47,14 @@ func NewBadRequestProblemFromErrors(errors map[string]string) *Problem {
 	}
 }
 
-func NewInternalServerProblemFromError(err error) *Problem {
+func NewInternalServerProblem(err error) *Problem {
 	status := http.StatusInternalServerError
 	return &Problem{
 		Type:   buildTypeURL(status),
 		Title:  "Internal Server Error",
 		Status: status,
 		Detail: fmt.Sprintf("An unexpected error occurred: %s", err.Error()),
+		Errors: map[string]string{},
 	}
 }
 

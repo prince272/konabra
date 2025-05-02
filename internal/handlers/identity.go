@@ -41,11 +41,8 @@ func NewIdentityHandler(cnt *di.Container) *IdentityHandler {
 func (handler *IdentityHandler) CreateAccount(ctx *gin.Context) {
 	var form *services.CreateAccountForm
 
-	if err := ctx.ShouldBindBodyWithJSON(&form); err != nil {
-		ctx.JSON(http.StatusBadRequest, problems.NewProblem(
-			http.StatusBadRequest,
-			"Invalid request body.",
-		))
+	if err := ctx.BindJSON(&form); err != nil {
+		ctx.JSON(http.StatusBadRequest, problems.NewProblem(http.StatusBadRequest, "Invalid request body."))
 		return
 	}
 
