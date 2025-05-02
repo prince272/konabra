@@ -25,17 +25,17 @@ func NewProblem(status int, title string) *Problem {
 	}
 }
 
-func NewBadRequestProblem(err error) *Problem {
+func NewBadRequestProblemFromError(err error) *Problem {
 	var errors map[string]string
 
 	if errs, ok := err.(validator.ValidationErrors); ok {
 		errors = utils.GetProcessValidationErrors(errs)
 	}
 
-	return NewBadRequestWithErrorsProblem(errors)
+	return NewBadRequestProblemFromErrors(errors)
 }
 
-func NewBadRequestWithErrorsProblem(errors map[string]string) *Problem {
+func NewBadRequestProblemFromErrors(errors map[string]string) *Problem {
 	status := http.StatusBadRequest
 	return &Problem{
 		Type:   buildTypeURL(status),
@@ -46,7 +46,7 @@ func NewBadRequestWithErrorsProblem(errors map[string]string) *Problem {
 	}
 }
 
-func NewInternalServerProblem(err error) *Problem {
+func NewInternalServerProblemFromError(err error) *Problem {
 	status := http.StatusInternalServerError
 	return &Problem{
 		Type:   buildTypeURL(status),

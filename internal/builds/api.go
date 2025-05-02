@@ -29,6 +29,8 @@ type Api struct {
 }
 
 type Config struct {
+	Env       string `koanf:"ENV"`
+	Port      string `koanf:"PORT"`
 	DbDefault string `koanf:"DB_DEFAULT"`
 	LogLevel  string `koanf:"LOG_LEVEL"`
 	LogFile   string `koanf:"LOG_OUTPUT"`
@@ -55,12 +57,20 @@ func buildConfig() func() *Config {
 
 		fmt.Println("Loaded environment variables")
 
-		var cfg Config
+		var cfg *Config
 		if err := k.Unmarshal("", &cfg); err != nil {
 			panic(fmt.Errorf("error unmarshaling config: %w", err))
 		}
 
-		return &cfg
+		if cfg.Env == "" {
+			cfg.Env = "development"
+		}
+
+		if cfg.Port == "" {
+			cfg.Port = "8080"
+		}
+
+		return cfg
 	}
 }
 
@@ -73,9 +83,15 @@ func buildLogger(container *di.Container) func() *zap.Logger {
 			level = zapcore.InfoLevel
 		}
 
+		isDev := cfg.Env == "development"
+		encoderCfg := zap.NewProductionEncoderConfig()
+		if isDev {
+			encoderCfg = zap.NewDevelopmentEncoderConfig()
+		}
+
 		cores := []zapcore.Core{
 			zapcore.NewCore(
-				zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig()),
+				zapcore.NewConsoleEncoder(encoderCfg),
 				zapcore.AddSync(os.Stdout),
 				level,
 			),
@@ -144,14 +160,12 @@ func buildValidator() func() *validator.Validate {
 	}
 }
 
-func buildEngine(container *di.Container) func() *gin.Engine {
+func buildRouter(container *di.Container) func() *gin.Engine {
 	return func() *gin.Engine {
 		router := gin.New()
 		logger := di.MustGet[*zap.Logger](container)
 
 		// Add middleware
-		router.Use(ginzap.Ginzap(logger, time.RFC3339, true))
-		router.Use(ginzap.RecoveryWithZap(logger, true))
 		router.Use(gin.CustomRecovery(func(c *gin.Context, unknownErr any) {
 			var err error
 			switch e := unknownErr.(type) {
@@ -167,8 +181,10 @@ func buildEngine(container *di.Container) func() *gin.Engine {
 				zap.String("path", c.Request.URL.Path),
 				zap.Int("status_code", http.StatusInternalServerError),
 			)
-			c.JSON(http.StatusInternalServerError, problems.NewInternalServerProblem(err))
+			c.JSON(http.StatusInternalServerError, problems.NewInternalServerProblemFromError(err))
 		}))
+		router.Use(ginzap.Ginzap(logger, time.RFC3339, true))
+		router.Use(ginzap.RecoveryWithZap(logger, true))
 
 		return router
 	}
@@ -177,35 +193,29 @@ func buildEngine(container *di.Container) func() *gin.Engine {
 func NewApi() *Api {
 	container := di.New()
 
-	// Register container itself
 	if err := container.Register(func() *di.Container {
 		return container
 	}); err != nil {
 		panic(fmt.Errorf("failed to register container: %w", err))
 	}
 
-	// Register config
 	if err := container.Register(buildConfig()); err != nil {
 		panic(fmt.Errorf("failed to register config: %w", err))
 	}
 
-	// Register logger
 	if err := container.Register(buildLogger(container)); err != nil {
 		panic(fmt.Errorf("failed to register logger: %w", err))
 	}
 
-	// Register validator
 	if err := container.Register(buildValidator()); err != nil {
 		panic(fmt.Errorf("failed to register validator: %w", err))
 	}
 
-	// Register default DB
 	if err := container.RegisterWithKey("DefaultDB", buildDefaultDB(container)); err != nil {
 		panic(fmt.Errorf("failed to register default DB: %w", err))
 	}
 
-	// Register Gin engine
-	if err := container.Register(buildEngine(container)); err != nil {
+	if err := container.Register(buildRouter(container)); err != nil {
 		panic(fmt.Errorf("failed to register Gin engine: %w", err))
 	}
 
@@ -218,10 +228,14 @@ func (api *Api) Register(constructor any) {
 	}
 }
 
-// Run starts the HTTP server
 func (api *Api) Run() {
 	router := di.MustGet[*gin.Engine](api.container)
-	if err := router.Run(); err != nil {
+	cfg := di.MustGet[*Config](api.container)
+
+	port := cfg.Port
+	addr := fmt.Sprintf(":%s", port)
+
+	if err := router.Run(addr); err != nil {
 		panic(fmt.Errorf("server failed: %w", err))
 	}
 }
