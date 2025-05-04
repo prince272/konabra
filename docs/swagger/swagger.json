@@ -54,6 +54,53 @@
                     }
                 }
             }
+        },
+        "/account/signin": {
+            "post": {
+                "description": "Sign in to an existing user account with the provided credentials",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Identity"
+                ],
+                "summary": "Sign in to an account",
+                "parameters": [
+                    {
+                        "description": "Account sign-in credentials",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.SignInForm"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Account signed in successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/problems.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/problems.Problem"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -102,6 +149,22 @@
                     "type": "string",
                     "maxLength": 256
                 },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 256
+                }
+            }
+        },
+        "services.SignInForm": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
                 "password": {
                     "type": "string"
                 },

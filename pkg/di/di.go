@@ -18,25 +18,25 @@ func New() *Container {
 }
 
 // Register registers and verifies a constructor without a key
-func (c *Container) Register(constructor any) error {
-	if err := c.inner.Provide(constructor); err != nil {
+func (container *Container) Register(constructor any) error {
+	if err := container.inner.Provide(constructor); err != nil {
 		return fmt.Errorf("failed to register constructor: %w", err)
 	}
 
-	return c.verifyConstructor(constructor, "")
+	return container.verifyConstructor(constructor, "")
 }
 
 // RegisterWithKey registers and verifies a constructor with a key
-func (c *Container) RegisterWithKey(key string, constructor any) error {
-	if err := c.inner.Provide(constructor, dig.Name(key)); err != nil {
+func (container *Container) RegisterWithKey(key string, constructor any) error {
+	if err := container.inner.Provide(constructor, dig.Name(key)); err != nil {
 		return fmt.Errorf("failed to register constructor: %w", err)
 	}
 
-	return c.verifyConstructor(constructor, key)
+	return container.verifyConstructor(constructor, key)
 }
 
 // verifyConstructor checks if the constructor can be invoked
-func (c *Container) verifyConstructor(constructor any, key string) error {
+func (container *Container) verifyConstructor(constructor any, key string) error {
 	constructorType := reflect.TypeOf(constructor)
 	if constructorType.Kind() != reflect.Func {
 		return fmt.Errorf("constructor must be a function")
@@ -71,7 +71,7 @@ func (c *Container) verifyConstructor(constructor any, key string) error {
 		return nil
 	})
 
-	if err := c.inner.Invoke(consumer.Interface()); err != nil {
+	if err := container.inner.Invoke(consumer.Interface()); err != nil {
 		return fmt.Errorf("verification failed: %w", err)
 	}
 	return nil

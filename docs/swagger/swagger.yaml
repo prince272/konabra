@@ -39,6 +39,17 @@ definitions:
     - password
     - username
     type: object
+  services.SignInForm:
+    properties:
+      password:
+        type: string
+      username:
+        maxLength: 256
+        type: string
+    required:
+    - password
+    - username
+    type: object
 info:
   contact: {}
   description: Konabra is a smart, community-powered transport and road safety platform
@@ -76,6 +87,37 @@ paths:
           schema:
             $ref: '#/definitions/problems.Problem'
       summary: Create a new account
+      tags:
+      - Identity
+  /account/signin:
+    post:
+      consumes:
+      - application/json
+      description: Sign in to an existing user account with the provided credentials
+      parameters:
+      - description: Account sign-in credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.SignInForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Account signed in successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/problems.Problem'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/problems.Problem'
+      summary: Sign in to an account
       tags:
       - Identity
 swagger: "2.0"

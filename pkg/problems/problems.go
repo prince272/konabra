@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/prince272/konabra/utils"
+	"github.com/prince272/konabra/internal/helpers"
 )
 
 type Problem struct {
@@ -30,7 +30,7 @@ func NewBadRequestProblem(err error) *Problem {
 	var errors map[string]string
 
 	if errs, ok := err.(validator.ValidationErrors); ok {
-		errors = utils.GetProcessValidationErrors(errs)
+		errors = helpers.GetProcessValidationErrors(errs)
 	}
 
 	return NewCustomBadRequestProblem(errors)

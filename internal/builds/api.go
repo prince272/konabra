@@ -4,19 +4,19 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 	"github.com/knadh/koanf/parsers/dotenv"
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
+	"github.com/prince272/konabra/internal/helpers"
 	models "github.com/prince272/konabra/internal/models/identity"
 	"github.com/prince272/konabra/pkg/di"
 	"github.com/prince272/konabra/pkg/problems"
-	"github.com/prince272/konabra/utils"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -29,11 +29,17 @@ type Api struct {
 }
 
 type Config struct {
-	Env       string `koanf:"ENV"`
-	Port      string `koanf:"PORT"`
+	Env  string `koanf:"ENV"`
+	Port string `koanf:"PORT"`
+
 	DbDefault string `koanf:"DB_DEFAULT"`
-	LogLevel  string `koanf:"LOG_LEVEL"`
-	LogFile   string `koanf:"LOG_OUTPUT"`
+
+	LogLevel string `koanf:"LOG_LEVEL"`
+	LogFile  string `koanf:"LOG_OUTPUT"`
+
+	AuthJwtSecret   string `koanf:"AUTH_JWT_SECRET"`
+	AUthJwtIssuer   string `koanf:"AUTH_JWT_ISSUER"`
+	AuthJwtAudience string `koanf:"AUTH_JWT_AUDIENCE"`
 }
 
 func buildConfig() func() *Config {
@@ -116,8 +122,12 @@ func buildLogger(container *di.Container) func() *zap.Logger {
 	}
 }
 
-func buildDefaultDB(container *di.Container) func() *gorm.DB {
-	return func() *gorm.DB {
+type DefaultDB struct {
+	*gorm.DB
+}
+
+func buildDefaultDB(container *di.Container) func() *DefaultDB {
+	return func() *DefaultDB {
 		cfg := di.MustGet[*Config](container)
 
 		if cfg.DbDefault == "" {
@@ -129,7 +139,7 @@ func buildDefaultDB(container *di.Container) func() *gorm.DB {
 			panic(fmt.Errorf("failed to open database: %w", err))
 		}
 
-		if err := db.AutoMigrate(&models.User{}, &models.Role{}); err != nil {
+		if err := db.AutoMigrate(&models.User{}, &models.Role{}, &models.JwtToken{}); err != nil {
 			panic(fmt.Errorf("auto migration failed: %w", err))
 		}
 
@@ -142,21 +152,7 @@ func buildDefaultDB(container *di.Container) func() *gorm.DB {
 		sqlDB.SetMaxOpenConns(10)
 		sqlDB.SetConnMaxLifetime(time.Hour)
 
-		return db
-	}
-}
-
-func buildValidator() func() *validator.Validate {
-	return func() *validator.Validate {
-		validate := validator.New()
-		if err := validate.RegisterValidation("username", utils.ValidateUsername); err != nil {
-			panic(fmt.Errorf("failed to register username validator: %w", err))
-		}
-
-		if err := validate.RegisterValidation("password", utils.ValidatePassword); err != nil {
-			panic(fmt.Errorf("failed to register password validator: %w", err))
-		}
-		return validate
+		return &DefaultDB{DB: db}
 	}
 }
 
@@ -190,14 +186,30 @@ func buildRouter(container *di.Container) func() *gin.Engine {
 	}
 }
 
+func buildValidationHelper() func() *helpers.ValidationHelper {
+	return func() *helpers.ValidationHelper {
+		return helpers.NewValidationHelper()
+	}
+}
+
+func buildJwtHelper(container *di.Container) func() *helpers.JwtHelper {
+	return func() *helpers.JwtHelper {
+		cfg := di.MustGet[*Config](container)
+		defaultDB := di.MustGet[*DefaultDB](container)
+		logger := di.MustGet[*zap.Logger](container)
+
+		options := helpers.JwtOptions{
+			Secret:   cfg.AuthJwtSecret,
+			Audience: strings.Split(cfg.AuthJwtAudience, ","),
+			Issuer:   cfg.AUthJwtIssuer,
+		}
+
+		return helpers.NewJwtHelper(options, defaultDB.DB, logger)
+	}
+}
+
 func NewApi() *Api {
 	container := di.New()
-
-	if err := container.Register(func() *di.Container {
-		return container
-	}); err != nil {
-		panic(fmt.Errorf("failed to register container: %w", err))
-	}
 
 	if err := container.Register(buildConfig()); err != nil {
 		panic(fmt.Errorf("failed to register config: %w", err))
@@ -207,12 +219,16 @@ func NewApi() *Api {
 		panic(fmt.Errorf("failed to register logger: %w", err))
 	}
 
-	if err := container.Register(buildValidator()); err != nil {
+	if err := container.Register(buildValidationHelper()); err != nil {
 		panic(fmt.Errorf("failed to register validator: %w", err))
 	}
 
-	if err := container.RegisterWithKey("DefaultDB", buildDefaultDB(container)); err != nil {
+	if err := container.Register(buildDefaultDB(container)); err != nil {
 		panic(fmt.Errorf("failed to register default DB: %w", err))
+	}
+
+	if err := container.Register(buildJwtHelper(container)); err != nil {
+		panic(fmt.Errorf("failed to register JWT helper: %w", err))
 	}
 
 	if err := container.Register(buildRouter(container)); err != nil {

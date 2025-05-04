@@ -1,4 +1,4 @@
-package utils
+package helpers
 
 import (
 	"fmt"
@@ -9,6 +9,28 @@ import (
 	"github.com/gobeam/stringy"
 	"github.com/nyaruka/phonenumbers"
 )
+
+type ValidationHelper struct {
+	validate *validator.Validate
+}
+
+func NewValidationHelper() *ValidationHelper {
+	validate := validator.New()
+	if err := validate.RegisterValidation("username", ValidateUsername); err != nil {
+		panic(fmt.Errorf("failed to register username validator: %w", err))
+	}
+
+	if err := validate.RegisterValidation("password", ValidatePassword); err != nil {
+		panic(fmt.Errorf("failed to register password validator: %w", err))
+	}
+	return &ValidationHelper{
+		validate: validate,
+	}
+}
+
+func (helper *ValidationHelper) ValidateStruct(s any) error {
+	return helper.validate.Struct(s)
+}
 
 // ValidatePassword checks password strength
 func ValidatePassword(fl validator.FieldLevel) bool {

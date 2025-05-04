@@ -1,11 +1,13 @@
 package services
 
 import (
-	"github.com/go-playground/validator/v10"
+	"time"
+
+	"github.com/google/uuid"
 	"github.com/jinzhu/copier"
+	"github.com/prince272/konabra/internal/helpers"
 	models "github.com/prince272/konabra/internal/models/identity"
 	"github.com/prince272/konabra/internal/repositories"
-	"github.com/prince272/konabra/pkg/di"
 	"github.com/prince272/konabra/pkg/problems"
 	"github.com/prince272/konabra/utils"
 )
@@ -17,65 +19,160 @@ type CreateAccountForm struct {
 	Password  string `json:"password" validate:"required,password"`
 }
 
-func (form *CreateAccountForm) GetEmail() string {
-	if utils.IsEmail(form.Username) {
+type SignInForm struct {
+	Username string `json:"username" validate:"required,max=256,username"`
+	Password string `json:"password" validate:"required"`
+}
+
+func (form CreateAccountForm) GetEmail() string {
+	if helpers.IsEmail(form.Username) {
 		return form.Username
 	}
 	return ""
 }
 
-func (form *CreateAccountForm) GetPhoneNumber() string {
-	if utils.IsPhoneNumber(form.Username) {
+func (form CreateAccountForm) GetPhoneNumber() string {
+	if helpers.IsPhoneNumber(form.Username) {
 		return form.Username
 	}
 	return ""
 }
 
-type CreateAccountData struct {
-	FirstName   string `json:"firstName"`
-	LastName    string `json:"lastName"`
-	UserName    string `json:"userName"`
-	Email       string `json:"email"`
-	PhoneNumber string `json:"phoneNumber"`
+type AccountModel struct {
+	FirstName           string    `json:"firstName"`
+	LastName            string    `json:"lastName"`
+	UserName            string    `json:"userName"`
+	Email               string    `json:"email"`
+	EmailVerified       bool      `json:"emailVerified"`
+	PhoneNumber         string    `json:"phoneNumber"`
+	PhoneNumberVerified bool      `json:"phoneNumberVerified"`
+	HasPassword         bool      `json:"hasPassword"`
+	CreatedAt           time.Time `json:"createdAt"`
+	UpdatedAt           time.Time `json:"updatedAt"`
+	LastActiveAt        time.Time `json:"lastActiveAt"`
+	Roles               []string  `json:"roles"`
+}
+
+type AccountWithTokenModel struct {
+	AccountModel
+	helpers.JwtTokenModel
 }
 
 type IdentityService struct {
 	identityRepository *repositories.IdentityRepository
-	validate           *validator.Validate
+	jwtHelper          *helpers.JwtHelper
+	validationHelper   *helpers.ValidationHelper
 }
 
-func NewIdentityService(container *di.Container) *IdentityService {
-	identityRepository := di.MustGet[*repositories.IdentityRepository](container)
-	validate := di.MustGet[*validator.Validate](container)
+func NewIdentityService(
+	identityRepository *repositories.IdentityRepository,
+	validationHelper *helpers.ValidationHelper,
+	jwtHelper *helpers.JwtHelper) *IdentityService {
 	return &IdentityService{
 		identityRepository,
-		validate,
+		jwtHelper,
+		validationHelper,
 	}
 }
 
-func (identityService *IdentityService) CreateAccount(form *CreateAccountForm) (*CreateAccountData, *problems.Problem) {
-	// Validate form input
-	if err := identityService.validate.Struct(form); err != nil {
+func (service *IdentityService) CreateAccount(form CreateAccountForm) (*AccountModel, *problems.Problem) {
+
+	// Validate form
+	if err := service.validationHelper.ValidateStruct(form); err != nil {
 		return nil, problems.NewBadRequestProblem(err)
 	}
 
-	identityRepository := identityService.identityRepository
-
 	// Check if username exists
-	if usernameExists := identityRepository.CheckIfUsernameExists(form.Username); usernameExists {
+	if usernameExists := service.identityRepository.UsernameExists(form.Username); usernameExists {
 		return nil, problems.NewCustomBadRequestProblem(map[string]string{"username": "Username already exists."})
 	}
 
+	currentTime := time.Now()
+
 	user := &models.User{
-		FirstName:   form.FirstName,
-		LastName:    form.LastName,
-		Email:       form.GetEmail(),
-		PhoneNumber: form.GetPhoneNumber(),
-		UserName:    identityRepository.GenerateName(form.FirstName, form.LastName),
+		Id:                  uuid.New().String(),
+		FirstName:           form.FirstName,
+		LastName:            form.LastName,
+		Email:               form.GetEmail(),
+		EmailVerified:       false,
+		PhoneNumber:         form.GetPhoneNumber(),
+		PhoneNumberVerified: false,
+		UserName:            service.identityRepository.GenerateName(form.FirstName, form.LastName),
+		PasswordHash:        utils.MustHashPassword(form.Password),
+		HasPassword:         true,
+		SecurityStamp:       uuid.New().String(),
+		CreatedAt:           currentTime,
+		UpdatedAt:           currentTime,
+		LastActiveAt:        currentTime,
 	}
 
-	data := &CreateAccountData{}
-	copier.Copy(data, user)
+	roles, err := service.identityRepository.EnsureRoleExists("Administrator", "Member")
 
-	return data, nil
+	if err != nil {
+		return nil, problems.NewInternalServerProblem(err)
+	}
+
+	if err := service.identityRepository.CreateUser(user); err != nil {
+		return nil, problems.NewInternalServerProblem(err)
+	}
+
+	if err := service.identityRepository.AddUserToRoles(user, roles...); err != nil {
+		return nil, problems.NewInternalServerProblem(err)
+	}
+
+	model := &AccountModel{}
+
+	if err := copier.Copy(model, user); err != nil {
+		return nil, problems.NewInternalServerProblem(err)
+	}
+
+	model.Roles = user.RoleNames()
+	return model, nil
+}
+
+func (service *IdentityService) SignInAccount(form SignInForm) (*AccountWithTokenModel, *problems.Problem) {
+
+	// Validate form
+	if err := service.validationHelper.ValidateStruct(form); err != nil {
+		return nil, problems.NewBadRequestProblem(err)
+	}
+
+	// Check if username exists
+	var user *models.User
+	if user = service.identityRepository.FindUserByUsername(form.Username); user == nil {
+		return nil, problems.NewCustomBadRequestProblem(map[string]string{"username": "Username does not exist."})
+	}
+
+	// Check if password is correct
+	if !utils.CheckPasswordHash(form.Password, user.PasswordHash) {
+		return nil, problems.NewCustomBadRequestProblem(map[string]string{"password": "Password is incorrect."})
+	}
+
+	if err := service.jwtHelper.RevokeExpiredTokens(user.Id); err != nil {
+		return nil, problems.NewInternalServerProblem(err)
+	}
+
+	// Create JWT token
+	token, err := service.jwtHelper.CreateToken(user.Id, map[string]any{
+		"email":       user.Email,
+		"phoneNumber": user.PhoneNumber,
+		"roles":       user.RoleNames(),
+	})
+
+	if err != nil {
+		return nil, problems.NewInternalServerProblem(err)
+	}
+
+	model := &AccountWithTokenModel{}
+
+	if err := copier.Copy(model, user); err != nil {
+		return nil, problems.NewInternalServerProblem(err)
+	}
+
+	if err := copier.Copy(model, token); err != nil {
+		return nil, problems.NewInternalServerProblem(err)
+	}
+
+	model.Roles = user.RoleNames()
+	return model, nil
 }
