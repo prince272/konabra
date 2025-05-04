@@ -84,12 +84,12 @@ func (service *IdentityService) CreateAccount(form CreateAccountForm) (*AccountM
 	// Validate form
 	if err := service.validationHelper.ValidateStruct(form); err != nil {
 		service.logger.Error("Validation error: ", zap.Error(err))
-		return nil, problems.NewBadRequestProblem(err)
+		return nil, problems.FromError(err)
 	}
 
 	// Check if username exists
 	if usernameExists := service.identityRepository.UsernameExists(form.Username); usernameExists {
-		return nil, problems.NewCustomBadRequestProblem(map[string]string{"username": "Username already exists."})
+		return nil, problems.NewValidationProblem(map[string]string{"username": "Username already exists."})
 	}
 
 	currentTime := time.Now()
@@ -115,24 +115,24 @@ func (service *IdentityService) CreateAccount(form CreateAccountForm) (*AccountM
 
 	if err != nil {
 		service.logger.Error("Error ensuring roles exist: ", zap.Error(err))
-		return nil, problems.NewInternalServerProblem(err)
+		return nil, problems.FromError(err)
 	}
 
 	if err := service.identityRepository.CreateUser(user); err != nil {
 		service.logger.Error("Error creating user: ", zap.Error(err))
-		return nil, problems.NewInternalServerProblem(err)
+		return nil, problems.FromError(err)
 	}
 
 	if err := service.identityRepository.AddUserToRoles(user, roles...); err != nil {
 		service.logger.Error("Error adding user to roles: ", zap.Error(err))
-		return nil, problems.NewInternalServerProblem(err)
+		return nil, problems.FromError(err)
 	}
 
 	model := &AccountModel{}
 
 	if err := copier.Copy(model, user); err != nil {
 		service.logger.Error("Error copying user to model: ", zap.Error(err))
-		return nil, problems.NewInternalServerProblem(err)
+		return nil, problems.FromError(err)
 	}
 
 	model.Roles = user.RoleNames()
@@ -144,25 +144,25 @@ func (service *IdentityService) SignInAccount(form SignInForm) (*AccountWithToke
 	// Validate form
 	if err := service.validationHelper.ValidateStruct(form); err != nil {
 		service.logger.Error("Validation error: ", zap.Error(err))
-		return nil, problems.NewBadRequestProblem(err)
+		return nil, problems.FromError(err)
 	}
 
 	// Check if username exists
 	var user *models.User
 	if user = service.identityRepository.FindUserByUsername(form.Username); user == nil {
 		service.logger.Error("User not found: ", zap.String("username", form.Username))
-		return nil, problems.NewCustomBadRequestProblem(map[string]string{"username": "Username does not exist."})
+		return nil, problems.NewValidationProblem(map[string]string{"username": "Username does not exist."})
 	}
 
 	// Check if password is correct
 	if !utils.CheckPasswordHash(form.Password, user.PasswordHash) {
 		service.logger.Error("Incorrect password for user: ", zap.String("username", form.Username))
-		return nil, problems.NewCustomBadRequestProblem(map[string]string{"password": "Password is incorrect."})
+		return nil, problems.NewValidationProblem(map[string]string{"password": "Password is incorrect."})
 	}
 
 	if err := service.jwtHelper.RevokeExpiredTokens(user.Id); err != nil {
 		service.logger.Error("Error revoking expired tokens: ", zap.Error(err))
-		return nil, problems.NewInternalServerProblem(err)
+		return nil, problems.FromError(err)
 	}
 
 	// Create JWT token
@@ -174,19 +174,19 @@ func (service *IdentityService) SignInAccount(form SignInForm) (*AccountWithToke
 
 	if err != nil {
 		service.logger.Error("Error creating JWT token: ", zap.Error(err))
-		return nil, problems.NewInternalServerProblem(err)
+		return nil, problems.FromError(err)
 	}
 
 	model := &AccountWithTokenModel{}
 
 	if err := copier.Copy(model, user); err != nil {
 		service.logger.Error("Error copying user to model: ", zap.Error(err))
-		return nil, problems.NewInternalServerProblem(err)
+		return nil, problems.FromError(err)
 	}
 
 	if err := copier.Copy(model, token); err != nil {
 		service.logger.Error("Error copying token to model: ", zap.Error(err))
-		return nil, problems.NewInternalServerProblem(err)
+		return nil, problems.FromError(err)
 	}
 
 	model.Roles = user.RoleNames()
@@ -198,14 +198,14 @@ func (service *IdentityService) GetAccountById(id string) (*AccountModel, *probl
 
 	if user == nil {
 		service.logger.Error("User not found: ", zap.String("id", id))
-		return nil, problems.NewProblem(http.StatusNotFound, "Account not found.")
+		return nil, problems.NewProblem(http.StatusNotFound, "User not found.")
 	}
 
 	model := &AccountModel{}
 
 	if err := copier.Copy(model, user); err != nil {
 		service.logger.Error("Error copying user to model: ", zap.Error(err))
-		return nil, problems.NewInternalServerProblem(err)
+		return nil, problems.FromError(err)
 	}
 
 	model.Roles = user.RoleNames()

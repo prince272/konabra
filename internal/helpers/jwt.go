@@ -273,7 +273,7 @@ func (helper *JwtHelper) RequireAuth(roles ...string) gin.HandlerFunc {
 		token, err := helper.extractBearerToken(c)
 		if err != nil {
 			helper.logger.Error("Failed to extract token", zap.Error(err))
-			problem := problems.NewProblem(http.StatusUnauthorized, "Missing or malformed Authorization header")
+			problem := problems.NewProblem(http.StatusUnauthorized, "Unauthorized access")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, problem)
 			return
 		}
@@ -281,7 +281,7 @@ func (helper *JwtHelper) RequireAuth(roles ...string) gin.HandlerFunc {
 		claims, err := helper.ValidateToken(token)
 		if err != nil {
 			helper.logger.Error("Failed to validate token", zap.Error(err))
-			problem := problems.NewProblem(http.StatusUnauthorized, "Invalid token")
+			problem := problems.NewProblem(http.StatusUnauthorized, "Unauthorized access")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, problem)
 			return
 		}

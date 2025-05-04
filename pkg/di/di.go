@@ -59,7 +59,7 @@ func (container *Container) verifyConstructor(constructor any, key string) error
 		Type: returnType,
 	}
 	if key != "" {
-		serviceField.Tag = reflect.StructTag(fmt.Sprintf(`name:"%s"`, key))
+		serviceField.Tag = reflect.StructTag(fmt.Sprintf(`name:"%v"`, key))
 	}
 	paramFields = append(paramFields, serviceField)
 
@@ -100,7 +100,7 @@ func GetWithKey[T any](c *Container, key string) (T, error) {
 		{
 			Name: "Service",
 			Type: reflect.TypeOf(result),
-			Tag:  reflect.StructTag(fmt.Sprintf(`name:"%s"`, key)),
+			Tag:  reflect.StructTag(fmt.Sprintf(`name:"%v"`, key)),
 		},
 	})
 
@@ -130,7 +130,7 @@ func MustGet[T any](c *Container) T {
 func MustGetWithKey[T any](c *Container, key string) T {
 	service, err := GetWithKey[T](c, key)
 	if err != nil {
-		panic(fmt.Errorf("failed to get service with key '%s': %w", key, err))
+		panic(fmt.Errorf("failed to get service with key '%v': %w", key, err))
 	}
 	return service
 }

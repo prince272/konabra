@@ -27,7 +27,10 @@ func NewIdentityRepository(logger *zap.Logger, defaultDB *builds.DefaultDB) *Ide
 
 func (repository *IdentityRepository) CreateUser(user *models.User) error {
 	result := repository.defaultDB.Create(user)
-	return result.Error
+	if result.Error != nil {
+		return fmt.Errorf("failed to create user: %w", result.Error)
+	}
+	return nil
 }
 
 func (repository *IdentityRepository) FindUserByUsername(username string) *models.User {
@@ -42,7 +45,7 @@ func (repository *IdentityRepository) FindUserByUsername(username string) *model
 			return nil
 		}
 
-		panic(fmt.Errorf("failed to find user by username: %v", result.Error))
+		panic(fmt.Errorf("failed to find user by username: %w", result.Error))
 	}
 
 	return user
@@ -59,7 +62,7 @@ func (repository *IdentityRepository) FindUserById(id string) *models.User {
 			return nil
 		}
 
-		panic(fmt.Errorf("failed to find user by id: %v", result.Error))
+		panic(fmt.Errorf("failed to find user by id: %w", result.Error))
 	}
 
 	return user
@@ -72,7 +75,7 @@ func (repository *IdentityRepository) UsernameExists(username string) bool {
 		Count(&count)
 
 	if result.Error != nil {
-		panic(fmt.Errorf("failed to check if username exists: %v", result.Error))
+		panic(fmt.Errorf("failed to check if username exists: %w", result.Error))
 	}
 
 	return count > 0
@@ -85,7 +88,7 @@ func (repository *IdentityRepository) NameExists(name string) bool {
 		Count(&count)
 
 	if result.Error != nil {
-		panic(fmt.Errorf("failed to check if name exists: %v", result.Error))
+		panic(fmt.Errorf("failed to check if name exists: %w", result.Error))
 	}
 
 	return count > 0
@@ -112,7 +115,7 @@ func (repository *IdentityRepository) GenerateName(names ...string) string {
 		if count == 1 {
 			nameWithCount = baseName
 		} else {
-			nameWithCount = fmt.Sprintf("%s %d", baseName, count)
+			nameWithCount = fmt.Sprintf("%v %d", baseName, count)
 		}
 
 		slug := stringy.New(nameWithCount).SnakeCase().ToLower()
@@ -163,7 +166,7 @@ func (repository *IdentityRepository) EnsureRoleExists(roles ...string) ([]*mode
 func (repository *IdentityRepository) AddUserToRoles(user *models.User, roles ...*models.Role) error {
 	for _, role := range roles {
 		if err := repository.defaultDB.Model(user).Association("Roles").Append(role); err != nil {
-			return err
+			return fmt.Errorf("failed to add user to role: %w", err)
 		}
 	}
 	return nil

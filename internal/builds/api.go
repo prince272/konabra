@@ -179,7 +179,7 @@ func buildRouter(container *di.Container) func() *gin.Engine {
 				zap.String("path", c.Request.URL.Path),
 				zap.Int("status_code", http.StatusInternalServerError),
 			)
-			c.JSON(http.StatusInternalServerError, problems.NewInternalServerProblem(err))
+			c.JSON(http.StatusInternalServerError, problems.FromError(err))
 		}))
 
 		return router
@@ -249,7 +249,7 @@ func (api *Api) Run() {
 	cfg := di.MustGet[*Config](api.container)
 
 	port := cfg.Port
-	addr := fmt.Sprintf(":%s", port)
+	addr := fmt.Sprintf(":%v", port)
 
 	if err := router.Run(addr); err != nil {
 		panic(fmt.Errorf("server failed: %w", err))

@@ -43,7 +43,7 @@ func (handler *IdentityHandler) CreateAccount(ctx *gin.Context) {
 	var form services.CreateAccountForm
 
 	if err := ctx.BindJSON(&form); err != nil {
-		ctx.JSON(http.StatusBadRequest, problems.NewProblem(http.StatusBadRequest, "Invalid request body."))
+		ctx.JSON(http.StatusBadRequest, problems.NewProblem(http.StatusBadRequest, "Invalid request body"))
 		return
 	}
 
@@ -72,7 +72,7 @@ func (handler *IdentityHandler) SignInAccount(ctx *gin.Context) {
 	var form services.SignInForm
 
 	if err := ctx.BindJSON(&form); err != nil {
-		ctx.JSON(http.StatusBadRequest, problems.NewProblem(http.StatusBadRequest, "Invalid request body."))
+		ctx.JSON(http.StatusBadRequest, problems.NewProblem(http.StatusBadRequest, "Invalid request body"))
 		return
 	}
 
@@ -100,14 +100,14 @@ func (handler *IdentityHandler) GetCurrentAccount(ctx *gin.Context) {
 	claims, exists := ctx.Get("claims")
 
 	if !exists {
-		ctx.JSON(http.StatusUnauthorized, problems.NewProblem(http.StatusUnauthorized, "User not authenticated."))
+		ctx.JSON(http.StatusUnauthorized, problems.NewProblem(http.StatusUnauthorized, "Unauthorized access"))
 		return
 	}
 
 	sub, ok := claims.(map[string]any)["sub"].(string)
 
 	if !ok {
-		ctx.JSON(http.StatusUnauthorized, problems.NewProblem(http.StatusUnauthorized, "Invalid token."))
+		ctx.JSON(http.StatusUnauthorized, problems.NewProblem(http.StatusUnauthorized, "Unauthorized access"))
 		return
 	}
 
