@@ -41,7 +41,7 @@ func NewCustomBadRequestProblem(errors map[string]string) *Problem {
 	status := http.StatusBadRequest
 	return &Problem{
 		Type:   buildTypeURL(status),
-		Title:  "One or more validation errors occurred.",
+		Title:  "One or more validation errors occurred",
 		Status: status,
 		Detail: getProblemDetail(status),
 		Errors: errors,

@@ -27,9 +27,6 @@ func NewIdentityRepository(logger *zap.Logger, defaultDB *builds.DefaultDB) *Ide
 
 func (repository *IdentityRepository) CreateUser(user *models.User) error {
 	result := repository.defaultDB.Create(user)
-	if result.Error != nil {
-		repository.logger.Error("Failed to create user", zap.Error(result.Error), zap.String("email", user.Email))
-	}
 	return result.Error
 }
 
@@ -44,8 +41,8 @@ func (repository *IdentityRepository) FindUserByUsername(username string) *model
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil
 		}
-		repository.logger.Warn("Failed to find user by username", zap.Error(result.Error), zap.String("username", username))
-		return nil
+
+		panic(fmt.Errorf("failed to find user by username: %v", result.Error))
 	}
 
 	return user
@@ -61,8 +58,8 @@ func (repository *IdentityRepository) FindUserById(id string) *models.User {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil
 		}
-		repository.logger.Warn("Failed to find user by ID", zap.Error(result.Error), zap.String("user_id", id))
-		return nil
+
+		panic(fmt.Errorf("failed to find user by id: %v", result.Error))
 	}
 
 	return user
@@ -75,8 +72,7 @@ func (repository *IdentityRepository) UsernameExists(username string) bool {
 		Count(&count)
 
 	if result.Error != nil {
-		repository.logger.Warn("Failed to check if username exists", zap.Error(result.Error), zap.String("username", username))
-		return false
+		panic(fmt.Errorf("failed to check if username exists: %v", result.Error))
 	}
 
 	return count > 0
@@ -89,8 +85,7 @@ func (repository *IdentityRepository) NameExists(name string) bool {
 		Count(&count)
 
 	if result.Error != nil {
-		repository.logger.Warn("Failed to check if name exists", zap.Error(result.Error), zap.String("user_name", name))
-		return false
+		panic(fmt.Errorf("failed to check if name exists: %v", result.Error))
 	}
 
 	return count > 0
@@ -147,7 +142,6 @@ func (repository *IdentityRepository) EnsureRoleExists(roles ...string) ([]*mode
 			continue
 		} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 			// An actual error occurred (not just "not found")
-			repository.logger.Error("Failed to check if role exists", zap.Error(err), zap.String("role", role))
 			return nil, err
 		}
 
@@ -158,7 +152,6 @@ func (repository *IdentityRepository) EnsureRoleExists(roles ...string) ([]*mode
 		}
 		result := repository.defaultDB.Create(roleModel)
 		if result.Error != nil {
-			repository.logger.Error("Failed to create role", zap.Error(result.Error), zap.String("role", role))
 			return nil, result.Error
 		}
 		// Add the newly created role to the result
@@ -170,7 +163,6 @@ func (repository *IdentityRepository) EnsureRoleExists(roles ...string) ([]*mode
 func (repository *IdentityRepository) AddUserToRoles(user *models.User, roles ...*models.Role) error {
 	for _, role := range roles {
 		if err := repository.defaultDB.Model(user).Association("Roles").Append(role); err != nil {
-			repository.logger.Error("Failed to add user to role", zap.Error(err), zap.String("user_id", user.Id), zap.String("role_id", role.Id))
 			return err
 		}
 	}

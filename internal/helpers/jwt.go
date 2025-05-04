@@ -78,7 +78,6 @@ func (helper *JwtHelper) CreateToken(subject string, claims map[string]any) (*Jw
 
 	result := helper.database.Create(&token)
 	if result.Error != nil {
-		helper.logger.Error("Failed to create jwt token", zap.Error(result.Error))
 		return nil, result.Error
 	}
 
@@ -97,7 +96,6 @@ func (helper *JwtHelper) RevokeAllTokens(subject string) error {
 		Where("subject = ?", subject).
 		Delete(&models.JwtToken{})
 	if result.Error != nil {
-		helper.logger.Error("Failed to revoke all JWT tokens", zap.Error(result.Error))
 		return result.Error
 	}
 	return nil
@@ -111,7 +109,6 @@ func (helper *JwtHelper) RevokeExpiredTokens(subject string) error {
 			subject, currentTime, currentTime).
 		Delete(&models.JwtToken{})
 	if result.Error != nil {
-		helper.logger.Error("Failed to revoke expired JWT tokens", zap.Error(result.Error))
 		return result.Error
 	}
 	return nil
@@ -129,10 +126,35 @@ func (helper *JwtHelper) RevokeTokenByHash(subject string, tokenString string) e
 			subject, tokenHash, tokenHash).
 		Delete(&models.JwtToken{})
 	if result.Error != nil {
-		helper.logger.Error("Failed to revoke JWT token by hash", zap.Error(result.Error))
 		return result.Error
 	}
 	return nil
+}
+
+func (helper *JwtHelper) ValidTokenByHash(subject string, tokenString string) error {
+	tokenHash := utils.HashToken(tokenString)
+	if tokenHash == "" {
+		return errors.New("invalid token hash")
+	}
+
+	currentTime := time.Now()
+	var token models.JwtToken
+
+	result := helper.database.
+		Model(&models.JwtToken{}).
+		Where("subject = ? AND (access_token_hash = ? OR refresh_token_hash = ?)",
+			subject, tokenHash, tokenHash).
+		First(&token)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if token.AccessTokenExpiresAt.After(currentTime) || token.RefreshTokenExpiresAt.After(currentTime) {
+		return nil
+	}
+
+	return errors.New("token has expired")
 }
 
 func (helper *JwtHelper) GenerateToken(creationTime, expirationTime time.Time, subject string, claims map[string]any) (string, error) {
@@ -210,7 +232,8 @@ func (helper *JwtHelper) ValidateToken(tokenString string) (map[string]any, erro
 	}
 
 	// Validate subject
-	_, err = claims.GetSubject()
+	sub, err := claims.GetSubject()
+
 	if err != nil {
 		return nil, errors.New("invalid subject")
 	}
@@ -237,6 +260,11 @@ func (helper *JwtHelper) ValidateToken(tokenString string) (map[string]any, erro
 		}
 	}
 
+	// validate hash
+	if err := helper.ValidTokenByHash(sub, tokenString); err != nil {
+		return nil, err
+	}
+
 	return claims, nil
 }
 
@@ -244,18 +272,24 @@ func (helper *JwtHelper) RequireAuth(roles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token, err := helper.extractBearerToken(c)
 		if err != nil {
-			helper.abortWithError(c, http.StatusUnauthorized, err)
+			helper.logger.Error("Failed to extract token", zap.Error(err))
+			problem := problems.NewProblem(http.StatusUnauthorized, "Missing or malformed Authorization header")
+			c.AbortWithStatusJSON(http.StatusUnauthorized, problem)
 			return
 		}
 
 		claims, err := helper.ValidateToken(token)
 		if err != nil {
-			helper.abortWithError(c, http.StatusUnauthorized, err)
+			helper.logger.Error("Failed to validate token", zap.Error(err))
+			problem := problems.NewProblem(http.StatusUnauthorized, "Invalid token")
+			c.AbortWithStatusJSON(http.StatusUnauthorized, problem)
 			return
 		}
 
 		if len(roles) > 0 && !helper.hasRequiredRole(claims, roles) {
-			helper.abortWithError(c, http.StatusForbidden, errors.New("insufficient permissions"))
+			helper.logger.Error("Insufficient permissions", zap.String("roles", fmt.Sprintf("%v", roles)))
+			problem := problems.NewProblem(http.StatusForbidden, "Insufficient permissions")
+			c.AbortWithStatusJSON(http.StatusForbidden, problem)
 			return
 		}
 
@@ -309,9 +343,4 @@ func (helper *JwtHelper) extractRolesFromClaims(claims map[string]any) []string 
 	}
 
 	return roles
-}
-
-func (helper *JwtHelper) abortWithError(c *gin.Context, status int, err error) {
-	problem := problems.NewProblem(status, err.Error())
-	c.AbortWithStatusJSON(status, problem)
 }

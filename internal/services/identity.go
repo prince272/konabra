@@ -11,6 +11,7 @@ import (
 	"github.com/prince272/konabra/internal/repositories"
 	"github.com/prince272/konabra/pkg/problems"
 	"github.com/prince272/konabra/utils"
+	"go.uber.org/zap"
 )
 
 type CreateAccountForm struct {
@@ -63,16 +64,18 @@ type IdentityService struct {
 	identityRepository *repositories.IdentityRepository
 	jwtHelper          *helpers.JwtHelper
 	validationHelper   *helpers.ValidationHelper
+	logger             *zap.Logger
 }
 
 func NewIdentityService(
 	identityRepository *repositories.IdentityRepository,
 	validationHelper *helpers.ValidationHelper,
-	jwtHelper *helpers.JwtHelper) *IdentityService {
+	jwtHelper *helpers.JwtHelper, logger *zap.Logger) *IdentityService {
 	return &IdentityService{
 		identityRepository,
 		jwtHelper,
 		validationHelper,
+		logger,
 	}
 }
 
@@ -80,6 +83,7 @@ func (service *IdentityService) CreateAccount(form CreateAccountForm) (*AccountM
 
 	// Validate form
 	if err := service.validationHelper.ValidateStruct(form); err != nil {
+		service.logger.Error("Validation error: ", zap.Error(err))
 		return nil, problems.NewBadRequestProblem(err)
 	}
 
@@ -110,20 +114,24 @@ func (service *IdentityService) CreateAccount(form CreateAccountForm) (*AccountM
 	roles, err := service.identityRepository.EnsureRoleExists("Administrator", "Member")
 
 	if err != nil {
+		service.logger.Error("Error ensuring roles exist: ", zap.Error(err))
 		return nil, problems.NewInternalServerProblem(err)
 	}
 
 	if err := service.identityRepository.CreateUser(user); err != nil {
+		service.logger.Error("Error creating user: ", zap.Error(err))
 		return nil, problems.NewInternalServerProblem(err)
 	}
 
 	if err := service.identityRepository.AddUserToRoles(user, roles...); err != nil {
+		service.logger.Error("Error adding user to roles: ", zap.Error(err))
 		return nil, problems.NewInternalServerProblem(err)
 	}
 
 	model := &AccountModel{}
 
 	if err := copier.Copy(model, user); err != nil {
+		service.logger.Error("Error copying user to model: ", zap.Error(err))
 		return nil, problems.NewInternalServerProblem(err)
 	}
 
@@ -135,21 +143,25 @@ func (service *IdentityService) SignInAccount(form SignInForm) (*AccountWithToke
 
 	// Validate form
 	if err := service.validationHelper.ValidateStruct(form); err != nil {
+		service.logger.Error("Validation error: ", zap.Error(err))
 		return nil, problems.NewBadRequestProblem(err)
 	}
 
 	// Check if username exists
 	var user *models.User
 	if user = service.identityRepository.FindUserByUsername(form.Username); user == nil {
+		service.logger.Error("User not found: ", zap.String("username", form.Username))
 		return nil, problems.NewCustomBadRequestProblem(map[string]string{"username": "Username does not exist."})
 	}
 
 	// Check if password is correct
 	if !utils.CheckPasswordHash(form.Password, user.PasswordHash) {
+		service.logger.Error("Incorrect password for user: ", zap.String("username", form.Username))
 		return nil, problems.NewCustomBadRequestProblem(map[string]string{"password": "Password is incorrect."})
 	}
 
 	if err := service.jwtHelper.RevokeExpiredTokens(user.Id); err != nil {
+		service.logger.Error("Error revoking expired tokens: ", zap.Error(err))
 		return nil, problems.NewInternalServerProblem(err)
 	}
 
@@ -161,16 +173,19 @@ func (service *IdentityService) SignInAccount(form SignInForm) (*AccountWithToke
 	})
 
 	if err != nil {
+		service.logger.Error("Error creating JWT token: ", zap.Error(err))
 		return nil, problems.NewInternalServerProblem(err)
 	}
 
 	model := &AccountWithTokenModel{}
 
 	if err := copier.Copy(model, user); err != nil {
+		service.logger.Error("Error copying user to model: ", zap.Error(err))
 		return nil, problems.NewInternalServerProblem(err)
 	}
 
 	if err := copier.Copy(model, token); err != nil {
+		service.logger.Error("Error copying token to model: ", zap.Error(err))
 		return nil, problems.NewInternalServerProblem(err)
 	}
 
@@ -182,12 +197,14 @@ func (service *IdentityService) GetAccountById(id string) (*AccountModel, *probl
 	user := service.identityRepository.FindUserById(id)
 
 	if user == nil {
+		service.logger.Error("User not found: ", zap.String("id", id))
 		return nil, problems.NewProblem(http.StatusNotFound, "Account not found.")
 	}
 
 	model := &AccountModel{}
 
 	if err := copier.Copy(model, user); err != nil {
+		service.logger.Error("Error copying user to model: ", zap.Error(err))
 		return nil, problems.NewInternalServerProblem(err)
 	}
 
