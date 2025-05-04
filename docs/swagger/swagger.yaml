@@ -89,6 +89,30 @@ paths:
       summary: Create a new account
       tags:
       - Identity
+  /account/me:
+    get:
+      description: Get information about the currently authenticated user account
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Account information retrieved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: User not authenticated
+          schema:
+            $ref: '#/definitions/problems.Problem'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/problems.Problem'
+      security:
+      - ApiKeyAuth: []
+      summary: Get current account information
+      tags:
+      - Identity
   /account/signin:
     post:
       consumes:

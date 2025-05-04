@@ -1,16 +1,24 @@
 package helpers
 
 import (
+	"errors"
+	"fmt"
+	"net/http"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
+	"go.uber.org/zap"
+	"gorm.io/gorm"
 
 	"maps"
 
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
+	"slices"
+
 	models "github.com/prince272/konabra/internal/models/identity"
+	"github.com/prince272/konabra/pkg/problems"
 	"github.com/prince272/konabra/utils"
-	"go.uber.org/zap"
-	"gorm.io/gorm"
 )
 
 type JwtHelper struct {
@@ -37,20 +45,21 @@ func NewJwtHelper(options JwtOptions, database *gorm.DB, logger *zap.Logger) *Jw
 	return &JwtHelper{
 		Options:  options,
 		database: database,
+		logger:   logger,
 	}
 }
 
 func (helper *JwtHelper) CreateToken(subject string, claims map[string]any) (*JwtTokenModel, error) {
 	creationTime := time.Now()
 
-	accessTokenExpiresAt := creationTime.Add(15 * time.Minute) // 15 minutes
-	accessToken, err := helper.generateToken(creationTime, accessTokenExpiresAt, subject, claims)
+	accessTokenExpiresAt := creationTime.Add(15 * time.Minute)
+	accessToken, err := helper.GenerateToken(creationTime, accessTokenExpiresAt, subject, claims)
 	if err != nil {
 		return nil, err
 	}
 
-	refreshTokenExpiresAt := creationTime.Add(30 * 24 * time.Hour) // 30 days
-	refreshToken, err := helper.generateToken(creationTime, refreshTokenExpiresAt, subject, map[string]any{})
+	refreshTokenExpiresAt := creationTime.Add(30 * 24 * time.Hour)
+	refreshToken, err := helper.GenerateToken(creationTime, refreshTokenExpiresAt, subject, map[string]any{})
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +77,6 @@ func (helper *JwtHelper) CreateToken(subject string, claims map[string]any) (*Jw
 	}
 
 	result := helper.database.Create(&token)
-
 	if result.Error != nil {
 		helper.logger.Error("Failed to create jwt token", zap.Error(result.Error))
 		return nil, result.Error
@@ -83,58 +91,51 @@ func (helper *JwtHelper) CreateToken(subject string, claims map[string]any) (*Jw
 	}, nil
 }
 
-// RevokeAllTokens deletes all tokens associated with the subject.
 func (helper *JwtHelper) RevokeAllTokens(subject string) error {
-	if result := helper.database.
+	result := helper.database.
 		Model(&models.JwtToken{}).
 		Where("subject = ?", subject).
-		Delete(&models.JwtToken{}); result.Error != nil {
+		Delete(&models.JwtToken{})
+	if result.Error != nil {
 		helper.logger.Error("Failed to revoke all JWT tokens", zap.Error(result.Error))
 		return result.Error
 	}
 	return nil
 }
 
-// RevokeExpiredTokens deletes tokens for the subject where either access or refresh token has expired.
 func (helper *JwtHelper) RevokeExpiredTokens(subject string) error {
 	currentTime := time.Now()
-
-	// Subject and (access expired OR refresh expired)
-	if result := helper.database.
+	result := helper.database.
 		Model(&models.JwtToken{}).
 		Where("subject = ? AND (access_token_expires_at < ? OR refresh_token_expires_at < ?)",
 			subject, currentTime, currentTime).
-		Delete(&models.JwtToken{}); result.Error != nil {
-
+		Delete(&models.JwtToken{})
+	if result.Error != nil {
 		helper.logger.Error("Failed to revoke expired JWT tokens", zap.Error(result.Error))
 		return result.Error
 	}
 	return nil
 }
 
-// RevokeTokenByHash deletes tokens where either access or refresh token hash matches the given token's hash.
-func (helper *JwtHelper) RevokeTokenByHash(subject string, token string) error {
-	tokenHash := utils.HashToken(token)
+func (helper *JwtHelper) RevokeTokenByHash(subject string, tokenString string) error {
+	tokenHash := utils.HashToken(tokenString)
 	if tokenHash == "" {
-		// If hashing failed or token empty, nothing to do.
 		return nil
 	}
 
-	if result := helper.database.
+	result := helper.database.
 		Model(&models.JwtToken{}).
-		Where("subject = ?", subject).
-		Where("access_token_hash = ? OR refresh_token_hash = ?", tokenHash, tokenHash).
-		Delete(&models.JwtToken{}); result.Error != nil {
-
+		Where("subject = ? AND (access_token_hash = ? OR refresh_token_hash = ?)",
+			subject, tokenHash, tokenHash).
+		Delete(&models.JwtToken{})
+	if result.Error != nil {
 		helper.logger.Error("Failed to revoke JWT token by hash", zap.Error(result.Error))
 		return result.Error
 	}
 	return nil
 }
 
-func (helper *JwtHelper) generateToken(creationTime, expirationTime time.Time, subject string, claims map[string]any) (string, error) {
-
-	// Create jwt claims
+func (helper *JwtHelper) GenerateToken(creationTime, expirationTime time.Time, subject string, claims map[string]any) (string, error) {
 	jwtClaims := jwt.MapClaims{
 		"iss": helper.Options.Issuer,
 		"sub": subject,
@@ -145,10 +146,172 @@ func (helper *JwtHelper) generateToken(creationTime, expirationTime time.Time, s
 		"jti": uuid.New().String(),
 	}
 
-	// Merge custom claims
 	maps.Copy(jwtClaims, claims)
 
-	// Create token with merged claims
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtClaims)
 	return token.SignedString([]byte(helper.Options.Secret))
+}
+
+func (helper *JwtHelper) ValidateToken(tokenString string) (map[string]any, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(helper.Options.Secret), nil
+	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Name}))
+
+	if err != nil {
+		return nil, errors.New("invalid token")
+	}
+
+	if !token.Valid {
+		return nil, errors.New("invalid token")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+
+	if !ok {
+		return nil, errors.New("invalid token")
+	}
+
+	// Validate expiration time
+	exp, err := claims.GetExpirationTime()
+	if err != nil || exp == nil {
+		return nil, errors.New("missing expiration claim")
+	}
+	if exp.Before(time.Now()) {
+		return nil, errors.New("token has expired")
+	}
+
+	// Validate not before time if present
+	nbf, err := claims.GetNotBefore()
+	if err != nil {
+		return nil, errors.New("invalid token")
+	}
+	if nbf != nil && nbf.After(time.Now()) {
+		return nil, errors.New("token not valid yet")
+	}
+
+	// Validate issued at time if present
+	iat, err := claims.GetIssuedAt()
+	if err != nil {
+		return nil, errors.New("invalid token")
+	}
+	if iat != nil && iat.After(time.Now()) {
+		return nil, errors.New("token issued in the future")
+	}
+
+	// Validate issuer
+	if helper.Options.Issuer != "" {
+		iss, err := claims.GetIssuer()
+		if err != nil || iss != helper.Options.Issuer {
+			return nil, errors.New("invalid issuer")
+		}
+	}
+
+	// Validate subject
+	_, err = claims.GetSubject()
+	if err != nil {
+		return nil, errors.New("invalid subject")
+	}
+
+	// Validate audience
+	if len(helper.Options.Audience) > 0 {
+		aud, err := claims.GetAudience()
+		if err != nil {
+			return nil, errors.New("invalid audience")
+		}
+
+		found := false
+		for _, expectedAud := range helper.Options.Audience {
+			if slices.Contains(aud, expectedAud) {
+				found = true
+			}
+			if found {
+				break
+			}
+		}
+
+		if !found {
+			return nil, errors.New("invalid audience")
+		}
+	}
+
+	return claims, nil
+}
+
+func (helper *JwtHelper) RequireAuth(roles ...string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		token, err := helper.extractBearerToken(c)
+		if err != nil {
+			helper.abortWithError(c, http.StatusUnauthorized, err)
+			return
+		}
+
+		claims, err := helper.ValidateToken(token)
+		if err != nil {
+			helper.abortWithError(c, http.StatusUnauthorized, err)
+			return
+		}
+
+		if len(roles) > 0 && !helper.hasRequiredRole(claims, roles) {
+			helper.abortWithError(c, http.StatusForbidden, errors.New("insufficient permissions"))
+			return
+		}
+
+		c.Set("claims", claims)
+		c.Next()
+	}
+}
+
+func (helper *JwtHelper) extractBearerToken(c *gin.Context) (string, error) {
+	authHeader := c.GetHeader("Authorization")
+	const prefix = "Bearer "
+
+	if authHeader == "" {
+		return "", errors.New("missing Authorization header")
+	}
+
+	if len(authHeader) <= len(prefix) || authHeader[:len(prefix)] != prefix {
+		return "", errors.New("malformed Authorization header")
+	}
+
+	return authHeader[len(prefix):], nil
+}
+
+func (helper *JwtHelper) hasRequiredRole(claims map[string]any, requiredRoles []string) bool {
+	userRoles := helper.extractRolesFromClaims(claims)
+	if len(userRoles) == 0 {
+		return false
+	}
+
+	for _, requiredRole := range requiredRoles {
+		if slices.Contains(userRoles, requiredRole) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (helper *JwtHelper) extractRolesFromClaims(claims map[string]any) []string {
+	var roles []string
+
+	switch v := claims["roles"].(type) {
+	case string:
+		roles = append(roles, v)
+	case []any:
+		for _, role := range v {
+			if str, ok := role.(string); ok {
+				roles = append(roles, str)
+			}
+		}
+	}
+
+	return roles
+}
+
+func (helper *JwtHelper) abortWithError(c *gin.Context, status int, err error) {
+	problem := problems.NewProblem(status, err.Error())
+	c.AbortWithStatusJSON(status, problem)
 }

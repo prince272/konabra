@@ -1,6 +1,7 @@
 package services
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/google/uuid"
@@ -170,6 +171,23 @@ func (service *IdentityService) SignInAccount(form SignInForm) (*AccountWithToke
 	}
 
 	if err := copier.Copy(model, token); err != nil {
+		return nil, problems.NewInternalServerProblem(err)
+	}
+
+	model.Roles = user.RoleNames()
+	return model, nil
+}
+
+func (service *IdentityService) GetAccountById(id string) (*AccountModel, *problems.Problem) {
+	user := service.identityRepository.FindUserById(id)
+
+	if user == nil {
+		return nil, problems.NewProblem(http.StatusNotFound, "Account not found.")
+	}
+
+	model := &AccountModel{}
+
+	if err := copier.Copy(model, user); err != nil {
 		return nil, problems.NewInternalServerProblem(err)
 	}
 

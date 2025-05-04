@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prince272/konabra/internal/helpers"
 	"github.com/prince272/konabra/internal/services"
 	"github.com/prince272/konabra/pkg/problems"
 )
@@ -13,7 +14,7 @@ type IdentityHandler struct {
 	identityService *services.IdentityService
 }
 
-func NewIdentityHandler(router *gin.Engine, identityService *services.IdentityService) *IdentityHandler {
+func NewIdentityHandler(router *gin.Engine, jwtHelper *helpers.JwtHelper, identityService *services.IdentityService) *IdentityHandler {
 
 	handler := &IdentityHandler{
 		router,
@@ -22,6 +23,7 @@ func NewIdentityHandler(router *gin.Engine, identityService *services.IdentitySe
 
 	router.POST("/account/create", handler.CreateAccount)
 	router.POST("/account/signin", handler.SignInAccount)
+	router.GET("/account/me", jwtHelper.RequireAuth(), handler.GetCurrentAccount)
 
 	return handler
 }
@@ -75,6 +77,41 @@ func (handler *IdentityHandler) SignInAccount(ctx *gin.Context) {
 	}
 
 	data, problem := handler.identityService.SignInAccount(form)
+
+	if problem != nil {
+		ctx.JSON(problem.Status, problem)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, data)
+}
+
+// GetCurrentAccount godoc
+// @Summary Get current account information
+// @Description Get information about the currently authenticated user account
+// @Tags Identity
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} map[string]interface{} "Account information retrieved successfully"
+// @Failure 401 {object} problems.Problem "User not authenticated"
+// @Failure 500 {object} problems.Problem "Internal server error"
+// @Router /account/me [get]
+func (handler *IdentityHandler) GetCurrentAccount(ctx *gin.Context) {
+	claims, exists := ctx.Get("claims")
+
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, problems.NewProblem(http.StatusUnauthorized, "User not authenticated."))
+		return
+	}
+
+	sub, ok := claims.(map[string]any)["sub"].(string)
+
+	if !ok {
+		ctx.JSON(http.StatusUnauthorized, problems.NewProblem(http.StatusUnauthorized, "Invalid token."))
+		return
+	}
+
+	data, problem := handler.identityService.GetAccountById(sub)
 
 	if problem != nil {
 		ctx.JSON(problem.Status, problem)

@@ -73,7 +73,7 @@ func buildConfig() func() *Config {
 		}
 
 		if cfg.Port == "" {
-			cfg.Port = "8080"
+			cfg.Port = "8000"
 		}
 
 		return cfg
@@ -161,7 +161,7 @@ func buildRouter(container *di.Container) func() *gin.Engine {
 		router := gin.New()
 		logger := di.MustGet[*zap.Logger](container)
 
-		// Add middleware
+		// Add middlewares
 		router.Use(ginzap.Ginzap(logger, time.RFC3339, true))
 		router.Use(ginzap.RecoveryWithZap(logger, true))
 		router.Use(gin.CustomRecovery(func(c *gin.Context, unknownErr any) {

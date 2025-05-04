@@ -51,6 +51,23 @@ func (repository *IdentityRepository) FindUserByUsername(username string) *model
 	return user
 }
 
+func (repository *IdentityRepository) FindUserById(id string) *models.User {
+	user := &models.User{}
+	result := repository.defaultDB.Model(&models.User{}).Preload("Roles").
+		Where("id = ?", id).
+		First(user)
+
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil
+		}
+		repository.logger.Warn("Failed to find user by ID", zap.Error(result.Error), zap.String("user_id", id))
+		return nil
+	}
+
+	return user
+}
+
 func (repository *IdentityRepository) UsernameExists(username string) bool {
 	var count int64
 	result := repository.defaultDB.Model(&models.User{}).

@@ -62,6 +62,44 @@ const docTemplate = `{
                 }
             }
         },
+        "/account/me": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get information about the currently authenticated user account",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Identity"
+                ],
+                "summary": "Get current account information",
+                "responses": {
+                    "200": {
+                        "description": "Account information retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "User not authenticated",
+                        "schema": {
+                            "$ref": "#/definitions/problems.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/problems.Problem"
+                        }
+                    }
+                }
+            }
+        },
         "/account/signin": {
             "post": {
                 "description": "Sign in to an existing user account with the provided credentials",
