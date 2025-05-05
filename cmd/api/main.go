@@ -16,6 +16,9 @@ func main() {
 	// Initialize the API application
 	api := builds.NewApi()
 
+	// Register the configuration for the application
+	api.RegisterCore()
+
 	// Register repositories in the application's container
 	api.Register(repositories.NewIdentityRepository)
 
