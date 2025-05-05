@@ -13,18 +13,18 @@ type Validator struct {
 	validate *validator.Validate
 }
 
-func NewValidator() *Validator {
+func NewValidator() (*Validator, error) {
 	validate := validator.New()
 	if err := validate.RegisterValidation("username", ValidateUsername); err != nil {
-		panic(fmt.Errorf("failed to register username validator: %w", err))
+		return nil, fmt.Errorf("failed to register username validator: %w", err)
 	}
 
 	if err := validate.RegisterValidation("password", ValidatePassword); err != nil {
-		panic(fmt.Errorf("failed to register password validator: %w", err))
+		return nil, fmt.Errorf("failed to register password validator: %w", err)
 	}
 	return &Validator{
 		validate: validate,
-	}
+	}, nil
 }
 
 func (helper *Validator) ValidateStruct(s any) error {

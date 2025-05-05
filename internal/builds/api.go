@@ -37,238 +37,258 @@ type Config struct {
 	LogLevel string `koanf:"LOG_LEVEL"`
 	LogFile  string `koanf:"LOG_OUTPUT"`
 
-	AuthJwtSecret   string `koanf:"AUTH_JWT_SECRET"`
-	AUthJwtIssuer   string `koanf:"AUTH_JWT_ISSUER"`
-	AuthJwtAudience string `koanf:"AUTH_JWT_AUDIENCE"`
+	JwtAuthSecret   string `koanf:"JWT_AUTH_SECRET"`
+	JwtAUthIssuer   string `koanf:"JWT_AUTH_ISSUER"`
+	JwtAuthAudience string `koanf:"JWT_AUTH_AUDIENCE"`
 
-	DataEncryptionKey string `koanf:"DATA_ENCRYPTION_KEY"`
+	EncryptKey string `koanf:"ENCRYPT_KEY"`
+
+	SmtpHost     string `koanf:"SMTP_HOST"`
+	SmtpPort     int    `koanf:"SMTP_PORT"`
+	SmtpUsername string `koanf:"SMTP_USERNAME"`
+	SmtpPassword string `koanf:"SMTP_PASSWORD"`
 }
 
-func buildConfig() func() *Config {
-	return func() *Config {
-		k := koanf.New(".")
+func (api *Api) registerConfig() error {
 
-		// Try loading .env file (optional)
-		if _, err := os.Stat(".env"); err == nil {
-			if err := k.Load(file.Provider(".env"), dotenv.Parser()); err != nil {
-				panic(fmt.Errorf("error loading .env file: %w", err))
-			}
-			fmt.Println("Loaded .env file")
+	k := koanf.New(".")
+
+	// Try loading .env file (optional)
+	if _, err := os.Stat(".env"); err == nil {
+		if err := k.Load(file.Provider(".env"), dotenv.Parser()); err != nil {
+			return fmt.Errorf("error loading .env file: %w", err)
 		}
+		fmt.Println("Loaded .env file")
+	}
 
-		// Load environment variables
-		if err := k.Load(env.Provider("", ".", func(s string) string {
-			return s
-		}), nil); err != nil {
-			panic(fmt.Errorf("error loading env vars: %w", err))
-		}
+	// Load environment variables
+	if err := k.Load(env.Provider("", ".", func(s string) string {
+		return s
+	}), nil); err != nil {
+		return fmt.Errorf("error loading env vars: %w", err)
+	}
 
-		fmt.Println("Loaded environment variables")
+	fmt.Println("Loaded environment variables")
 
-		var cfg *Config
-		if err := k.Unmarshal("", &cfg); err != nil {
-			panic(fmt.Errorf("error unmarshaling config: %w", err))
-		}
+	var cfg *Config
+	if err := k.Unmarshal("", &cfg); err != nil {
+		return fmt.Errorf("error unmarshaling config: %w", err)
+	}
 
-		if cfg.Env == "" {
-			cfg.Env = "development"
-		}
+	if cfg.Env == "" {
+		cfg.Env = "development"
+	}
 
-		if cfg.Port == "" {
-			cfg.Port = "8000"
-		}
+	if cfg.Port == "" {
+		cfg.Port = "8000"
+	}
 
+	return api.container.Register(func() *Config {
 		return cfg
-	}
+	})
 }
 
-func buildLogger(container *di.Container) func() *zap.Logger {
-	return func() *zap.Logger {
-		cfg := di.MustGet[*Config](container)
+func (api *Api) registerLogger() error {
+	cfg := di.MustGet[*Config](api.container)
 
-		var level zapcore.Level
-		if err := level.UnmarshalText([]byte(cfg.LogLevel)); err != nil {
-			level = zapcore.InfoLevel
-		}
+	var level zapcore.Level
+	if err := level.UnmarshalText([]byte(cfg.LogLevel)); err != nil {
+		level = zapcore.InfoLevel
+	}
 
-		isDev := cfg.Env == "development"
-		encoderCfg := zap.NewProductionEncoderConfig()
-		if isDev {
-			encoderCfg = zap.NewDevelopmentEncoderConfig()
-		}
+	isDev := cfg.Env == "development"
+	encoderCfg := zap.NewProductionEncoderConfig()
+	if isDev {
+		encoderCfg = zap.NewDevelopmentEncoderConfig()
+	}
 
-		cores := []zapcore.Core{
-			zapcore.NewCore(
-				zapcore.NewConsoleEncoder(encoderCfg),
-				zapcore.AddSync(os.Stdout),
-				level,
-			),
-		}
+	cores := []zapcore.Core{
+		zapcore.NewCore(
+			zapcore.NewConsoleEncoder(encoderCfg),
+			zapcore.AddSync(os.Stdout),
+			level,
+		),
+	}
 
-		if cfg.LogFile != "" {
-			fileWS := zapcore.AddSync(&lumberjack.Logger{
-				Filename:   cfg.LogFile,
-				MaxSize:    10, // MB
-				MaxBackups: 5,
-				MaxAge:     28, // days
-				Compress:   true,
-			})
-			cores = append(cores, zapcore.NewCore(
-				zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
-				fileWS,
-				level,
-			))
-		}
+	if cfg.LogFile != "" {
+		fileWS := zapcore.AddSync(&lumberjack.Logger{
+			Filename:   cfg.LogFile,
+			MaxSize:    10, // MB
+			MaxBackups: 5,
+			MaxAge:     28, // days
+			Compress:   true,
+		})
+		cores = append(cores, zapcore.NewCore(
+			zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+			fileWS,
+			level,
+		))
+	}
 
+	return api.container.Register(func() *zap.Logger {
 		return zap.New(zapcore.NewTee(cores...), zap.AddCaller())
-	}
+	})
 }
 
-func buildProtector(container *di.Container) func() *helpers.Protector {
-	return func() *helpers.Protector {
-		cfg := di.MustGet[*Config](container)
+func (api *Api) registerProtector() error {
+	cfg := di.MustGet[*Config](api.container)
 
-		protector, err := helpers.NewProtector([]byte(cfg.DataEncryptionKey))
-		if err != nil {
-			panic(fmt.Errorf("failed to create protector: %w", err))
-		}
+	protector, err := helpers.NewProtector([]byte(cfg.EncryptKey))
 
+	if err != nil {
+		return fmt.Errorf("failed to create protector: %w", err)
+	}
+
+	return api.container.Register(func() *helpers.Protector {
 		return protector
-	}
+	})
 }
 
-func buildState() func() *helpers.State {
-	return func() *helpers.State {
+func (api *Api) registerSmtp() error {
+	cfg := di.MustGet[*Config](api.container)
+
+	smtp := helpers.NewSmtp(helpers.SmtpOptions{
+		Host:     cfg.SmtpHost,
+		Port:     cfg.SmtpPort,
+		Username: cfg.SmtpUsername,
+		Password: cfg.SmtpPassword,
+	})
+
+	return api.container.Register(func() *helpers.Smtp {
+		return smtp
+	})
+}
+
+func (api *Api) registerState() error {
+	return api.container.Register(func() *helpers.State {
 		return helpers.NewState()
-	}
+	})
 }
 
 type DefaultDB struct {
 	*gorm.DB
 }
 
-func buildDefaultDB(container *di.Container) func() *DefaultDB {
-	return func() *DefaultDB {
-		cfg := di.MustGet[*Config](container)
+func (api *Api) registerDefaultDB() error {
 
-		if cfg.DbDefault == "" {
-			panic("default database path not configured")
-		}
+	cfg := di.MustGet[*Config](api.container)
 
-		db, err := gorm.Open(sqlite.Open(cfg.DbDefault), &gorm.Config{})
-		if err != nil {
-			panic(fmt.Errorf("failed to open database: %w", err))
-		}
+	if cfg.DbDefault == "" {
+		return fmt.Errorf("default database path not configured")
+	}
 
-		if err := db.AutoMigrate(&models.User{}, &models.Role{}, &models.JwtToken{}); err != nil {
-			panic(fmt.Errorf("auto migration failed: %w", err))
-		}
+	db, err := gorm.Open(sqlite.Open(cfg.DbDefault), &gorm.Config{})
+	if err != nil {
+		return fmt.Errorf("failed to open database: %w", err)
+	}
 
-		sqlDB, err := db.DB()
-		if err != nil {
-			panic(fmt.Errorf("failed to get sql.DB: %w", err))
-		}
+	if err := db.AutoMigrate(&models.User{}, &models.Role{}, &models.JwtToken{}); err != nil {
+		return fmt.Errorf("auto migration failed: %w", err)
+	}
 
-		sqlDB.SetMaxIdleConns(5)
-		sqlDB.SetMaxOpenConns(10)
-		sqlDB.SetConnMaxLifetime(time.Hour)
+	sqlDB, err := db.DB()
 
+	if err != nil {
+		panic(fmt.Errorf("failed to get sql.DB: %w", err))
+	}
+
+	sqlDB.SetMaxIdleConns(5)
+	sqlDB.SetMaxOpenConns(10)
+	sqlDB.SetConnMaxLifetime(time.Hour)
+
+	return api.container.Register(func() *DefaultDB {
 		return &DefaultDB{DB: db}
-	}
+	})
 }
 
-func buildRouter(container *di.Container) func() *gin.Engine {
-	return func() *gin.Engine {
-		router := gin.New()
-		logger := di.MustGet[*zap.Logger](container)
+func (api *Api) registerRouter() error {
 
-		// Add middlewares
-		router.Use(ginzap.RecoveryWithZap(logger, true))
-		router.Use(gin.CustomRecovery(func(c *gin.Context, unknownErr any) {
-			var err error
-			switch e := unknownErr.(type) {
-			case error:
-				err = e
-			default:
-				err = fmt.Errorf("%v", unknownErr)
-			}
+	router := gin.New()
+	logger := di.MustGet[*zap.Logger](api.container)
 
-			logger.Error("Panic recovered",
-				zap.Any("error", err),
-				zap.String("method", c.Request.Method),
-				zap.String("path", c.Request.URL.Path),
-				zap.Int("status_code", http.StatusInternalServerError),
-			)
-			c.JSON(http.StatusInternalServerError, problems.FromError(err))
-		}))
-
-		return router
-	}
-}
-
-func buildValidator() func() *helpers.Validator {
-	return func() *helpers.Validator {
-		return helpers.NewValidator()
-	}
-}
-
-func buildJwtHelper(container *di.Container) func() *helpers.JwtHelper {
-	return func() *helpers.JwtHelper {
-		cfg := di.MustGet[*Config](container)
-		defaultDB := di.MustGet[*DefaultDB](container)
-		logger := di.MustGet[*zap.Logger](container)
-
-		options := helpers.JwtOptions{
-			Secret:   cfg.AuthJwtSecret,
-			Audience: strings.Split(cfg.AuthJwtAudience, ","),
-			Issuer:   cfg.AUthJwtIssuer,
+	// Add middlewares
+	router.Use(ginzap.RecoveryWithZap(logger, true))
+	router.Use(gin.CustomRecovery(func(c *gin.Context, unknownErr any) {
+		var err error
+		switch e := unknownErr.(type) {
+		case error:
+			err = e
+		default:
+			err = fmt.Errorf("%v", unknownErr)
 		}
 
-		return helpers.NewJwtHelper(options, defaultDB.DB, logger)
+		logger.Error("Panic recovered",
+			zap.Any("error", err),
+			zap.String("method", c.Request.Method),
+			zap.String("path", c.Request.URL.Path),
+			zap.Int("status_code", http.StatusInternalServerError),
+		)
+		c.JSON(http.StatusInternalServerError, problems.FromError(err))
+	}))
+
+	return api.container.Register(func() *gin.Engine {
+		return router
+	})
+}
+
+func (api *Api) registerValidator() error {
+	validator, err := helpers.NewValidator()
+
+	if err != nil {
+		return fmt.Errorf("failed to create validator: %w", err)
 	}
+
+	return api.container.Register(func() *helpers.Validator {
+		return validator
+	})
+}
+
+func (api *Api) registerJwtHelper() error {
+
+	cfg := di.MustGet[*Config](api.container)
+	defaultDB := di.MustGet[*DefaultDB](api.container)
+	logger := di.MustGet[*zap.Logger](api.container)
+
+	options := helpers.JwtOptions{
+		Secret:   cfg.JwtAuthSecret,
+		Audience: strings.Split(cfg.JwtAuthAudience, ","),
+		Issuer:   cfg.JwtAUthIssuer,
+	}
+
+	return api.container.Register(func() *helpers.JwtHelper {
+		return helpers.NewJwtHelper(options, defaultDB.DB, logger)
+	})
 }
 
 func NewApi() *Api {
 	container := di.New()
-
-	if err := container.Register(buildConfig()); err != nil {
-		panic(fmt.Errorf("failed to register config: %w", err))
-	}
-
-	if err := container.Register(buildLogger(container)); err != nil {
-		panic(fmt.Errorf("failed to register logger: %w", err))
-	}
-
-	if err := container.Register(buildValidator()); err != nil {
-		panic(fmt.Errorf("failed to register validator: %w", err))
-	}
-
-	if err := container.Register(buildState()); err != nil {
-		panic(fmt.Errorf("failed to register state: %w", err))
-	}
-
-	if err := container.Register(buildProtector(container)); err != nil {
-		panic(fmt.Errorf("failed to register protector: %w", err))
-	}
-
-	if err := container.Register(buildDefaultDB(container)); err != nil {
-		panic(fmt.Errorf("failed to register default DB: %w", err))
-	}
-
-	if err := container.Register(buildJwtHelper(container)); err != nil {
-		panic(fmt.Errorf("failed to register JWT helper: %w", err))
-	}
-
-	if err := container.Register(buildRouter(container)); err != nil {
-		panic(fmt.Errorf("failed to register Gin engine: %w", err))
-	}
-
 	return &Api{container: container}
 }
 
 func (api *Api) Register(constructor any) {
 	if err := api.container.Register(constructor); err != nil {
 		panic(fmt.Errorf("failed to register constructor: %w", err))
+	}
+}
+
+func (api *Api) RegisterCore() {
+
+	services := []func() error{
+		api.registerConfig,
+		api.registerLogger,
+		api.registerProtector,
+		api.registerSmtp,
+		api.registerState,
+		api.registerDefaultDB,
+		api.registerJwtHelper,
+		api.registerValidator,
+		api.registerRouter,
+	}
+
+	for _, service := range services {
+		if err := service(); err != nil {
+			panic(fmt.Errorf("failed to register core service: %w", err))
+		}
 	}
 }
 

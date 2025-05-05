@@ -13,6 +13,7 @@ require (
 	github.com/knadh/koanf/v2 v2.2.0
 	github.com/nyaruka/phonenumbers v1.6.1
 	github.com/swaggo/swag v1.16.4
+	github.com/wneessen/go-mail v0.6.2
 	go.uber.org/dig v1.18.1
 	gorm.io/driver/sqlite v1.5.7
 	gorm.io/gorm v1.25.12
