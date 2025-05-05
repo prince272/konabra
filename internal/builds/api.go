@@ -136,7 +136,7 @@ func (api *Api) registerProtector() error {
 	protector, err := helpers.NewProtector([]byte(cfg.EncryptKey))
 
 	if err != nil {
-		return fmt.Errorf("failed to create protector: %w", err)
+		return err
 	}
 
 	return api.container.Register(func() *helpers.Protector {
@@ -147,12 +147,16 @@ func (api *Api) registerProtector() error {
 func (api *Api) registerSmtp() error {
 	cfg := di.MustGet[*Config](api.container)
 
-	smtp := helpers.NewSmtp(helpers.SmtpOptions{
+	smtp, err := helpers.NewSmtp(helpers.SmtpOptions{
 		Host:     cfg.SmtpHost,
 		Port:     cfg.SmtpPort,
 		Username: cfg.SmtpUsername,
 		Password: cfg.SmtpPassword,
 	})
+
+	if err != nil {
+		return err
+	}
 
 	return api.container.Register(func() *helpers.Smtp {
 		return smtp
@@ -189,7 +193,7 @@ func (api *Api) registerDefaultDB() error {
 	sqlDB, err := db.DB()
 
 	if err != nil {
-		panic(fmt.Errorf("failed to get sql.DB: %w", err))
+		return fmt.Errorf("failed to get sql.DB: %w", err)
 	}
 
 	sqlDB.SetMaxIdleConns(5)
@@ -235,7 +239,7 @@ func (api *Api) registerValidator() error {
 	validator, err := helpers.NewValidator()
 
 	if err != nil {
-		return fmt.Errorf("failed to create validator: %w", err)
+		return err
 	}
 
 	return api.container.Register(func() *helpers.Validator {
