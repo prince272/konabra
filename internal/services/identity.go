@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -8,8 +9,8 @@ import (
 	"github.com/jinzhu/copier"
 	"github.com/prince272/konabra/internal/helpers"
 	models "github.com/prince272/konabra/internal/models/identity"
+	"github.com/prince272/konabra/internal/problems"
 	"github.com/prince272/konabra/internal/repositories"
-	"github.com/prince272/konabra/pkg/problems"
 	"github.com/prince272/konabra/utils"
 	"go.uber.org/zap"
 )
@@ -27,20 +28,21 @@ type SignInForm struct {
 }
 
 func (form CreateAccountForm) GetEmail() string {
-	if helpers.IsEmail(form.Username) {
+	if !helpers.MaybePhoneOrEmail(form.Username) {
 		return form.Username
 	}
 	return ""
 }
 
 func (form CreateAccountForm) GetPhoneNumber() string {
-	if helpers.IsPhoneNumber(form.Username) {
+	if helpers.MaybePhoneOrEmail(form.Username) {
 		return form.Username
 	}
 	return ""
 }
 
 type AccountModel struct {
+	Id                  string    `json:"id"`
 	FirstName           string    `json:"firstName"`
 	LastName            string    `json:"lastName"`
 	UserName            string    `json:"userName"`
@@ -60,21 +62,37 @@ type AccountWithTokenModel struct {
 	helpers.JwtTokenModel
 }
 
+type AccountVerificationForm struct {
+	Username string `json:"username" validate:"required,max=256,username"`
+}
+
+type CompleteAccountVerificationForm struct {
+	AccountVerificationForm
+	Code string `json:"code" validate:"required"`
+}
+
 type IdentityService struct {
 	identityRepository *repositories.IdentityRepository
 	jwtHelper          *helpers.JwtHelper
-	validationHelper   *helpers.ValidationHelper
+	protector          *helpers.Protector
+	validator          *helpers.Validator
+	state              *helpers.State
 	logger             *zap.Logger
 }
 
 func NewIdentityService(
 	identityRepository *repositories.IdentityRepository,
-	validationHelper *helpers.ValidationHelper,
-	jwtHelper *helpers.JwtHelper, logger *zap.Logger) *IdentityService {
+	jwtHelper *helpers.JwtHelper,
+	protector *helpers.Protector,
+	validator *helpers.Validator,
+	state *helpers.State,
+	logger *zap.Logger) *IdentityService {
 	return &IdentityService{
 		identityRepository,
 		jwtHelper,
-		validationHelper,
+		protector,
+		validator,
+		state,
 		logger,
 	}
 }
@@ -82,8 +100,7 @@ func NewIdentityService(
 func (service *IdentityService) CreateAccount(form CreateAccountForm) (*AccountModel, *problems.Problem) {
 
 	// Validate form
-	if err := service.validationHelper.ValidateStruct(form); err != nil {
-		service.logger.Error("Validation error: ", zap.Error(err))
+	if err := service.validator.ValidateStruct(form); err != nil {
 		return nil, problems.FromError(err)
 	}
 
@@ -142,21 +159,18 @@ func (service *IdentityService) CreateAccount(form CreateAccountForm) (*AccountM
 func (service *IdentityService) SignInAccount(form SignInForm) (*AccountWithTokenModel, *problems.Problem) {
 
 	// Validate form
-	if err := service.validationHelper.ValidateStruct(form); err != nil {
-		service.logger.Error("Validation error: ", zap.Error(err))
+	if err := service.validator.ValidateStruct(form); err != nil {
 		return nil, problems.FromError(err)
 	}
 
 	// Check if username exists
 	var user *models.User
 	if user = service.identityRepository.FindUserByUsername(form.Username); user == nil {
-		service.logger.Error("User not found: ", zap.String("username", form.Username))
 		return nil, problems.NewValidationProblem(map[string]string{"username": "Username does not exist."})
 	}
 
 	// Check if password is correct
 	if !utils.CheckPasswordHash(form.Password, user.PasswordHash) {
-		service.logger.Error("Incorrect password for user: ", zap.String("username", form.Username))
 		return nil, problems.NewValidationProblem(map[string]string{"password": "Password is incorrect."})
 	}
 
@@ -193,12 +207,11 @@ func (service *IdentityService) SignInAccount(form SignInForm) (*AccountWithToke
 	return model, nil
 }
 
-func (service *IdentityService) GetAccountById(id string) (*AccountModel, *problems.Problem) {
-	user := service.identityRepository.FindUserById(id)
+func (service *IdentityService) GetAccountByUserId(userId string) (*AccountModel, *problems.Problem) {
+	user := service.identityRepository.FindUserById(userId)
 
 	if user == nil {
-		service.logger.Error("User not found: ", zap.String("id", id))
-		return nil, problems.NewProblem(http.StatusNotFound, "User not found.")
+		return nil, problems.NewProblem(http.StatusNotFound, "User was not found.")
 	}
 
 	model := &AccountModel{}
@@ -210,4 +223,95 @@ func (service *IdentityService) GetAccountById(id string) (*AccountModel, *probl
 
 	model.Roles = user.RoleNames()
 	return model, nil
+}
+
+var (
+	AccountVerificationPurpose = "AccountVerification"
+)
+
+func (service *IdentityService) SendAccountVerification(form AccountVerificationForm) *problems.Problem {
+	// Validate form
+	if err := service.validator.ValidateStruct(form); err != nil {
+		return problems.FromError(err)
+	}
+
+	// Lookup user & determine contact type
+	isPhone := helpers.MaybePhoneOrEmail(form.Username)
+	user := service.identityRepository.FindUserByUsername(form.Username)
+	if user == nil {
+		errorMessage := map[bool]string{true: "Phone number was not found.", false: "Email was not found."}[isPhone]
+		return problems.NewValidationProblem(map[string]string{"username": errorMessage})
+	}
+
+	// Build shared metadata & key
+	metadata := map[string]string{"id": user.Id, "securityStamp": user.SecurityStamp, "purpose": AccountVerificationPurpose}
+	signatureKey := fmt.Sprintf("%s-%s-%s", user.Id, user.SecurityStamp, AccountVerificationPurpose)
+
+	if isPhone {
+		ttl := 10 * time.Minute
+		code, err := service.protector.GenerateShortCode("numeric", 6, ttl, metadata)
+		if err != nil {
+			service.logger.Error("Error generating short code: ", zap.Error(err))
+			return problems.FromError(err)
+		}
+		service.state.SetItem(signatureKey, code.Signature, ttl)
+		// TODO: send SMS
+	} else {
+		ttl := 30 * time.Minute
+		token, err := service.protector.GenerateToken(ttl, metadata)
+		if err != nil {
+			service.logger.Error("Error generating token: ", zap.Error(err))
+			return problems.FromError(err)
+		}
+		service.state.SetItem(signatureKey, token.Signature, ttl)
+		// TODO: send email
+	}
+
+	return nil
+}
+
+func (service *IdentityService) CompleteAccountVerification(form CompleteAccountVerificationForm) *problems.Problem {
+	// Validate form
+	if err := service.validator.ValidateStruct(form); err != nil {
+		return problems.FromError(err)
+	}
+
+	// Lookup user & determine contact type
+	isPhone := helpers.MaybePhoneOrEmail(form.Username)
+	user := service.identityRepository.FindUserByUsername(form.Username)
+
+	if user == nil {
+		errorMessage := map[bool]string{true: "Phone number was not found.", false: "Email was not found."}[isPhone]
+		return problems.NewValidationProblem(map[string]string{"username": errorMessage})
+	}
+
+	// Reconstruct key
+	signatureKey := fmt.Sprintf("%s-%s-%s", user.Id, user.SecurityStamp, AccountVerificationPurpose)
+	signature, _ := service.state.PopItem(signatureKey).(string)
+
+	// Verify code/token and update user
+	if isPhone {
+
+		if _, err := service.protector.VerifyShortCode(signature, form.Code); err != nil {
+			return problems.NewValidationProblem(map[string]string{"code": "Code is incorrect."})
+		}
+
+		user.PhoneNumberVerified = true
+	} else {
+
+		if _, err := service.protector.VerifyToken(signature, form.Code); err != nil {
+			return problems.NewValidationProblem(map[string]string{"code": "Code is incorrect."})
+		}
+
+		user.EmailVerified = true
+	}
+
+	user.SecurityStamp = uuid.New().String()
+
+	if err := service.identityRepository.UpdateUser(user); err != nil {
+		service.logger.Error("Error updating user: ", zap.Error(err))
+		return problems.FromError(err)
+	}
+
+	return nil
 }

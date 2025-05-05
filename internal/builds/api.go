@@ -15,8 +15,8 @@ import (
 	"github.com/knadh/koanf/v2"
 	"github.com/prince272/konabra/internal/helpers"
 	models "github.com/prince272/konabra/internal/models/identity"
+	"github.com/prince272/konabra/internal/problems"
 	"github.com/prince272/konabra/pkg/di"
-	"github.com/prince272/konabra/pkg/problems"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -40,6 +40,8 @@ type Config struct {
 	AuthJwtSecret   string `koanf:"AUTH_JWT_SECRET"`
 	AUthJwtIssuer   string `koanf:"AUTH_JWT_ISSUER"`
 	AuthJwtAudience string `koanf:"AUTH_JWT_AUDIENCE"`
+
+	DataEncryptionKey string `koanf:"DATA_ENCRYPTION_KEY"`
 }
 
 func buildConfig() func() *Config {
@@ -122,6 +124,25 @@ func buildLogger(container *di.Container) func() *zap.Logger {
 	}
 }
 
+func buildProtector(container *di.Container) func() *helpers.Protector {
+	return func() *helpers.Protector {
+		cfg := di.MustGet[*Config](container)
+
+		protector, err := helpers.NewProtector([]byte(cfg.DataEncryptionKey))
+		if err != nil {
+			panic(fmt.Errorf("failed to create protector: %w", err))
+		}
+
+		return protector
+	}
+}
+
+func buildState() func() *helpers.State {
+	return func() *helpers.State {
+		return helpers.NewState()
+	}
+}
+
 type DefaultDB struct {
 	*gorm.DB
 }
@@ -162,7 +183,6 @@ func buildRouter(container *di.Container) func() *gin.Engine {
 		logger := di.MustGet[*zap.Logger](container)
 
 		// Add middlewares
-		router.Use(ginzap.Ginzap(logger, time.RFC3339, true))
 		router.Use(ginzap.RecoveryWithZap(logger, true))
 		router.Use(gin.CustomRecovery(func(c *gin.Context, unknownErr any) {
 			var err error
@@ -186,9 +206,9 @@ func buildRouter(container *di.Container) func() *gin.Engine {
 	}
 }
 
-func buildValidationHelper() func() *helpers.ValidationHelper {
-	return func() *helpers.ValidationHelper {
-		return helpers.NewValidationHelper()
+func buildValidator() func() *helpers.Validator {
+	return func() *helpers.Validator {
+		return helpers.NewValidator()
 	}
 }
 
@@ -219,8 +239,16 @@ func NewApi() *Api {
 		panic(fmt.Errorf("failed to register logger: %w", err))
 	}
 
-	if err := container.Register(buildValidationHelper()); err != nil {
+	if err := container.Register(buildValidator()); err != nil {
 		panic(fmt.Errorf("failed to register validator: %w", err))
+	}
+
+	if err := container.Register(buildState()); err != nil {
+		panic(fmt.Errorf("failed to register state: %w", err))
+	}
+
+	if err := container.Register(buildProtector(container)); err != nil {
+		panic(fmt.Errorf("failed to register protector: %w", err))
 	}
 
 	if err := container.Register(buildDefaultDB(container)); err != nil {

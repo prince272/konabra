@@ -9,11 +9,11 @@ import (
 	"github.com/nyaruka/phonenumbers"
 )
 
-type ValidationHelper struct {
+type Validator struct {
 	validate *validator.Validate
 }
 
-func NewValidationHelper() *ValidationHelper {
+func NewValidator() *Validator {
 	validate := validator.New()
 	if err := validate.RegisterValidation("username", ValidateUsername); err != nil {
 		panic(fmt.Errorf("failed to register username validator: %w", err))
@@ -22,12 +22,12 @@ func NewValidationHelper() *ValidationHelper {
 	if err := validate.RegisterValidation("password", ValidatePassword); err != nil {
 		panic(fmt.Errorf("failed to register password validator: %w", err))
 	}
-	return &ValidationHelper{
+	return &Validator{
 		validate: validate,
 	}
 }
 
-func (helper *ValidationHelper) ValidateStruct(s any) error {
+func (helper *Validator) ValidateStruct(s any) error {
 	return helper.validate.Struct(s)
 }
 
@@ -70,4 +70,9 @@ func IsPhoneNumber(input string) bool {
 func IsEmail(input string) bool {
 	emailPattern := regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
 	return emailPattern.MatchString(input)
+}
+
+func MaybePhoneOrEmail(input string) bool {
+	phonePattern := regexp.MustCompile(`^[-+0-9() ]+$`)
+	return phonePattern.MatchString(input)
 }

@@ -5,118 +5,130 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/prince272/konabra/internal/helpers"
+	"github.com/prince272/konabra/internal/problems"
 	"github.com/prince272/konabra/internal/services"
-	"github.com/prince272/konabra/pkg/problems"
 )
 
+// IdentityHandler handles user identity routes
 type IdentityHandler struct {
-	router          *gin.Engine
 	identityService *services.IdentityService
+	jwtHelper       *helpers.JwtHelper
 }
 
+// NewIdentityHandler registers identity routes
 func NewIdentityHandler(router *gin.Engine, jwtHelper *helpers.JwtHelper, identityService *services.IdentityService) *IdentityHandler {
+	handler := &IdentityHandler{identityService: identityService, jwtHelper: jwtHelper}
 
-	handler := &IdentityHandler{
-		router,
-		identityService,
+	identityGroup := router.Group("/account")
+	{
+		identityGroup.POST("/create", handler.handle(handler.CreateAccount))
+		identityGroup.POST("/signin", handler.handle(handler.SignInAccount))
+		identityGroup.GET("/me", jwtHelper.RequireAuth(), handler.handle(handler.GetCurrentAccount))
+		identityGroup.POST("/verify", handler.handle(handler.SendAccountVerification))
+		identityGroup.POST("/verify/complete", handler.handle(handler.CompleteAccountVerification))
 	}
-
-	router.POST("/account/create", handler.CreateAccount)
-	router.POST("/account/signin", handler.SignInAccount)
-	router.GET("/account/me", jwtHelper.RequireAuth(), handler.GetCurrentAccount)
 
 	return handler
 }
 
-// CreateAccount godoc
-// @Summary Create a new account
-// @Description Create a new user account with the provided information
-// @Tags Identity
+// handle wraps handler functions for consistent error handling
+func (handler *IdentityHandler) handle(handlerFunc func(*gin.Context) (any, *problems.Problem)) gin.HandlerFunc {
+	return func(context *gin.Context) {
+		response, problem := handlerFunc(context)
+		if problem != nil {
+			context.JSON(problem.Status, problem)
+			return
+		}
+		context.JSON(http.StatusOK, response)
+	}
+}
+
+// CreateAccount handles account creation
+// @Summary Create a new user account
+// @Description Creates a new user account with the provided details
+// @Tags Account
 // @Accept json
 // @Produce json
-// @Param request body services.CreateAccountForm true "Account creation details"
-// @Success 200 {object} map[string]interface{} "Account created successfully"
-// @Failure 400 {object} problems.Problem "Invalid request body"
-// @Failure 500 {object} problems.Problem "Internal server error"
+// @Param body body services.CreateAccountForm true "Account creation details"
 // @Router /account/create [post]
-func (handler *IdentityHandler) CreateAccount(ctx *gin.Context) {
+func (handler *IdentityHandler) CreateAccount(context *gin.Context) (any, *problems.Problem) {
 	var form services.CreateAccountForm
-
-	if err := ctx.BindJSON(&form); err != nil {
-		ctx.JSON(http.StatusBadRequest, problems.NewProblem(http.StatusBadRequest, "Invalid request body"))
-		return
+	if err := context.ShouldBindJSON(&form); err != nil {
+		return nil, problems.NewProblem(http.StatusBadRequest, "The request format is incorrect.")
 	}
-
-	data, problem := handler.identityService.CreateAccount(form)
-
-	if problem != nil {
-		ctx.JSON(problem.Status, problem)
-		return
-	}
-
-	ctx.JSON(http.StatusOK, data)
+	return handler.identityService.CreateAccount(form)
 }
 
-// SignInAccount godoc
-// @Summary Sign in to an account
-// @Description Sign in to an existing user account with the provided credentials
-// @Tags Identity
+// SignInAccount handles account sign-in
+// @Summary Sign in to an existing account
+// @Description Authenticates a user with email and password
+// @Tags Account
 // @Accept json
 // @Produce json
-// @Param request body services.SignInForm true "Account sign-in credentials"
-// @Success 200 {object} map[string]interface{} "Account signed in successfully"
-// @Failure 400 {object} problems.Problem "Invalid request body"
-// @Failure 500 {object} problems.Problem "Internal server error"
+// @Param body body services.SignInForm true "Sign-in credentials"
 // @Router /account/signin [post]
-func (handler *IdentityHandler) SignInAccount(ctx *gin.Context) {
+func (handler *IdentityHandler) SignInAccount(context *gin.Context) (any, *problems.Problem) {
 	var form services.SignInForm
-
-	if err := ctx.BindJSON(&form); err != nil {
-		ctx.JSON(http.StatusBadRequest, problems.NewProblem(http.StatusBadRequest, "Invalid request body"))
-		return
+	if err := context.ShouldBindJSON(&form); err != nil {
+		return nil, problems.NewProblem(http.StatusBadRequest, "The request format is incorrect.")
 	}
-
-	data, problem := handler.identityService.SignInAccount(form)
-
-	if problem != nil {
-		ctx.JSON(problem.Status, problem)
-		return
-	}
-
-	ctx.JSON(http.StatusOK, data)
+	return handler.identityService.SignInAccount(form)
 }
 
-// GetCurrentAccount godoc
-// @Summary Get current account information
-// @Description Get information about the currently authenticated user account
-// @Tags Identity
+// SendAccountVerification handles sending verification emails/SMS
+// @Summary Send account verification
+// @Description Sends a verification email or SMS to the user
+// @Tags Account
+// @Accept json
 // @Produce json
-// @Security ApiKeyAuth
-// @Success 200 {object} map[string]interface{} "Account information retrieved successfully"
-// @Failure 401 {object} problems.Problem "User not authenticated"
-// @Failure 500 {object} problems.Problem "Internal server error"
+// @Param body body services.AccountVerificationForm true "Verification request details"
+// @Router /account/verify [post]
+func (handler *IdentityHandler) SendAccountVerification(context *gin.Context) (any, *problems.Problem) {
+	var form services.AccountVerificationForm
+	if err := context.ShouldBindJSON(&form); err != nil {
+		return nil, problems.NewProblem(http.StatusBadRequest, "The request format is incorrect.")
+	}
+	if problem := handler.identityService.SendAccountVerification(form); problem != nil {
+		return nil, problem
+	}
+	return gin.H{}, nil
+}
+
+// CompleteAccountVerification handles verification completion
+// @Summary Complete account verification
+// @Description Completes the account verification process using a token
+// @Tags Account
+// @Accept json
+// @Produce json
+// @Param body body services.CompleteAccountVerificationForm true "Verification completion details"
+// @Router /account/verify/complete [post]
+func (handler *IdentityHandler) CompleteAccountVerification(context *gin.Context) (any, *problems.Problem) {
+	var form services.CompleteAccountVerificationForm
+	if err := context.ShouldBindJSON(&form); err != nil {
+		return nil, problems.NewProblem(http.StatusBadRequest, "The request format is incorrect.")
+	}
+	if problem := handler.identityService.CompleteAccountVerification(form); problem != nil {
+		return nil, problem
+	}
+	return gin.H{}, nil
+}
+
+// GetCurrentAccount retrieves info for the authenticated user
+// @Summary Get current user account
+// @Description Retrieves details of the authenticated user
+// @Tags Account
+// @Accept json
+// @Produce json
+// @Security BearerAuth
 // @Router /account/me [get]
-func (handler *IdentityHandler) GetCurrentAccount(ctx *gin.Context) {
-	claims, exists := ctx.Get("claims")
-
+func (handler *IdentityHandler) GetCurrentAccount(context *gin.Context) (any, *problems.Problem) {
+	claims, exists := context.Get("claims")
 	if !exists {
-		ctx.JSON(http.StatusUnauthorized, problems.NewProblem(http.StatusUnauthorized, "Unauthorized access"))
-		return
+		return nil, problems.NewProblem(http.StatusUnauthorized, "You are not authorized to perform this action.")
 	}
-
-	sub, ok := claims.(map[string]any)["sub"].(string)
-
+	userID, ok := claims.(map[string]any)["sub"].(string)
 	if !ok {
-		ctx.JSON(http.StatusUnauthorized, problems.NewProblem(http.StatusUnauthorized, "Unauthorized access"))
-		return
+		return nil, problems.NewProblem(http.StatusUnauthorized, "You are not authorized to perform this action.")
 	}
-
-	data, problem := handler.identityService.GetAccountById(sub)
-
-	if problem != nil {
-		ctx.JSON(problem.Status, problem)
-		return
-	}
-
-	ctx.JSON(http.StatusOK, data)
+	return handler.identityService.GetAccountByUserId(userID)
 }

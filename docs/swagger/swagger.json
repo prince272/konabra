@@ -10,7 +10,7 @@
     "paths": {
         "/account/create": {
             "post": {
-                "description": "Create a new user account with the provided information",
+                "description": "Creates a new user account with the provided details",
                 "consumes": [
                     "application/json"
                 ],
@@ -18,13 +18,13 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Identity"
+                    "Account"
                 ],
-                "summary": "Create a new account",
+                "summary": "Create a new user account",
                 "parameters": [
                     {
                         "description": "Account creation details",
-                        "name": "request",
+                        "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -32,70 +32,17 @@
                         }
                     }
                 ],
-                "responses": {
-                    "200": {
-                        "description": "Account created successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request body",
-                        "schema": {
-                            "$ref": "#/definitions/problems.Problem"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/problems.Problem"
-                        }
-                    }
-                }
+                "responses": {}
             }
         },
         "/account/me": {
             "get": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "BearerAuth": []
                     }
                 ],
-                "description": "Get information about the currently authenticated user account",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Identity"
-                ],
-                "summary": "Get current account information",
-                "responses": {
-                    "200": {
-                        "description": "Account information retrieved successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "User not authenticated",
-                        "schema": {
-                            "$ref": "#/definitions/problems.Problem"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/problems.Problem"
-                        }
-                    }
-                }
-            }
-        },
-        "/account/signin": {
-            "post": {
-                "description": "Sign in to an existing user account with the provided credentials",
+                "description": "Retrieves details of the authenticated user",
                 "consumes": [
                     "application/json"
                 ],
@@ -103,13 +50,29 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Identity"
+                    "Account"
                 ],
-                "summary": "Sign in to an account",
+                "summary": "Get current user account",
+                "responses": {}
+            }
+        },
+        "/account/signin": {
+            "post": {
+                "description": "Authenticates a user with email and password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Sign in to an existing account",
                 "parameters": [
                     {
-                        "description": "Account sign-in credentials",
-                        "name": "request",
+                        "description": "Sign-in credentials",
+                        "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -117,56 +80,90 @@
                         }
                     }
                 ],
-                "responses": {
-                    "200": {
-                        "description": "Account signed in successfully",
+                "responses": {}
+            }
+        },
+        "/account/verify": {
+            "post": {
+                "description": "Sends a verification email or SMS to the user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Send account verification",
+                "parameters": [
+                    {
+                        "description": "Verification request details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request body",
-                        "schema": {
-                            "$ref": "#/definitions/problems.Problem"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/problems.Problem"
+                            "$ref": "#/definitions/services.AccountVerificationForm"
                         }
                     }
-                }
+                ],
+                "responses": {}
+            }
+        },
+        "/account/verify/complete": {
+            "post": {
+                "description": "Completes the account verification process using a token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Complete account verification",
+                "parameters": [
+                    {
+                        "description": "Verification completion details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.CompleteAccountVerificationForm"
+                        }
+                    }
+                ],
+                "responses": {}
             }
         }
     },
     "definitions": {
-        "problems.Problem": {
+        "services.AccountVerificationForm": {
             "type": "object",
+            "required": [
+                "username"
+            ],
             "properties": {
-                "detail": {
-                    "description": "Human-readable explanation",
+                "username": {
+                    "type": "string",
+                    "maxLength": 256
+                }
+            }
+        },
+        "services.CompleteAccountVerificationForm": {
+            "type": "object",
+            "required": [
+                "code",
+                "username"
+            ],
+            "properties": {
+                "code": {
                     "type": "string"
                 },
-                "errors": {
-                    "description": "Field validation errors",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "status": {
-                    "description": "HTTP status code",
-                    "type": "integer"
-                },
-                "title": {
-                    "description": "Short summary of the problem",
-                    "type": "string"
-                },
-                "type": {
-                    "description": "A URI reference to the problem type",
-                    "type": "string"
+                "username": {
+                    "type": "string",
+                    "maxLength": 256
                 }
             }
         },

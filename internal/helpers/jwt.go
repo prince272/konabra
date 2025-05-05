@@ -17,7 +17,7 @@ import (
 	"slices"
 
 	models "github.com/prince272/konabra/internal/models/identity"
-	"github.com/prince272/konabra/pkg/problems"
+	"github.com/prince272/konabra/internal/problems"
 	"github.com/prince272/konabra/utils"
 )
 
@@ -272,23 +272,23 @@ func (helper *JwtHelper) RequireAuth(roles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token, err := helper.extractBearerToken(c)
 		if err != nil {
-			helper.logger.Error("Failed to extract token", zap.Error(err))
-			problem := problems.NewProblem(http.StatusUnauthorized, "Unauthorized access")
+			helper.logger.Error("Failed to extract token: ", zap.Error(err))
+			problem := problems.NewProblem(http.StatusUnauthorized, "You are not authorized to perform this action.")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, problem)
 			return
 		}
 
 		claims, err := helper.ValidateToken(token)
 		if err != nil {
-			helper.logger.Error("Failed to validate token", zap.Error(err))
-			problem := problems.NewProblem(http.StatusUnauthorized, "Unauthorized access")
+			helper.logger.Error("Failed to validate token: ", zap.Error(err))
+			problem := problems.NewProblem(http.StatusUnauthorized, "You are not authorized to perform this action.")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, problem)
 			return
 		}
 
 		if len(roles) > 0 && !helper.hasRequiredRole(claims, roles) {
-			helper.logger.Error("Insufficient permissions", zap.String("roles", fmt.Sprintf("%v", roles)))
-			problem := problems.NewProblem(http.StatusForbidden, "Insufficient permissions")
+			helper.logger.Error("Failed to validate token: ", zap.String("roles", fmt.Sprintf("%v", roles)))
+			problem := problems.NewProblem(http.StatusForbidden, "You don't have the necessary permissions.")
 			c.AbortWithStatusJSON(http.StatusForbidden, problem)
 			return
 		}

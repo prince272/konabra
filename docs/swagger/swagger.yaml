@@ -1,24 +1,23 @@
 basePath: /
 definitions:
-  problems.Problem:
+  services.AccountVerificationForm:
     properties:
-      detail:
-        description: Human-readable explanation
+      username:
+        maxLength: 256
         type: string
-      errors:
-        additionalProperties:
-          type: string
-        description: Field validation errors
-        type: object
-      status:
-        description: HTTP status code
-        type: integer
-      title:
-        description: Short summary of the problem
+    required:
+    - username
+    type: object
+  services.CompleteAccountVerificationForm:
+    properties:
+      code:
         type: string
-      type:
-        description: A URI reference to the problem type
+      username:
+        maxLength: 256
         type: string
+    required:
+    - code
+    - username
     type: object
   services.CreateAccountForm:
     properties:
@@ -62,86 +61,85 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a new user account with the provided information
+      description: Creates a new user account with the provided details
       parameters:
       - description: Account creation details
         in: body
-        name: request
+        name: body
         required: true
         schema:
           $ref: '#/definitions/services.CreateAccountForm'
       produces:
       - application/json
-      responses:
-        "200":
-          description: Account created successfully
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid request body
-          schema:
-            $ref: '#/definitions/problems.Problem'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/problems.Problem'
-      summary: Create a new account
+      responses: {}
+      summary: Create a new user account
       tags:
-      - Identity
+      - Account
   /account/me:
     get:
-      description: Get information about the currently authenticated user account
+      consumes:
+      - application/json
+      description: Retrieves details of the authenticated user
       produces:
       - application/json
-      responses:
-        "200":
-          description: Account information retrieved successfully
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: User not authenticated
-          schema:
-            $ref: '#/definitions/problems.Problem'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/problems.Problem'
+      responses: {}
       security:
-      - ApiKeyAuth: []
-      summary: Get current account information
+      - BearerAuth: []
+      summary: Get current user account
       tags:
-      - Identity
+      - Account
   /account/signin:
     post:
       consumes:
       - application/json
-      description: Sign in to an existing user account with the provided credentials
+      description: Authenticates a user with email and password
       parameters:
-      - description: Account sign-in credentials
+      - description: Sign-in credentials
         in: body
-        name: request
+        name: body
         required: true
         schema:
           $ref: '#/definitions/services.SignInForm'
       produces:
       - application/json
-      responses:
-        "200":
-          description: Account signed in successfully
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Invalid request body
-          schema:
-            $ref: '#/definitions/problems.Problem'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/problems.Problem'
-      summary: Sign in to an account
+      responses: {}
+      summary: Sign in to an existing account
       tags:
-      - Identity
+      - Account
+  /account/verify:
+    post:
+      consumes:
+      - application/json
+      description: Sends a verification email or SMS to the user
+      parameters:
+      - description: Verification request details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/services.AccountVerificationForm'
+      produces:
+      - application/json
+      responses: {}
+      summary: Send account verification
+      tags:
+      - Account
+  /account/verify/complete:
+    post:
+      consumes:
+      - application/json
+      description: Completes the account verification process using a token
+      parameters:
+      - description: Verification completion details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/services.CompleteAccountVerificationForm'
+      produces:
+      - application/json
+      responses: {}
+      summary: Complete account verification
+      tags:
+      - Account
 swagger: "2.0"
