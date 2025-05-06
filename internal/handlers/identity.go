@@ -23,9 +23,10 @@ func NewIdentityHandler(router *gin.Engine, jwtHelper *helpers.JwtHelper, identi
 	{
 		identityGroup.POST("/create", handler.handle(handler.CreateAccount))
 		identityGroup.POST("/signin", handler.handle(handler.SignInAccount))
-		identityGroup.GET("/me", jwtHelper.RequireAuth(), handler.handle(handler.GetCurrentAccount))
-		identityGroup.POST("/verify", handler.handle(handler.SendAccountVerification))
-		identityGroup.POST("/verify/complete", handler.handle(handler.CompleteAccountVerification))
+		identityGroup.POST("/signout", jwtHelper.RequireAuth(), handler.handle(handler.SignOutAccount))
+		identityGroup.GET("/current", jwtHelper.RequireAuth(), handler.handle(handler.GetCurrentAccount))
+		identityGroup.POST("/verification/send", handler.handle(handler.SendAccountVerification))
+		identityGroup.POST("/verification/complete", handler.handle(handler.CompleteAccountVerification))
 	}
 
 	return handler
@@ -75,6 +76,29 @@ func (handler *IdentityHandler) SignInAccount(context *gin.Context) (any, *probl
 	return handler.identityService.SignInAccount(form)
 }
 
+// SignOutAccount handles account sign-out
+// @Summary Sign out of the current account
+// @Description Logs out the user and invalidates the session/token
+// @Tags Account
+// @Accept json
+// @Produce json
+// @Param body body services.SignOutForm true "Sign-out request details"
+// @Router /account/signout [post]
+func (handler *IdentityHandler) SignOutAccount(context *gin.Context) (any, *problems.Problem) {
+	userId := context.MustGet("sub").(string)
+
+	var form services.SignOutForm
+	if err := context.ShouldBindJSON(&form); err != nil {
+		return nil, problems.NewProblem(http.StatusBadRequest, "The request format is incorrect.")
+	}
+
+	if problem := handler.identityService.SignOutAccount(userId, form); problem != nil {
+		return nil, problem
+	}
+
+	return gin.H{}, nil
+}
+
 // SendAccountVerification handles sending verification emails/SMS
 // @Summary Send account verification
 // @Description Sends a verification email or SMS to the user
@@ -82,7 +106,7 @@ func (handler *IdentityHandler) SignInAccount(context *gin.Context) (any, *probl
 // @Accept json
 // @Produce json
 // @Param body body services.AccountVerificationForm true "Verification request details"
-// @Router /account/verify [post]
+// @Router /account/verification/send [post]
 func (handler *IdentityHandler) SendAccountVerification(context *gin.Context) (any, *problems.Problem) {
 	var form services.AccountVerificationForm
 	if err := context.ShouldBindJSON(&form); err != nil {
@@ -101,7 +125,7 @@ func (handler *IdentityHandler) SendAccountVerification(context *gin.Context) (a
 // @Accept json
 // @Produce json
 // @Param body body services.CompleteAccountVerificationForm true "Verification completion details"
-// @Router /account/verify/complete [post]
+// @Router /account/verification/complete [post]
 func (handler *IdentityHandler) CompleteAccountVerification(context *gin.Context) (any, *problems.Problem) {
 	var form services.CompleteAccountVerificationForm
 	if err := context.ShouldBindJSON(&form); err != nil {
@@ -120,15 +144,8 @@ func (handler *IdentityHandler) CompleteAccountVerification(context *gin.Context
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Router /account/me [get]
+// @Router /account/current [get]
 func (handler *IdentityHandler) GetCurrentAccount(context *gin.Context) (any, *problems.Problem) {
-	claims, exists := context.Get("claims")
-	if !exists {
-		return nil, problems.NewProblem(http.StatusUnauthorized, "You are not authorized to perform this action.")
-	}
-	userID, ok := claims.(map[string]any)["sub"].(string)
-	if !ok {
-		return nil, problems.NewProblem(http.StatusUnauthorized, "You are not authorized to perform this action.")
-	}
-	return handler.identityService.GetAccountByUserId(userID)
+	userId := context.MustGet("sub").(string)
+	return handler.identityService.GetAccountByUserId(userId)
 }

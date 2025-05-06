@@ -114,7 +114,7 @@ func (helper *JwtHelper) RevokeExpiredTokens(subject string) error {
 	return nil
 }
 
-func (helper *JwtHelper) RevokeTokenByHash(subject string, tokenString string) error {
+func (helper *JwtHelper) RevokeToken(subject string, tokenString string) error {
 	tokenHash := utils.HashToken(tokenString)
 	if tokenHash == "" {
 		return nil
@@ -131,7 +131,7 @@ func (helper *JwtHelper) RevokeTokenByHash(subject string, tokenString string) e
 	return nil
 }
 
-func (helper *JwtHelper) ValidTokenByHash(subject string, tokenString string) error {
+func (helper *JwtHelper) VerifyToken(subject string, tokenString string) error {
 	tokenHash := utils.HashToken(tokenString)
 	if tokenHash == "" {
 		return errors.New("invalid token hash")
@@ -260,8 +260,8 @@ func (helper *JwtHelper) ValidateToken(tokenString string) (map[string]any, erro
 		}
 	}
 
-	// validate hash
-	if err := helper.ValidTokenByHash(sub, tokenString); err != nil {
+	// verify token
+	if err := helper.VerifyToken(sub, tokenString); err != nil {
 		return nil, err
 	}
 
@@ -293,8 +293,14 @@ func (helper *JwtHelper) RequireAuth(roles ...string) gin.HandlerFunc {
 			return
 		}
 
-		c.Set("claims", claims)
-		c.Next()
+		subject, ok := claims["sub"].(string)
+		if !ok {
+			helper.logger.Error("Failed to extract subject from claims")
+			problem := problems.NewProblem(http.StatusUnauthorized, "You are not authorized to perform this action.")
+			c.AbortWithStatusJSON(http.StatusUnauthorized, problem)
+			return
+		}
+		c.Set("sub", subject)
 	}
 }
 

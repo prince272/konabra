@@ -32,7 +32,7 @@ func NewProtector(masterKey []byte) (*Protector, error) {
 	hkdfReader := hkdf.New(sha256.New, masterKey, nil, []byte("xai-protector-key-derivation"))
 	derivedKey := make([]byte, 64) // 32 for AES + 32 for HMAC
 	if _, err := io.ReadFull(hkdfReader, derivedKey); err != nil {
-		return nil, fmt.Errorf("failed to derive keys: %v", err)
+		return nil, fmt.Errorf("failed to derive keys: %w", err)
 	}
 
 	aesKey := derivedKey[:32]
@@ -78,7 +78,7 @@ type ShortCodeInfo struct {
 func (p *Protector) GenerateToken(expiresIn time.Duration, metadata map[string]string) (*TokenInfo, error) {
 	value, err := generateAlphanumericCode(32)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate alphanumeric code: %v", err)
+		return nil, fmt.Errorf("failed to generate alphanumeric code: %w", err)
 	}
 	expiry := time.Now().UTC().Add(expiresIn)
 
@@ -106,11 +106,11 @@ func (p *Protector) VerifyToken(encoded, expectedToken string) (*TokenInfo, erro
 	var payload Payload
 	env, err := p.decryptAndVerify(encoded, &payload)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decrypt and verify token: %v", err)
+		return nil, fmt.Errorf("failed to decrypt and verify token: %w", err)
 	}
 
 	if payload.Value != expectedToken {
-		return nil, fmt.Errorf("expected token '%s', got '%s'", expectedToken, payload.Value)
+		return nil, fmt.Errorf("expected token '%v', got '%v'", expectedToken, payload.Value)
 	}
 
 	if time.Now().UTC().Unix() > payload.ExpiresAt {
@@ -135,10 +135,10 @@ func (p *Protector) GenerateShortCode(codeType string, length int, expiresIn tim
 	case "alphanumeric":
 		code, err = generateAlphanumericCode(length)
 	default:
-		return nil, fmt.Errorf("invalid code type '%s'", codeType)
+		return nil, fmt.Errorf("invalid code type '%v'", codeType)
 	}
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate code: %v", err)
+		return nil, fmt.Errorf("failed to generate code: %w", err)
 	}
 
 	expiry := time.Now().UTC().Add(expiresIn)
@@ -167,7 +167,7 @@ func (p *Protector) VerifyShortCode(encoded, expectedCode string) (*ShortCodeInf
 	var payload Payload
 	env, err := p.decryptAndVerify(encoded, &payload)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decrypt and verify shortcode: %v", err)
+		return nil, fmt.Errorf("failed to decrypt and verify shortcode: %w", err)
 	}
 
 	if time.Now().UTC().Unix() > payload.ExpiresAt {
@@ -175,7 +175,7 @@ func (p *Protector) VerifyShortCode(encoded, expectedCode string) (*ShortCodeInf
 	}
 
 	if payload.Value != expectedCode {
-		return nil, fmt.Errorf("expected code '%s', got '%s'", expectedCode, payload.Value)
+		return nil, fmt.Errorf("expected code '%v', got '%v'", expectedCode, payload.Value)
 	}
 
 	return &ShortCodeInfo{
@@ -189,11 +189,11 @@ func (p *Protector) VerifyShortCode(encoded, expectedCode string) (*ShortCodeInf
 func (p *Protector) encryptAndSign(payload Payload) (string, error) {
 	raw, err := json.Marshal(payload)
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal payload: %v", err)
+		return "", fmt.Errorf("failed to marshal payload: %w", err)
 	}
 	ciphertext, err := p.encrypt(raw)
 	if err != nil {
-		return "", fmt.Errorf("failed to encrypt payload: %v", err)
+		return "", fmt.Errorf("failed to encrypt payload: %w", err)
 	}
 	cipherB64 := base64.StdEncoding.EncodeToString(ciphertext)
 	sig := p.calculateEnvelopeHMAC(cipherB64, payload.Version)
@@ -204,7 +204,7 @@ func (p *Protector) encryptAndSign(payload Payload) (string, error) {
 	}
 	envBytes, err := json.Marshal(env)
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal envelope: %v", err)
+		return "", fmt.Errorf("failed to marshal envelope: %w", err)
 	}
 	return base64.StdEncoding.EncodeToString(envBytes), nil
 }
@@ -212,30 +212,30 @@ func (p *Protector) encryptAndSign(payload Payload) (string, error) {
 func (p *Protector) decryptAndVerify(encoded string, dest *Payload) (*Envelope, error) {
 	envBytes, err := base64.StdEncoding.DecodeString(encoded)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode envelope: %v", err)
+		return nil, fmt.Errorf("failed to decode envelope: %w", err)
 	}
 	var env Envelope
 	if err := json.Unmarshal(envBytes, &env); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal envelope: %v", err)
+		return nil, fmt.Errorf("failed to unmarshal envelope: %w", err)
 	}
 	expectedMAC := p.calculateEnvelopeHMAC(env.Payload, env.Version)
 	actualMAC, err := base64.StdEncoding.DecodeString(env.Signature)
 	if err != nil {
-		return nil, fmt.Errorf("invalid signature encoding: %v", err)
+		return nil, fmt.Errorf("invalid signature encoding: %w", err)
 	}
 	if !hmac.Equal(expectedMAC, actualMAC) {
 		return nil, errors.New("invalid signature")
 	}
 	cipherBytes, err := base64.StdEncoding.DecodeString(env.Payload)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode payload: %v", err)
+		return nil, fmt.Errorf("failed to decode payload: %w", err)
 	}
 	plain, err := p.decrypt(cipherBytes)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decrypt payload: %v", err)
+		return nil, fmt.Errorf("failed to decrypt payload: %w", err)
 	}
 	if err := json.Unmarshal(plain, dest); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal payload: %v", err)
+		return nil, fmt.Errorf("failed to unmarshal payload: %w", err)
 	}
 	return &env, nil
 }
@@ -243,15 +243,15 @@ func (p *Protector) decryptAndVerify(encoded string, dest *Payload) (*Envelope, 
 func (p *Protector) encrypt(plaintext []byte) ([]byte, error) {
 	block, err := aes.NewCipher(p.aesKey)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create AES cipher: %v", err)
+		return nil, fmt.Errorf("failed to create AES cipher: %w", err)
 	}
 	nonce := make([]byte, 12)
 	if _, err := rand.Read(nonce); err != nil {
-		return nil, fmt.Errorf("failed to generate nonce: %v", err)
+		return nil, fmt.Errorf("failed to generate nonce: %w", err)
 	}
 	aesgcm, err := cipher.NewGCM(block)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create GCM cipher: %v", err)
+		return nil, fmt.Errorf("failed to create GCM cipher: %w", err)
 	}
 	return append(nonce, aesgcm.Seal(nil, nonce, plaintext, nil)...), nil
 }
@@ -259,11 +259,11 @@ func (p *Protector) encrypt(plaintext []byte) ([]byte, error) {
 func (p *Protector) decrypt(ciphertext []byte) ([]byte, error) {
 	block, err := aes.NewCipher(p.aesKey)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create AES cipher: %v", err)
+		return nil, fmt.Errorf("failed to create AES cipher: %w", err)
 	}
 	aesgcm, err := cipher.NewGCM(block)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create GCM cipher: %v", err)
+		return nil, fmt.Errorf("failed to create GCM cipher: %w", err)
 	}
 	if len(ciphertext) < 12 {
 		return nil, errors.New("ciphertext too short")
@@ -273,7 +273,7 @@ func (p *Protector) decrypt(ciphertext []byte) ([]byte, error) {
 }
 
 func (p *Protector) calculateEnvelopeHMAC(payloadBase64, version string) []byte {
-	msg := fmt.Sprintf("%s|%s", payloadBase64, version)
+	msg := fmt.Sprintf("%v|%v", payloadBase64, version)
 	h := hmac.New(sha256.New, p.hmacKey)
 	h.Write([]byte(msg))
 	return h.Sum(nil)
@@ -285,7 +285,7 @@ func generateAlphanumericCode(length int) (string, error) {
 	for i := 0; i < length; i++ {
 		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(letters))))
 		if err != nil {
-			return "", fmt.Errorf("failed to generate random alphanumeric character: %v", err)
+			return "", fmt.Errorf("failed to generate random alphanumeric character: %w", err)
 		}
 		result.WriteByte(letters[n.Int64()])
 	}
@@ -298,7 +298,7 @@ func generateNumericCode(length int) (string, error) {
 	for i := 0; i < length; i++ {
 		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(digits))))
 		if err != nil {
-			return "", fmt.Errorf("failed to generate random numeric character: %v", err)
+			return "", fmt.Errorf("failed to generate random numeric character: %w", err)
 		}
 		result.WriteByte(digits[n.Int64()])
 	}

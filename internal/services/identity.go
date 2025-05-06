@@ -27,6 +27,11 @@ type SignInForm struct {
 	Password string `json:"password" validate:"required"`
 }
 
+type SignOutForm struct {
+	Token  string `json:"token"`
+	Global bool   `json:"global"`
+}
+
 func (form CreateAccountForm) GetEmail() string {
 	if !helpers.MaybePhoneOrEmail(form.Username) {
 		return form.Username
@@ -207,6 +212,25 @@ func (service *IdentityService) SignInAccount(form SignInForm) (*AccountWithToke
 	return model, nil
 }
 
+func (service *IdentityService) SignOutAccount(userId string, form SignOutForm) *problems.Problem {
+	// Validate form
+	if err := service.validator.ValidateStruct(form); err != nil {
+		return problems.FromError(err)
+	}
+
+	if form.Global {
+		if err := service.jwtHelper.RevokeAllTokens(userId); err != nil {
+			return problems.FromError(err)
+		}
+	} else {
+		if err := service.jwtHelper.RevokeToken(userId, form.Token); err != nil {
+			return problems.FromError(err)
+		}
+	}
+
+	return nil
+}
+
 func (service *IdentityService) GetAccountByUserId(userId string) (*AccountModel, *problems.Problem) {
 	user := service.identityRepository.FindUserById(userId)
 
@@ -225,7 +249,7 @@ func (service *IdentityService) GetAccountByUserId(userId string) (*AccountModel
 	return model, nil
 }
 
-var (
+const (
 	AccountVerificationPurpose = "AccountVerification"
 )
 
@@ -245,7 +269,7 @@ func (service *IdentityService) SendAccountVerification(form AccountVerification
 
 	// Build shared metadata & key
 	metadata := map[string]string{"id": user.Id, "securityStamp": user.SecurityStamp, "purpose": AccountVerificationPurpose}
-	signatureKey := fmt.Sprintf("%s-%s-%s", user.Id, user.SecurityStamp, AccountVerificationPurpose)
+	signatureKey := fmt.Sprintf("%v-%v-%v", user.Id, user.SecurityStamp, AccountVerificationPurpose)
 
 	if isPhone {
 		ttl := 10 * time.Minute
@@ -286,7 +310,7 @@ func (service *IdentityService) CompleteAccountVerification(form CompleteAccount
 	}
 
 	// Reconstruct key
-	signatureKey := fmt.Sprintf("%s-%s-%s", user.Id, user.SecurityStamp, AccountVerificationPurpose)
+	signatureKey := fmt.Sprintf("%v-%v-%v", user.Id, user.SecurityStamp, AccountVerificationPurpose)
 	signature, _ := service.state.PopItem(signatureKey).(string)
 
 	// Verify code/token and update user

@@ -49,6 +49,13 @@ definitions:
     - password
     - username
     type: object
+  services.SignOutForm:
+    properties:
+      global:
+        type: boolean
+      token:
+        type: string
+    type: object
 info:
   contact: {}
   description: Konabra is a smart, community-powered transport and road safety platform
@@ -75,7 +82,7 @@ paths:
       summary: Create a new user account
       tags:
       - Account
-  /account/me:
+  /account/current:
     get:
       consumes:
       - application/json
@@ -106,25 +113,25 @@ paths:
       summary: Sign in to an existing account
       tags:
       - Account
-  /account/verify:
+  /account/signout:
     post:
       consumes:
       - application/json
-      description: Sends a verification email or SMS to the user
+      description: Logs out the user and invalidates the session/token
       parameters:
-      - description: Verification request details
+      - description: Sign-out request details
         in: body
         name: body
         required: true
         schema:
-          $ref: '#/definitions/services.AccountVerificationForm'
+          $ref: '#/definitions/services.SignOutForm'
       produces:
       - application/json
       responses: {}
-      summary: Send account verification
+      summary: Sign out of the current account
       tags:
       - Account
-  /account/verify/complete:
+  /account/verification/complete:
     post:
       consumes:
       - application/json
@@ -140,6 +147,24 @@ paths:
       - application/json
       responses: {}
       summary: Complete account verification
+      tags:
+      - Account
+  /account/verification/send:
+    post:
+      consumes:
+      - application/json
+      description: Sends a verification email or SMS to the user
+      parameters:
+      - description: Verification request details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/services.AccountVerificationForm'
+      produces:
+      - application/json
+      responses: {}
+      summary: Send account verification
       tags:
       - Account
 swagger: "2.0"

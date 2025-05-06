@@ -42,7 +42,7 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/account/me": {
+        "/account/current": {
             "get": {
                 "security": [
                     {
@@ -90,9 +90,9 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/account/verify": {
+        "/account/signout": {
             "post": {
-                "description": "Sends a verification email or SMS to the user",
+                "description": "Logs out the user and invalidates the session/token",
                 "consumes": [
                     "application/json"
                 ],
@@ -102,22 +102,22 @@ const docTemplate = `{
                 "tags": [
                     "Account"
                 ],
-                "summary": "Send account verification",
+                "summary": "Sign out of the current account",
                 "parameters": [
                     {
-                        "description": "Verification request details",
+                        "description": "Sign-out request details",
                         "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/services.AccountVerificationForm"
+                            "$ref": "#/definitions/services.SignOutForm"
                         }
                     }
                 ],
                 "responses": {}
             }
         },
-        "/account/verify/complete": {
+        "/account/verification/complete": {
             "post": {
                 "description": "Completes the account verification process using a token",
                 "consumes": [
@@ -138,6 +138,33 @@ const docTemplate = `{
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/services.CompleteAccountVerificationForm"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/account/verification/send": {
+            "post": {
+                "description": "Sends a verification email or SMS to the user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Send account verification",
+                "parameters": [
+                    {
+                        "description": "Verification request details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.AccountVerificationForm"
                         }
                     }
                 ],
@@ -213,6 +240,17 @@ const docTemplate = `{
                 "username": {
                     "type": "string",
                     "maxLength": 256
+                }
+            }
+        },
+        "services.SignOutForm": {
+            "type": "object",
+            "properties": {
+                "global": {
+                    "type": "boolean"
+                },
+                "token": {
+                    "type": "string"
                 }
             }
         }
