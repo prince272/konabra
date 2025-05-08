@@ -91,6 +91,23 @@ type CompleteChangeAccountForm struct {
 	Token string `json:"token" validate:"required"`
 }
 
+type ResetPasswordForm struct {
+	Username string `json:"username" validate:"required,max=256,username"`
+}
+
+type CompleteResetPasswordForm struct {
+	ResetPasswordForm
+	Token           string `json:"token" validate:"required"`
+	NewPassword     string `json:"newPassword" validate:"required,password"`
+	ConfirmPassword string `json:"confirmPassword" validate:"required,password"`
+}
+
+type ChangePasswordForm struct {
+	OldPassword     string `json:"oldPassword" validate:"required"`
+	NewPassword     string `json:"newPassword" validate:"required,password"`
+	ConfirmPassword string `json:"confirmPassword" validate:"required,password"`
+}
+
 type AccountType string
 
 const (
@@ -112,6 +129,7 @@ func GetAccountType(input string) AccountType {
 const (
 	PurposeVerifyAccount = "VerifyAccount"
 	PurposeChangeAccount = "ChangeAccount"
+	PurposeResetPassword = "ResetPassword"
 )
 
 type IdentityService struct {
@@ -144,9 +162,9 @@ func (service *IdentityService) CreateAccount(form CreateAccountForm) (*AccountM
 		return nil, problems.FromError(err)
 	}
 
-	// Check if username exists
+	accountType := GetAccountType(form.Username)
 	if usernameExists := service.identityRepository.UsernameExists(form.Username); usernameExists {
-		return nil, problems.NewValidationProblem(map[string]string{"username": "Username already exists."})
+		return nil, problems.NewValidationProblem(map[string]string{"username": fmt.Sprintf("%v already exists.", humanize.Humanize(string(accountType), humanize.SentenceCase))})
 	}
 
 	currentTime := time.Now()
@@ -204,9 +222,10 @@ func (service *IdentityService) SignIn(form SignInForm) (*AccountWithTokenModel,
 	}
 
 	// Check if username exists
+	accountType := GetAccountType(form.Username)
 	var user *models.User
 	if user = service.identityRepository.FindUserByUsername(form.Username); user == nil {
-		return nil, problems.NewValidationProblem(map[string]string{"username": "Username does not exist."})
+		return nil, problems.NewValidationProblem(map[string]string{"username": fmt.Sprintf("%v does not exist.", humanize.Humanize(string(accountType), humanize.SentenceCase))})
 	}
 
 	// Check if password is correct
@@ -347,7 +366,7 @@ func (service *IdentityService) VerifyAccount(form VerifyAccountForm) *problems.
 	accountType := GetAccountType(form.Username)
 	user := service.identityRepository.FindUserByUsername(form.Username)
 	if user == nil {
-		return problems.NewValidationProblem(map[string]string{"username": "Username does not exist."})
+		return problems.NewValidationProblem(map[string]string{"username": fmt.Sprintf("%v does not exist.", humanize.Humanize(string(accountType), humanize.SentenceCase))})
 	}
 
 	secret := fmt.Sprintf("%v-%v-%v", user.Id, PurposeVerifyAccount, user.SecurityStamp)
@@ -399,7 +418,7 @@ func (service *IdentityService) CompleteVerifyAccount(form CompleteVerifyAccount
 	accountType := GetAccountType(form.Username)
 	user := service.identityRepository.FindUserByUsername(form.Username)
 	if user == nil {
-		return problems.NewValidationProblem(map[string]string{"username": "Username does not exist."})
+		return problems.NewValidationProblem(map[string]string{"username": fmt.Sprintf("%v does not exist.", humanize.Humanize(string(accountType), humanize.SentenceCase))})
 	}
 
 	secret := fmt.Sprintf("%v-%v-%v", user.Id, PurposeVerifyAccount, user.SecurityStamp)
@@ -563,6 +582,148 @@ func (service *IdentityService) CompleteChangeAccount(userId string, form Comple
 		return problems.NewValidationProblem(map[string]string{"username": "Username is not a valid email or phone number."})
 	}
 
+	user.SecurityStamp = uuid.New().String()
+	user.UpdatedAt = time.Now()
+
+	if err := service.identityRepository.UpdateUser(user); err != nil {
+		service.logger.Error("User update error: ", zap.Error(err))
+		return problems.FromError(err)
+	}
+
+	return nil
+}
+
+func (service *IdentityService) ResetPassword(form ResetPasswordForm) *problems.Problem {
+	if err := service.validator.ValidateStruct(form); err != nil {
+		return problems.FromError(err)
+	}
+
+	accountType := GetAccountType(form.Username)
+	user := service.identityRepository.FindUserByUsername(form.Username)
+
+	if user == nil {
+		return problems.NewValidationProblem(map[string]string{"username": fmt.Sprintf("%v does not exist.", humanize.Humanize(string(accountType), humanize.SentenceCase))})
+	}
+
+	secret := fmt.Sprintf("%v-%v-%v", user.Id, PurposeResetPassword, user.SecurityStamp)
+
+	if accountType == AccountTypeEmail {
+		tp, err := otp.NewTokenProvider(secret)
+		if err != nil {
+			service.logger.Error("Token provider error: ", zap.Error(err))
+			return problems.FromError(err)
+		}
+
+		token, err := tp.GenerateToken(map[string]any{})
+		if err != nil {
+			service.logger.Error("Token generation error: ", zap.Error(err))
+			return problems.FromError(err)
+		}
+
+		service.logger.Debug("Email reset password token: " + token)
+
+	} else if accountType == AccountTypePhoneNumber {
+		tp, err := otp.NewCodeProvider(secret)
+		if err != nil {
+			service.logger.Error("Code provider error: ", zap.Error(err))
+			return problems.FromError(err)
+		}
+
+		code, err := tp.GenerateCode()
+		if err != nil {
+			service.logger.Error("Code generation error: ", zap.Error(err))
+			return problems.FromError(err)
+		}
+
+		service.logger.Debug("Phone reset password code: " + code)
+	} else {
+		return problems.NewValidationProblem(map[string]string{"username": "Username is not a valid email or phone number."})
+	}
+
+	return nil
+}
+
+func (service *IdentityService) CompleteResetPassword(form CompleteResetPasswordForm) *problems.Problem {
+	if err := service.validator.ValidateStruct(form); err != nil {
+		return problems.FromError(err)
+	}
+
+	accountType := GetAccountType(form.Username)
+	user := service.identityRepository.FindUserByUsername(form.Username)
+
+	if user == nil {
+		return problems.NewValidationProblem(map[string]string{"username": fmt.Sprintf("%v does not exist.", humanize.Humanize(string(accountType), humanize.SentenceCase))})
+	}
+
+	if form.NewPassword != form.ConfirmPassword {
+		return problems.NewValidationProblem(map[string]string{"confirmPassword": "New password and confirm password do not match."})
+	}
+
+	secret := fmt.Sprintf("%v-%v-%v", user.Id, PurposeResetPassword, user.SecurityStamp)
+
+	if accountType == AccountTypeEmail {
+		tp, err := otp.NewTokenProvider(secret)
+		if err != nil {
+			service.logger.Error("Token provider error: ", zap.Error(err))
+			return problems.FromError(err)
+		}
+
+		if _, err := tp.ValidateToken(form.Token); err != nil {
+			service.logger.Error("Token validation error: ", zap.Error(err))
+			return problems.FromError(err)
+		}
+
+	} else if accountType == AccountTypePhoneNumber {
+		tp, err := otp.NewCodeProvider(secret)
+		if err != nil {
+			service.logger.Error("Code provider error: ", zap.Error(err))
+			return problems.FromError(err)
+		}
+
+		valid, err := tp.ValidateCode(form.Token)
+		if err != nil {
+			service.logger.Error("Code validation error: ", zap.Error(err))
+			return problems.FromError(err)
+		}
+		if !valid {
+			return problems.NewValidationProblem(map[string]string{"token": "Token is invalid."})
+		}
+	} else {
+		return problems.NewValidationProblem(map[string]string{"username": "Username is not a valid email or phone number."})
+	}
+
+	user.PasswordHash = utils.MustHashPassword(form.NewPassword)
+	user.SecurityStamp = uuid.New().String()
+	user.UpdatedAt = time.Now()
+
+	if err := service.identityRepository.UpdateUser(user); err != nil {
+		service.logger.Error("User update error: ", zap.Error(err))
+		return problems.FromError(err)
+	}
+
+	return nil
+}
+
+func (service *IdentityService) ChangePassword(userId string, form ChangePasswordForm) *problems.Problem {
+	if err := service.validator.ValidateStruct(form); err != nil {
+		return problems.FromError(err)
+	}
+
+	user := service.identityRepository.FindUserById(userId)
+
+	if user == nil {
+		return problems.NewProblem(http.StatusNotFound, "User not found.")
+	}
+
+	if !utils.CheckPasswordHash(form.OldPassword, user.PasswordHash) {
+		return problems.NewValidationProblem(map[string]string{"oldPassword": "Old password is incorrect."})
+	}
+
+	if form.NewPassword != form.ConfirmPassword {
+		return problems.NewValidationProblem(map[string]string{"confirmPassword": "New password and confirm password do not match."})
+	}
+
+	user.PasswordHash = utils.MustHashPassword(form.NewPassword)
 	user.SecurityStamp = uuid.New().String()
 	user.UpdatedAt = time.Now()
 

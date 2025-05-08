@@ -127,6 +127,92 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/account/password/change": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Changes the password for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Change the current password",
+                "parameters": [
+                    {
+                        "description": "Password change details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.ChangePasswordForm"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/account/password/reset": {
+            "post": {
+                "description": "Starts the process of resetting the password for the account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Initiate password reset",
+                "parameters": [
+                    {
+                        "description": "Password reset details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.ResetPasswordForm"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/account/password/reset/complete": {
+            "post": {
+                "description": "Completes the password reset process using the received token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Complete password reset",
+                "parameters": [
+                    {
+                        "description": "Password reset completion details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.CompleteResetPasswordForm"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/account/signin": {
             "post": {
                 "description": "Authenticates a user with email and password",
@@ -276,6 +362,25 @@ const docTemplate = `{
                 }
             }
         },
+        "services.ChangePasswordForm": {
+            "type": "object",
+            "required": [
+                "confirmPassword",
+                "newPassword",
+                "oldPassword"
+            ],
+            "properties": {
+                "confirmPassword": {
+                    "type": "string"
+                },
+                "newPassword": {
+                    "type": "string"
+                },
+                "oldPassword": {
+                    "type": "string"
+                }
+            }
+        },
         "services.CompleteChangeAccountForm": {
             "type": "object",
             "required": [
@@ -289,6 +394,30 @@ const docTemplate = `{
                 },
                 "token": {
                     "type": "string"
+                }
+            }
+        },
+        "services.CompleteResetPasswordForm": {
+            "type": "object",
+            "required": [
+                "confirmPassword",
+                "newPassword",
+                "token",
+                "username"
+            ],
+            "properties": {
+                "confirmPassword": {
+                    "type": "string"
+                },
+                "newPassword": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 256
                 }
             }
         },
@@ -328,6 +457,18 @@ const docTemplate = `{
                 "password": {
                     "type": "string"
                 },
+                "username": {
+                    "type": "string",
+                    "maxLength": 256
+                }
+            }
+        },
+        "services.ResetPasswordForm": {
+            "type": "object",
+            "required": [
+                "username"
+            ],
+            "properties": {
                 "username": {
                     "type": "string",
                     "maxLength": 256

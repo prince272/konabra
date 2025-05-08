@@ -8,6 +8,19 @@ definitions:
     required:
     - newUsername
     type: object
+  services.ChangePasswordForm:
+    properties:
+      confirmPassword:
+        type: string
+      newPassword:
+        type: string
+      oldPassword:
+        type: string
+    required:
+    - confirmPassword
+    - newPassword
+    - oldPassword
+    type: object
   services.CompleteChangeAccountForm:
     properties:
       newUsername:
@@ -18,6 +31,23 @@ definitions:
     required:
     - newUsername
     - token
+    type: object
+  services.CompleteResetPasswordForm:
+    properties:
+      confirmPassword:
+        type: string
+      newPassword:
+        type: string
+      token:
+        type: string
+      username:
+        maxLength: 256
+        type: string
+    required:
+    - confirmPassword
+    - newPassword
+    - token
+    - username
     type: object
   services.CompleteVerifyAccountForm:
     properties:
@@ -47,6 +77,14 @@ definitions:
     - firstName
     - lastName
     - password
+    - username
+    type: object
+  services.ResetPasswordForm:
+    properties:
+      username:
+        maxLength: 256
+        type: string
+    required:
     - username
     type: object
   services.SignInForm:
@@ -161,6 +199,62 @@ paths:
       security:
       - BearerAuth: []
       summary: Get current user account
+      tags:
+      - Account
+  /account/password/change:
+    post:
+      consumes:
+      - application/json
+      description: Changes the password for the authenticated user
+      parameters:
+      - description: Password change details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/services.ChangePasswordForm'
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Change the current password
+      tags:
+      - Account
+  /account/password/reset:
+    post:
+      consumes:
+      - application/json
+      description: Starts the process of resetting the password for the account
+      parameters:
+      - description: Password reset details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/services.ResetPasswordForm'
+      produces:
+      - application/json
+      responses: {}
+      summary: Initiate password reset
+      tags:
+      - Account
+  /account/password/reset/complete:
+    post:
+      consumes:
+      - application/json
+      description: Completes the password reset process using the received token
+      parameters:
+      - description: Password reset completion details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/services.CompleteResetPasswordForm'
+      produces:
+      - application/json
+      responses: {}
+      summary: Complete password reset
       tags:
       - Account
   /account/signin:

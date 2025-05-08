@@ -31,6 +31,9 @@ func NewIdentityHandler(router *gin.Engine, jwtHelper *helpers.JwtHelper, identi
 		identityGroup.POST("/verify/complete", handler.handle(handler.CompleteVerifyAccount))
 		identityGroup.POST("/change", jwtHelper.RequireAuth(), handler.handle(handler.ChangeAccount))
 		identityGroup.POST("/change/complete", jwtHelper.RequireAuth(), handler.handle(handler.CompleteChangeAccount))
+		identityGroup.POST("/password/reset", handler.handle(handler.ResetPassword))
+		identityGroup.POST("/password/reset/complete", handler.handle(handler.CompleteResetPassword))
+		identityGroup.POST("/password/change", jwtHelper.RequireAuth(), handler.handle(handler.ChangePassword))
 	}
 
 	return handler
@@ -59,7 +62,7 @@ func (handler *IdentityHandler) handle(handlerFunc func(*gin.Context) (any, *pro
 func (handler *IdentityHandler) CreateAccount(context *gin.Context) (any, *problems.Problem) {
 	var form services.CreateAccountForm
 	if err := context.ShouldBindJSON(&form); err != nil {
-		return nil, problems.NewProblem(http.StatusBadRequest, "The request format is incorrect.")
+		return nil, problems.FromError(err)
 	}
 	return handler.identityService.CreateAccount(form)
 }
@@ -75,7 +78,7 @@ func (handler *IdentityHandler) CreateAccount(context *gin.Context) (any, *probl
 func (handler *IdentityHandler) VerifyAccount(context *gin.Context) (any, *problems.Problem) {
 	var form services.VerifyAccountForm
 	if err := context.ShouldBindJSON(&form); err != nil {
-		return nil, problems.NewProblem(http.StatusBadRequest, "The request format is incorrect.")
+		return nil, problems.FromError(err)
 	}
 	if problem := handler.identityService.VerifyAccount(form); problem != nil {
 		return nil, problem
@@ -94,7 +97,7 @@ func (handler *IdentityHandler) VerifyAccount(context *gin.Context) (any, *probl
 func (handler *IdentityHandler) CompleteVerifyAccount(context *gin.Context) (any, *problems.Problem) {
 	var form services.CompleteVerifyAccountForm
 	if err := context.ShouldBindJSON(&form); err != nil {
-		return nil, problems.NewProblem(http.StatusBadRequest, "The request format is incorrect.")
+		return nil, problems.FromError(err)
 	}
 	if problem := handler.identityService.CompleteVerifyAccount(form); problem != nil {
 		return nil, problem
@@ -117,7 +120,7 @@ func (handler *IdentityHandler) ChangeAccount(context *gin.Context) (any, *probl
 
 	var form services.ChangeAccountForm
 	if err := context.ShouldBindJSON(&form); err != nil {
-		return nil, problems.NewProblem(http.StatusBadRequest, "The request format is incorrect.")
+		return nil, problems.FromError(err)
 	}
 	if problem := handler.identityService.ChangeAccount(userId, form); problem != nil {
 		return nil, problem
@@ -140,9 +143,71 @@ func (handler *IdentityHandler) CompleteChangeAccount(context *gin.Context) (any
 
 	var form services.CompleteChangeAccountForm
 	if err := context.ShouldBindJSON(&form); err != nil {
-		return nil, problems.NewProblem(http.StatusBadRequest, "The request format is incorrect.")
+		return nil, problems.FromError(err)
 	}
 	if problem := handler.identityService.CompleteChangeAccount(userId, form); problem != nil {
+		return nil, problem
+	}
+	return gin.H{}, nil
+}
+
+// ResetPassword handles password reset initiation
+// @Summary Initiate password reset
+// @Description Starts the process of resetting the password for the account
+// @Tags Account
+// @Accept json
+// @Produce json
+// @Param body body services.ResetPasswordForm true "Password reset details"
+// @Router /account/password/reset [post]
+func (handler *IdentityHandler) ResetPassword(context *gin.Context) (any, *problems.Problem) {
+	var form services.ResetPasswordForm
+	if err := context.ShouldBindJSON(&form); err != nil {
+		return nil, problems.NewProblem(http.StatusBadRequest, "The request form is incorrect.")
+	}
+
+	if problem := handler.identityService.ResetPassword(form); problem != nil {
+		return nil, problem
+	}
+	return gin.H{}, nil
+}
+
+// CompleteResetPassword handles password reset completion
+// @Summary Complete password reset
+// @Description Completes the password reset process using the received token
+// @Tags Account
+// @Accept json
+// @Produce json
+// @Param body body services.CompleteResetPasswordForm true "Password reset completion details"
+// @Router /account/password/reset/complete [post]
+func (handler *IdentityHandler) CompleteResetPassword(context *gin.Context) (any, *problems.Problem) {
+	var form services.CompleteResetPasswordForm
+	if err := context.ShouldBindJSON(&form); err != nil {
+		return nil, problems.FromError(err)
+	}
+	if problem := handler.identityService.CompleteResetPassword(form); problem != nil {
+		return nil, problem
+	}
+	return gin.H{}, nil
+}
+
+// ChangePassword handles password change
+// @Summary Change the current password
+// @Description Changes the password for the authenticated user
+// @Tags Account
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param body body services.ChangePasswordForm true "Password change details"
+// @Router /account/password/change [post]
+func (handler *IdentityHandler) ChangePassword(context *gin.Context) (any, *problems.Problem) {
+	claims := context.MustGet(constants.ContextClaimsKey).(map[string]any)
+	userId := claims["sub"].(string)
+
+	var form services.ChangePasswordForm
+	if err := context.ShouldBindJSON(&form); err != nil {
+		return nil, problems.FromError(err)
+	}
+	if problem := handler.identityService.ChangePassword(userId, form); problem != nil {
 		return nil, problem
 	}
 	return gin.H{}, nil
@@ -159,7 +224,7 @@ func (handler *IdentityHandler) CompleteChangeAccount(context *gin.Context) (any
 func (handler *IdentityHandler) SignIn(context *gin.Context) (any, *problems.Problem) {
 	var form services.SignInForm
 	if err := context.ShouldBindJSON(&form); err != nil {
-		return nil, problems.NewProblem(http.StatusBadRequest, "The request format is incorrect.")
+		return nil, problems.FromError(err)
 	}
 	return handler.identityService.SignIn(form)
 }
@@ -175,7 +240,7 @@ func (handler *IdentityHandler) SignIn(context *gin.Context) (any, *problems.Pro
 func (handler *IdentityHandler) SignInWithRefreshToken(context *gin.Context) (any, *problems.Problem) {
 	var form services.SignInWithRefreshTokenForm
 	if err := context.ShouldBindJSON(&form); err != nil {
-		return nil, problems.NewProblem(http.StatusBadRequest, "The request format is incorrect.")
+		return nil, problems.FromError(err)
 	}
 	return handler.identityService.SignInWithRefreshToken(form)
 }
@@ -194,7 +259,7 @@ func (handler *IdentityHandler) SignOut(context *gin.Context) (any, *problems.Pr
 
 	var form services.SignOutForm
 	if err := context.ShouldBindJSON(&form); err != nil {
-		return nil, problems.NewProblem(http.StatusBadRequest, "The request format is incorrect.")
+		return nil, problems.FromError(err)
 	}
 
 	if problem := handler.identityService.SignOut(userId, form); problem != nil {
