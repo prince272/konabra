@@ -20,7 +20,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -166,8 +166,7 @@ func (api *Api) registerDefaultDB() error {
 	if cfg.DbDefault == "" {
 		return fmt.Errorf("default database path not configured")
 	}
-
-	db, err := gorm.Open(sqlite.Open(cfg.DbDefault), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(cfg.DbDefault), &gorm.Config{})
 	if err != nil {
 		return fmt.Errorf("failed to open database: %w", err)
 	}
