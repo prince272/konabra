@@ -16,6 +16,7 @@ import (
 
 	"slices"
 
+	"github.com/prince272/konabra/internal/constants"
 	models "github.com/prince272/konabra/internal/models/identity"
 	"github.com/prince272/konabra/internal/problems"
 	"github.com/prince272/konabra/utils"
@@ -53,13 +54,13 @@ func (helper *JwtHelper) CreateToken(subject string, claims map[string]any) (*Jw
 	creationTime := time.Now()
 
 	accessTokenExpiresAt := creationTime.Add(15 * time.Minute)
-	accessToken, err := helper.GenerateToken(creationTime, accessTokenExpiresAt, subject, claims)
+	accessToken, err := helper.GenerateToken(subject, creationTime, accessTokenExpiresAt, "access", claims)
 	if err != nil {
 		return nil, err
 	}
 
 	refreshTokenExpiresAt := creationTime.Add(30 * 24 * time.Hour)
-	refreshToken, err := helper.GenerateToken(creationTime, refreshTokenExpiresAt, subject, map[string]any{})
+	refreshToken, err := helper.GenerateToken(subject, creationTime, refreshTokenExpiresAt, "refresh", map[string]any{})
 	if err != nil {
 		return nil, err
 	}
@@ -120,10 +121,12 @@ func (helper *JwtHelper) RevokeToken(subject string, tokenString string) error {
 		return nil
 	}
 
+	currentTime := time.Now()
+
 	result := helper.database.
 		Model(&models.JwtToken{}).
-		Where("subject = ? AND (access_token_hash = ? OR refresh_token_hash = ?)",
-			subject, tokenHash, tokenHash).
+		Where("subject = ? AND ((access_token_expires_at < ? OR refresh_token_expires_at < ?) OR (access_token_hash = ? OR refresh_token_hash = ?))",
+			subject, currentTime, currentTime, tokenHash, tokenHash).
 		Delete(&models.JwtToken{})
 	if result.Error != nil {
 		return result.Error
@@ -131,7 +134,7 @@ func (helper *JwtHelper) RevokeToken(subject string, tokenString string) error {
 	return nil
 }
 
-func (helper *JwtHelper) VerifyToken(subject string, tokenString string) error {
+func (helper *JwtHelper) validateToken(subject string, tokenString string) error {
 	tokenHash := utils.HashToken(tokenString)
 	if tokenHash == "" {
 		return errors.New("invalid token hash")
@@ -157,24 +160,39 @@ func (helper *JwtHelper) VerifyToken(subject string, tokenString string) error {
 	return errors.New("token has expired")
 }
 
-func (helper *JwtHelper) GenerateToken(creationTime, expirationTime time.Time, subject string, claims map[string]any) (string, error) {
+func (helper *JwtHelper) GenerateToken(subject string, creationTime, expirationTime time.Time, tokenType string, claims map[string]any) (string, error) {
+
+	if tokenType != "access" && tokenType != "refresh" {
+		return "", errors.New("invalid token type")
+	}
+
 	jwtClaims := jwt.MapClaims{
-		"iss": helper.Options.Issuer,
-		"sub": subject,
-		"aud": helper.Options.Audience,
-		"exp": expirationTime.Unix(),
-		"iat": creationTime.Unix(),
-		"nbf": creationTime.Unix(),
-		"jti": uuid.New().String(),
+		"iss":  helper.Options.Issuer,
+		"sub":  subject,
+		"aud":  helper.Options.Audience,
+		"exp":  expirationTime.Unix(),
+		"iat":  creationTime.Unix(),
+		"nbf":  creationTime.Unix(),
+		"jti":  uuid.New().String(),
+		"type": tokenType,
 	}
 
 	maps.Copy(jwtClaims, claims)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtClaims)
+
 	return token.SignedString([]byte(helper.Options.Secret))
 }
 
-func (helper *JwtHelper) ValidateToken(tokenString string) (map[string]any, error) {
+func (helper *JwtHelper) verifyToken(tokenType string, tokenString string) (map[string]any, error) {
+	if tokenString == "" {
+		return nil, errors.New("missing token")
+	}
+
+	if tokenType != "access" && tokenType != "refresh" {
+		return nil, errors.New("invalid token type")
+	}
+
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -194,6 +212,11 @@ func (helper *JwtHelper) ValidateToken(tokenString string) (map[string]any, erro
 
 	if !ok {
 		return nil, errors.New("invalid token")
+	}
+
+	tokenTypeClaim, ok := claims["type"].(string)
+	if !ok || tokenTypeClaim != tokenType {
+		return nil, errors.New("invalid token type")
 	}
 
 	// Validate expiration time
@@ -260,12 +283,21 @@ func (helper *JwtHelper) ValidateToken(tokenString string) (map[string]any, erro
 		}
 	}
 
-	// verify token
-	if err := helper.VerifyToken(sub, tokenString); err != nil {
+	// validate token
+	if err := helper.validateToken(sub, tokenString); err != nil {
+		helper.logger.Error("Failed to validate token: ", zap.Error(err))
 		return nil, err
 	}
 
 	return claims, nil
+}
+
+func (helper *JwtHelper) VerifyAccessToken(tokenString string) (map[string]any, error) {
+	return helper.verifyToken("access", tokenString)
+}
+
+func (helper *JwtHelper) VerifyRefreshToken(tokenString string) (map[string]any, error) {
+	return helper.verifyToken("refresh", tokenString)
 }
 
 func (helper *JwtHelper) RequireAuth(roles ...string) gin.HandlerFunc {
@@ -278,29 +310,22 @@ func (helper *JwtHelper) RequireAuth(roles ...string) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := helper.ValidateToken(token)
+		claims, err := helper.VerifyAccessToken(token)
 		if err != nil {
-			helper.logger.Error("Failed to validate token: ", zap.Error(err))
+			helper.logger.Error("Failed to verify token: ", zap.Error(err))
 			problem := problems.NewProblem(http.StatusUnauthorized, "You are not authorized to perform this action.")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, problem)
 			return
 		}
 
 		if len(roles) > 0 && !helper.hasRequiredRole(claims, roles) {
-			helper.logger.Error("Failed to validate token: ", zap.String("roles", fmt.Sprintf("%v", roles)))
+			helper.logger.Error("Failed to verify token: ", zap.String("roles", fmt.Sprintf("%v", roles)))
 			problem := problems.NewProblem(http.StatusForbidden, "You don't have the necessary permissions.")
 			c.AbortWithStatusJSON(http.StatusForbidden, problem)
 			return
 		}
 
-		subject, ok := claims["sub"].(string)
-		if !ok {
-			helper.logger.Error("Failed to extract subject from claims")
-			problem := problems.NewProblem(http.StatusUnauthorized, "You are not authorized to perform this action.")
-			c.AbortWithStatusJSON(http.StatusUnauthorized, problem)
-			return
-		}
-		c.Set("sub", subject)
+		c.Set(constants.ContextClaimsKey, claims)
 	}
 }
 

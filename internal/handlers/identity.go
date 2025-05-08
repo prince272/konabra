@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prince272/konabra/internal/constants"
 	"github.com/prince272/konabra/internal/helpers"
 	"github.com/prince272/konabra/internal/problems"
 	"github.com/prince272/konabra/internal/services"
@@ -22,11 +23,14 @@ func NewIdentityHandler(router *gin.Engine, jwtHelper *helpers.JwtHelper, identi
 	identityGroup := router.Group("/account")
 	{
 		identityGroup.POST("/create", handler.handle(handler.CreateAccount))
-		identityGroup.POST("/signin", handler.handle(handler.SignInAccount))
-		identityGroup.POST("/signout", jwtHelper.RequireAuth(), handler.handle(handler.SignOutAccount))
+		identityGroup.POST("/signin", handler.handle(handler.SignIn))
+		identityGroup.POST("/signin/refresh", handler.handle(handler.SignInWithRefreshToken))
+		identityGroup.POST("/signout", jwtHelper.RequireAuth(), handler.handle(handler.SignOut))
 		identityGroup.GET("/current", jwtHelper.RequireAuth(), handler.handle(handler.GetCurrentAccount))
-		identityGroup.POST("/verification/send", handler.handle(handler.SendAccountVerification))
-		identityGroup.POST("/verification/complete", handler.handle(handler.CompleteAccountVerification))
+		identityGroup.POST("/verify", handler.handle(handler.VerifyAccount))
+		identityGroup.POST("/verify/complete", handler.handle(handler.CompleteVerifyAccount))
+		identityGroup.POST("/change", jwtHelper.RequireAuth(), handler.handle(handler.ChangeAccount))
+		identityGroup.POST("/change/complete", jwtHelper.RequireAuth(), handler.handle(handler.CompleteChangeAccount))
 	}
 
 	return handler
@@ -60,7 +64,91 @@ func (handler *IdentityHandler) CreateAccount(context *gin.Context) (any, *probl
 	return handler.identityService.CreateAccount(form)
 }
 
-// SignInAccount handles account sign-in
+// VerifyAccount handles account verification initiation
+// @Summary Initiate account verification
+// @Description Starts the verification process for the account (email or phone)
+// @Tags Account
+// @Accept json
+// @Produce json
+// @Param body body services.VerifyAccountForm true "Verification details"
+// @Router /account/verify [post]
+func (handler *IdentityHandler) VerifyAccount(context *gin.Context) (any, *problems.Problem) {
+	var form services.VerifyAccountForm
+	if err := context.ShouldBindJSON(&form); err != nil {
+		return nil, problems.NewProblem(http.StatusBadRequest, "The request format is incorrect.")
+	}
+	if problem := handler.identityService.VerifyAccount(form); problem != nil {
+		return nil, problem
+	}
+	return gin.H{}, nil
+}
+
+// CompleteVerifyAccount handles account verification completion
+// @Summary Complete account verification
+// @Description Completes the verification process using the received token
+// @Tags Account
+// @Accept json
+// @Produce json
+// @Param body body services.CompleteVerifyAccountForm true "Verification completion details"
+// @Router /account/verify/complete [post]
+func (handler *IdentityHandler) CompleteVerifyAccount(context *gin.Context) (any, *problems.Problem) {
+	var form services.CompleteVerifyAccountForm
+	if err := context.ShouldBindJSON(&form); err != nil {
+		return nil, problems.NewProblem(http.StatusBadRequest, "The request format is incorrect.")
+	}
+	if problem := handler.identityService.CompleteVerifyAccount(form); problem != nil {
+		return nil, problem
+	}
+	return gin.H{}, nil
+}
+
+// ChangeAccount handles account change initiation
+// @Summary Initiate account change
+// @Description Starts the process of changing account email or phone number
+// @Tags Account
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param body body services.ChangeAccountForm true "Account change details"
+// @Router /account/change [post]
+func (handler *IdentityHandler) ChangeAccount(context *gin.Context) (any, *problems.Problem) {
+	claims := context.MustGet(constants.ContextClaimsKey).(map[string]any)
+	userId := claims["sub"].(string)
+
+	var form services.ChangeAccountForm
+	if err := context.ShouldBindJSON(&form); err != nil {
+		return nil, problems.NewProblem(http.StatusBadRequest, "The request format is incorrect.")
+	}
+	if problem := handler.identityService.ChangeAccount(userId, form); problem != nil {
+		return nil, problem
+	}
+	return gin.H{}, nil
+}
+
+// CompleteChangeAccount handles account change completion
+// @Summary Complete account change
+// @Description Completes the process of changing account email or phone number
+// @Tags Account
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param body body services.CompleteChangeAccountForm true "Account change completion details"
+// @Router /account/change/complete [post]
+func (handler *IdentityHandler) CompleteChangeAccount(context *gin.Context) (any, *problems.Problem) {
+	claims := context.MustGet(constants.ContextClaimsKey).(map[string]any)
+	userId := claims["sub"].(string)
+
+	var form services.CompleteChangeAccountForm
+	if err := context.ShouldBindJSON(&form); err != nil {
+		return nil, problems.NewProblem(http.StatusBadRequest, "The request format is incorrect.")
+	}
+	if problem := handler.identityService.CompleteChangeAccount(userId, form); problem != nil {
+		return nil, problem
+	}
+	return gin.H{}, nil
+}
+
+// SignIn handles account sign-in
 // @Summary Sign in to an existing account
 // @Description Authenticates a user with email and password
 // @Tags Account
@@ -68,15 +156,31 @@ func (handler *IdentityHandler) CreateAccount(context *gin.Context) (any, *probl
 // @Produce json
 // @Param body body services.SignInForm true "Sign-in credentials"
 // @Router /account/signin [post]
-func (handler *IdentityHandler) SignInAccount(context *gin.Context) (any, *problems.Problem) {
+func (handler *IdentityHandler) SignIn(context *gin.Context) (any, *problems.Problem) {
 	var form services.SignInForm
 	if err := context.ShouldBindJSON(&form); err != nil {
 		return nil, problems.NewProblem(http.StatusBadRequest, "The request format is incorrect.")
 	}
-	return handler.identityService.SignInAccount(form)
+	return handler.identityService.SignIn(form)
 }
 
-// SignOutAccount handles account sign-out
+// SignInWithRefreshToken handles sign-in using a refresh token
+// @Summary Sign in using a refresh token
+// @Description Authenticates a user using a refresh token to obtain new access tokens
+// @Tags Account
+// @Accept json
+// @Produce json
+// @Param body body services.SignInWithRefreshTokenForm true "Refresh token details"
+// @Router /account/signin/refresh [post]
+func (handler *IdentityHandler) SignInWithRefreshToken(context *gin.Context) (any, *problems.Problem) {
+	var form services.SignInWithRefreshTokenForm
+	if err := context.ShouldBindJSON(&form); err != nil {
+		return nil, problems.NewProblem(http.StatusBadRequest, "The request format is incorrect.")
+	}
+	return handler.identityService.SignInWithRefreshToken(form)
+}
+
+// SignOut handles account sign-out
 // @Summary Sign out of the current account
 // @Description Logs out the user and invalidates the session/token
 // @Tags Account
@@ -84,56 +188,19 @@ func (handler *IdentityHandler) SignInAccount(context *gin.Context) (any, *probl
 // @Produce json
 // @Param body body services.SignOutForm true "Sign-out request details"
 // @Router /account/signout [post]
-func (handler *IdentityHandler) SignOutAccount(context *gin.Context) (any, *problems.Problem) {
-	userId := context.MustGet("sub").(string)
+func (handler *IdentityHandler) SignOut(context *gin.Context) (any, *problems.Problem) {
+	claims := context.MustGet(constants.ContextClaimsKey).(map[string]any)
+	userId := claims["sub"].(string)
 
 	var form services.SignOutForm
 	if err := context.ShouldBindJSON(&form); err != nil {
 		return nil, problems.NewProblem(http.StatusBadRequest, "The request format is incorrect.")
 	}
 
-	if problem := handler.identityService.SignOutAccount(userId, form); problem != nil {
+	if problem := handler.identityService.SignOut(userId, form); problem != nil {
 		return nil, problem
 	}
 
-	return gin.H{}, nil
-}
-
-// SendAccountVerification handles sending verification emails/SMS
-// @Summary Send account verification
-// @Description Sends a verification email or SMS to the user
-// @Tags Account
-// @Accept json
-// @Produce json
-// @Param body body services.AccountVerificationForm true "Verification request details"
-// @Router /account/verification/send [post]
-func (handler *IdentityHandler) SendAccountVerification(context *gin.Context) (any, *problems.Problem) {
-	var form services.AccountVerificationForm
-	if err := context.ShouldBindJSON(&form); err != nil {
-		return nil, problems.NewProblem(http.StatusBadRequest, "The request format is incorrect.")
-	}
-	if problem := handler.identityService.SendAccountVerification(form); problem != nil {
-		return nil, problem
-	}
-	return gin.H{}, nil
-}
-
-// CompleteAccountVerification handles verification completion
-// @Summary Complete account verification
-// @Description Completes the account verification process using a token
-// @Tags Account
-// @Accept json
-// @Produce json
-// @Param body body services.CompleteAccountVerificationForm true "Verification completion details"
-// @Router /account/verification/complete [post]
-func (handler *IdentityHandler) CompleteAccountVerification(context *gin.Context) (any, *problems.Problem) {
-	var form services.CompleteAccountVerificationForm
-	if err := context.ShouldBindJSON(&form); err != nil {
-		return nil, problems.NewProblem(http.StatusBadRequest, "The request format is incorrect.")
-	}
-	if problem := handler.identityService.CompleteAccountVerification(form); problem != nil {
-		return nil, problem
-	}
 	return gin.H{}, nil
 }
 
@@ -146,6 +213,7 @@ func (handler *IdentityHandler) CompleteAccountVerification(context *gin.Context
 // @Security BearerAuth
 // @Router /account/current [get]
 func (handler *IdentityHandler) GetCurrentAccount(context *gin.Context) (any, *problems.Problem) {
-	userId := context.MustGet("sub").(string)
+	claims := context.MustGet(constants.ContextClaimsKey).(map[string]any)
+	userId := claims["sub"].(string)
 	return handler.identityService.GetAccountByUserId(userId)
 }

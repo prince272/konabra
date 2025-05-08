@@ -11,6 +11,8 @@ import (
 	models "github.com/prince272/konabra/internal/models/identity"
 	"github.com/prince272/konabra/internal/problems"
 	"github.com/prince272/konabra/internal/repositories"
+	"github.com/prince272/konabra/pkg/humanize"
+	"github.com/prince272/konabra/pkg/otp"
 	"github.com/prince272/konabra/utils"
 	"go.uber.org/zap"
 )
@@ -27,20 +29,24 @@ type SignInForm struct {
 	Password string `json:"password" validate:"required"`
 }
 
+type SignInWithRefreshTokenForm struct {
+	RefreshToken string `json:"refreshToken" validate:"required"`
+}
+
 type SignOutForm struct {
-	Token  string `json:"token"`
-	Global bool   `json:"global"`
+	RefreshToken string `json:"refreshToken" validate:"required"`
+	Global       bool   `json:"global"`
 }
 
 func (form CreateAccountForm) GetEmail() string {
-	if !helpers.MaybePhoneOrEmail(form.Username) {
+	if !helpers.IsEmail(form.Username) {
 		return form.Username
 	}
 	return ""
 }
 
 func (form CreateAccountForm) GetPhoneNumber() string {
-	if helpers.MaybePhoneOrEmail(form.Username) {
+	if helpers.IsPhoneNumber(form.Username) {
 		return form.Username
 	}
 	return ""
@@ -67,19 +73,50 @@ type AccountWithTokenModel struct {
 	helpers.JwtTokenModel
 }
 
-type AccountVerificationForm struct {
+type VerifyAccountForm struct {
 	Username string `json:"username" validate:"required,max=256,username"`
 }
 
-type CompleteAccountVerificationForm struct {
-	AccountVerificationForm
-	Code string `json:"code" validate:"required"`
+type CompleteVerifyAccountForm struct {
+	VerifyAccountForm
+	Token string `json:"token" validate:"required"`
 }
+
+type ChangeAccountForm struct {
+	NewUsername string `json:"newUsername" validate:"required,max=256,username"`
+}
+
+type CompleteChangeAccountForm struct {
+	ChangeAccountForm
+	Token string `json:"token" validate:"required"`
+}
+
+type AccountType string
+
+const (
+	AccountTypeEmail       AccountType = "Email"
+	AccountTypePhoneNumber AccountType = "PhoneNumber"
+	AccountTypeUnknown     AccountType = "Unknown"
+)
+
+func GetAccountType(input string) AccountType {
+	if helpers.IsEmail(input) {
+		return AccountTypeEmail
+	}
+	if helpers.IsPhoneNumber(input) {
+		return AccountTypePhoneNumber
+	}
+	return AccountTypeUnknown
+}
+
+const (
+	PurposeVerifyAccount = "VerifyAccount"
+	PurposeChangeAccount = "ChangeAccount"
+)
 
 type IdentityService struct {
 	identityRepository *repositories.IdentityRepository
 	jwtHelper          *helpers.JwtHelper
-	protector          *helpers.Protector
 	validator          *helpers.Validator
 	state              *helpers.State
 	logger             *zap.Logger
@@ -88,14 +125,12 @@ type IdentityService struct {
 func NewIdentityService(
 	identityRepository *repositories.IdentityRepository,
 	jwtHelper *helpers.JwtHelper,
-	protector *helpers.Protector,
 	validator *helpers.Validator,
 	state *helpers.State,
 	logger *zap.Logger) *IdentityService {
 	return &IdentityService{
 		identityRepository,
 		jwtHelper,
-		protector,
 		validator,
 		state,
 		logger,
@@ -161,7 +196,7 @@ func (service *IdentityService) CreateAccount(form CreateAccountForm) (*AccountM
 	return model, nil
 }
 
-func (service *IdentityService) SignInAccount(form SignInForm) (*AccountWithTokenModel, *problems.Problem) {
+func (service *IdentityService) SignIn(form SignInForm) (*AccountWithTokenModel, *problems.Problem) {
 
 	// Validate form
 	if err := service.validator.ValidateStruct(form); err != nil {
@@ -192,7 +227,7 @@ func (service *IdentityService) SignInAccount(form SignInForm) (*AccountWithToke
 	})
 
 	if err != nil {
-		service.logger.Error("Error creating JWT token: ", zap.Error(err))
+		service.logger.Error("Error creating token: ", zap.Error(err))
 		return nil, problems.FromError(err)
 	}
 
@@ -212,7 +247,60 @@ func (service *IdentityService) SignInAccount(form SignInForm) (*AccountWithToke
 	return model, nil
 }
 
-func (service *IdentityService) SignOutAccount(userId string, form SignOutForm) *problems.Problem {
+func (service *IdentityService) SignInWithRefreshToken(form SignInWithRefreshTokenForm) (*AccountWithTokenModel, *problems.Problem) {
+
+	// Validate form
+	if err := service.validator.ValidateStruct(form); err != nil {
+		return nil, problems.FromError(err)
+	}
+
+	// Validate token
+	claims, err := service.jwtHelper.VerifyRefreshToken(form.RefreshToken)
+	if err != nil {
+		return nil, problems.NewValidationProblem(map[string]string{"refreshToken": "Refresh token is invalid."})
+	}
+
+	// Lookup user
+	user := service.identityRepository.FindUserById(claims["sub"].(string))
+	if user == nil {
+		return nil, problems.NewValidationProblem(map[string]string{"refreshToken": "User not found."})
+	}
+
+	// Revoke token
+	if err := service.jwtHelper.RevokeToken(user.Id, form.RefreshToken); err != nil {
+		service.logger.Error("Error revoking token: ", zap.Error(err))
+		return nil, problems.FromError(err)
+	}
+
+	// Create new token
+	token, err := service.jwtHelper.CreateToken(user.Id, map[string]any{
+		"email":       user.Email,
+		"phoneNumber": user.PhoneNumber,
+		"roles":       user.RoleNames(),
+	})
+
+	if err != nil {
+		service.logger.Error("Error creating token: ", zap.Error(err))
+		return nil, problems.FromError(err)
+	}
+
+	model := &AccountWithTokenModel{}
+
+	if err := copier.Copy(model, user); err != nil {
+		service.logger.Error("Error copying user to model: ", zap.Error(err))
+		return nil, problems.FromError(err)
+	}
+
+	if err := copier.Copy(model, token); err != nil {
+		service.logger.Error("Error copying token to model: ", zap.Error(err))
+		return nil, problems.FromError(err)
+	}
+
+	model.Roles = user.RoleNames()
+	return model, nil
+}
+
+func (service *IdentityService) SignOut(userId string, form SignOutForm) *problems.Problem {
 	// Validate form
 	if err := service.validator.ValidateStruct(form); err != nil {
 		return problems.FromError(err)
@@ -220,10 +308,12 @@ func (service *IdentityService) SignOutAccount(userId string, form SignOutForm) 
 
 	if form.Global {
 		if err := service.jwtHelper.RevokeAllTokens(userId); err != nil {
+			service.logger.Error("Error revoking all tokens: ", zap.Error(err))
 			return problems.FromError(err)
 		}
 	} else {
-		if err := service.jwtHelper.RevokeToken(userId, form.Token); err != nil {
+		if err := service.jwtHelper.RevokeToken(userId, form.RefreshToken); err != nil {
+			service.logger.Error("Error revoking token: ", zap.Error(err))
 			return problems.FromError(err)
 		}
 	}
@@ -235,7 +325,7 @@ func (service *IdentityService) GetAccountByUserId(userId string) (*AccountModel
 	user := service.identityRepository.FindUserById(userId)
 
 	if user == nil {
-		return nil, problems.NewProblem(http.StatusNotFound, "User was not found.")
+		return nil, problems.NewProblem(http.StatusNotFound, "User not found.")
 	}
 
 	model := &AccountModel{}
@@ -249,91 +339,235 @@ func (service *IdentityService) GetAccountByUserId(userId string) (*AccountModel
 	return model, nil
 }
 
-const (
-	AccountVerificationPurpose = "AccountVerification"
-)
-
-func (service *IdentityService) SendAccountVerification(form AccountVerificationForm) *problems.Problem {
-	// Validate form
+func (service *IdentityService) VerifyAccount(form VerifyAccountForm) *problems.Problem {
 	if err := service.validator.ValidateStruct(form); err != nil {
 		return problems.FromError(err)
 	}
 
-	// Lookup user & determine contact type
-	isPhone := helpers.MaybePhoneOrEmail(form.Username)
+	accountType := GetAccountType(form.Username)
 	user := service.identityRepository.FindUserByUsername(form.Username)
 	if user == nil {
-		errorMessage := map[bool]string{true: "Phone number was not found.", false: "Email was not found."}[isPhone]
-		return problems.NewValidationProblem(map[string]string{"username": errorMessage})
+		return problems.NewValidationProblem(map[string]string{"username": "Username does not exist."})
 	}
 
-	// Build shared metadata & key
-	metadata := map[string]string{"id": user.Id, "securityStamp": user.SecurityStamp, "purpose": AccountVerificationPurpose}
-	signatureKey := fmt.Sprintf("%v-%v-%v", user.Id, user.SecurityStamp, AccountVerificationPurpose)
+	secret := fmt.Sprintf("%v-%v-%v", user.Id, PurposeVerifyAccount, user.SecurityStamp)
 
-	if isPhone {
-		ttl := 10 * time.Minute
-		code, err := service.protector.GenerateShortCode("numeric", 6, ttl, metadata)
+	if accountType == AccountTypeEmail {
+		tp, err := otp.NewTokenProvider(secret)
 		if err != nil {
-			service.logger.Error("Error generating short code: ", zap.Error(err))
+			service.logger.Error("Token provider error: ", zap.Error(err))
 			return problems.FromError(err)
 		}
-		service.state.SetItem(signatureKey, code.Signature, ttl)
-		// TODO: send SMS
+
+		token, err := tp.GenerateToken(map[string]any{})
+		if err != nil {
+			service.logger.Error("Token generation error: ", zap.Error(err))
+			return problems.FromError(err)
+		}
+
+		// TODO: Send token via email
+
+		service.logger.Debug("Email verification token: " + token)
+
+	} else if accountType == AccountTypePhoneNumber {
+		tp, err := otp.NewCodeProvider(secret)
+		if err != nil {
+			service.logger.Error("Code provider error: ", zap.Error(err))
+			return problems.FromError(err)
+		}
+
+		code, err := tp.GenerateCode()
+		if err != nil {
+			service.logger.Error("Code generation error: ", zap.Error(err))
+			return problems.FromError(err)
+		}
+
+		// TODO: Send code via SMS
+		service.logger.Debug("Phone verification code: " + code)
 	} else {
-		ttl := 30 * time.Minute
-		token, err := service.protector.GenerateToken(ttl, metadata)
-		if err != nil {
-			service.logger.Error("Error generating token: ", zap.Error(err))
-			return problems.FromError(err)
-		}
-		service.state.SetItem(signatureKey, token.Signature, ttl)
-		// TODO: send email
+		return problems.NewValidationProblem(map[string]string{"username": "Username is not a valid email or phone number."})
 	}
 
 	return nil
 }
 
-func (service *IdentityService) CompleteAccountVerification(form CompleteAccountVerificationForm) *problems.Problem {
-	// Validate form
+func (service *IdentityService) CompleteVerifyAccount(form CompleteVerifyAccountForm) *problems.Problem {
 	if err := service.validator.ValidateStruct(form); err != nil {
 		return problems.FromError(err)
 	}
 
-	// Lookup user & determine contact type
-	isPhone := helpers.MaybePhoneOrEmail(form.Username)
+	accountType := GetAccountType(form.Username)
 	user := service.identityRepository.FindUserByUsername(form.Username)
-
 	if user == nil {
-		errorMessage := map[bool]string{true: "Phone number was not found.", false: "Email was not found."}[isPhone]
-		return problems.NewValidationProblem(map[string]string{"username": errorMessage})
+		return problems.NewValidationProblem(map[string]string{"username": "Username does not exist."})
 	}
 
-	// Reconstruct key
-	signatureKey := fmt.Sprintf("%v-%v-%v", user.Id, user.SecurityStamp, AccountVerificationPurpose)
-	signature, _ := service.state.PopItem(signatureKey).(string)
+	secret := fmt.Sprintf("%v-%v-%v", user.Id, PurposeVerifyAccount, user.SecurityStamp)
 
-	// Verify code/token and update user
-	if isPhone {
-
-		if _, err := service.protector.VerifyShortCode(signature, form.Code); err != nil {
-			return problems.NewValidationProblem(map[string]string{"code": "Code is incorrect."})
+	if accountType == AccountTypeEmail {
+		tp, err := otp.NewTokenProvider(secret)
+		if err != nil {
+			service.logger.Error("Token provider error: ", zap.Error(err))
+			return problems.FromError(err)
 		}
 
-		user.PhoneNumberVerified = true
-	} else {
-
-		if _, err := service.protector.VerifyToken(signature, form.Code); err != nil {
-			return problems.NewValidationProblem(map[string]string{"code": "Code is incorrect."})
+		if _, err := tp.ValidateToken(form.Token); err != nil {
+			service.logger.Error("Token validation error: ", zap.Error(err))
+			return problems.FromError(err)
 		}
 
 		user.EmailVerified = true
+
+	} else if accountType == AccountTypePhoneNumber {
+		tp, err := otp.NewCodeProvider(secret)
+		if err != nil {
+			service.logger.Error("Code provider error: ", zap.Error(err))
+			return problems.FromError(err)
+		}
+
+		valid, err := tp.ValidateCode(form.Token)
+		if err != nil {
+			service.logger.Error("Code validation error: ", zap.Error(err))
+			return problems.FromError(err)
+		}
+		if !valid {
+			return problems.NewValidationProblem(map[string]string{"token": "Token is invalid."})
+		}
+
+		user.PhoneNumberVerified = true
+
+	} else {
+		return problems.NewValidationProblem(map[string]string{"username": "Username is not a valid email or phone number."})
 	}
 
 	user.SecurityStamp = uuid.New().String()
+	user.UpdatedAt = time.Now()
 
 	if err := service.identityRepository.UpdateUser(user); err != nil {
-		service.logger.Error("Error updating user: ", zap.Error(err))
+		service.logger.Error("User update error: ", zap.Error(err))
+		return problems.FromError(err)
+	}
+
+	return nil
+}
+
+func (service *IdentityService) ChangeAccount(userId string, form ChangeAccountForm) *problems.Problem {
+	if err := service.validator.ValidateStruct(form); err != nil {
+		return problems.FromError(err)
+	}
+
+	accountType := GetAccountType(form.NewUsername)
+	user := service.identityRepository.FindUserById(userId)
+
+	if user == nil {
+		return problems.NewProblem(http.StatusNotFound, "User not found.")
+	}
+
+	if user.Email == form.NewUsername || user.PhoneNumber == form.NewUsername {
+		return problems.NewValidationProblem(map[string]string{
+			"username": fmt.Sprintf("%v is already associated with your account.", humanize.Humanize(string(accountType), humanize.SentenceCase)),
+		})
+	}
+
+	secret := fmt.Sprintf("%v-%v-%v-%v", user.Id, PurposeChangeAccount, user.SecurityStamp, form.NewUsername)
+
+	if accountType == AccountTypeEmail {
+		tp, err := otp.NewTokenProvider(secret)
+		if err != nil {
+			service.logger.Error("Token provider error: ", zap.Error(err))
+			return problems.FromError(err)
+		}
+
+		token, err := tp.GenerateToken(map[string]any{})
+
+		if err != nil {
+			service.logger.Error("Token generation error: ", zap.Error(err))
+			return problems.FromError(err)
+		}
+
+		service.logger.Debug("Email change verification token: " + token)
+	} else if accountType == AccountTypePhoneNumber {
+		tp, err := otp.NewCodeProvider(secret)
+		if err != nil {
+			service.logger.Error("Code provider error: ", zap.Error(err))
+			return problems.FromError(err)
+		}
+
+		code, err := tp.GenerateCode()
+		if err != nil {
+			service.logger.Error("Code generation error: ", zap.Error(err))
+			return problems.FromError(err)
+		}
+
+		service.logger.Debug("Phone change verification code: " + code)
+	} else {
+		return problems.NewValidationProblem(map[string]string{"username": "Username is not a valid email or phone number."})
+	}
+
+	return nil
+}
+
+func (service *IdentityService) CompleteChangeAccount(userId string, form CompleteChangeAccountForm) *problems.Problem {
+	if err := service.validator.ValidateStruct(form); err != nil {
+		return problems.FromError(err)
+	}
+
+	accountType := GetAccountType(form.NewUsername)
+	user := service.identityRepository.FindUserById(userId)
+
+	if user == nil {
+		return problems.NewProblem(http.StatusNotFound, "User not found.")
+	}
+
+	if user.Email == form.NewUsername || user.PhoneNumber == form.NewUsername {
+		return problems.NewValidationProblem(map[string]string{"username": fmt.Sprintf("%v is already verified.", humanize.Humanize(string(accountType), humanize.SentenceCase))})
+	}
+
+	secret := fmt.Sprintf("%v-%v-%v-%v", user.Id, PurposeChangeAccount, user.SecurityStamp, form.NewUsername)
+
+	if accountType == AccountTypeEmail {
+		tp, err := otp.NewTokenProvider(secret)
+		if err != nil {
+			service.logger.Error("Token provider error: ", zap.Error(err))
+			return problems.FromError(err)
+		}
+
+		if _, err := tp.ValidateToken(form.Token); err != nil {
+			service.logger.Error("Token validation error: ", zap.Error(err))
+			return problems.FromError(err)
+		}
+
+		user.Email = form.NewUsername
+		user.EmailVerified = true
+
+	} else if accountType == AccountTypePhoneNumber {
+		tp, err := otp.NewCodeProvider(secret)
+		if err != nil {
+			service.logger.Error("Code provider error: ", zap.Error(err))
+			return problems.FromError(err)
+		}
+
+		valid, err := tp.ValidateCode(form.Token)
+		if err != nil {
+			service.logger.Error("Code validation error: ", zap.Error(err))
+			return problems.FromError(err)
+		}
+		if !valid {
+			return problems.NewValidationProblem(map[string]string{"token": "Token is invalid."})
+		}
+
+		user.PhoneNumber = form.NewUsername
+		user.PhoneNumberVerified = true
+
+	} else {
+		return problems.NewValidationProblem(map[string]string{"username": "Username is not a valid email or phone number."})
+	}
+
+	user.SecurityStamp = uuid.New().String()
+	user.UpdatedAt = time.Now()
+
+	if err := service.identityRepository.UpdateUser(user); err != nil {
+		service.logger.Error("User update error: ", zap.Error(err))
 		return problems.FromError(err)
 	}
 

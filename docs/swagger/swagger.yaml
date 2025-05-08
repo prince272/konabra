@@ -1,22 +1,33 @@
 basePath: /
 definitions:
-  services.AccountVerificationForm:
+  services.ChangeAccountForm:
     properties:
-      username:
+      newUsername:
         maxLength: 256
         type: string
     required:
-    - username
+    - newUsername
     type: object
-  services.CompleteAccountVerificationForm:
+  services.CompleteChangeAccountForm:
     properties:
-      code:
+      newUsername:
+        maxLength: 256
+        type: string
+      token:
+        type: string
+    required:
+    - newUsername
+    - token
+    type: object
+  services.CompleteVerifyAccountForm:
+    properties:
+      token:
         type: string
       username:
         maxLength: 256
         type: string
     required:
-    - code
+    - token
     - username
     type: object
   services.CreateAccountForm:
@@ -49,12 +60,29 @@ definitions:
     - password
     - username
     type: object
+  services.SignInWithRefreshTokenForm:
+    properties:
+      refreshToken:
+        type: string
+    required:
+    - refreshToken
+    type: object
   services.SignOutForm:
     properties:
       global:
         type: boolean
-      token:
+      refreshToken:
         type: string
+    required:
+    - refreshToken
+    type: object
+  services.VerifyAccountForm:
+    properties:
+      username:
+        maxLength: 256
+        type: string
+    required:
+    - username
     type: object
 info:
   contact: {}
@@ -64,6 +92,46 @@ info:
   title: Konabra API
   version: "1.0"
 paths:
+  /account/change:
+    post:
+      consumes:
+      - application/json
+      description: Starts the process of changing account email or phone number
+      parameters:
+      - description: Account change details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/services.ChangeAccountForm'
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Initiate account change
+      tags:
+      - Account
+  /account/change/complete:
+    post:
+      consumes:
+      - application/json
+      description: Completes the process of changing account email or phone number
+      parameters:
+      - description: Account change completion details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/services.CompleteChangeAccountForm'
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Complete account change
+      tags:
+      - Account
   /account/create:
     post:
       consumes:
@@ -113,6 +181,25 @@ paths:
       summary: Sign in to an existing account
       tags:
       - Account
+  /account/signin/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user using a refresh token to obtain new access
+        tokens
+      parameters:
+      - description: Refresh token details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/services.SignInWithRefreshTokenForm'
+      produces:
+      - application/json
+      responses: {}
+      summary: Sign in using a refresh token
+      tags:
+      - Account
   /account/signout:
     post:
       consumes:
@@ -131,40 +218,45 @@ paths:
       summary: Sign out of the current account
       tags:
       - Account
-  /account/verification/complete:
+  /account/verify:
     post:
       consumes:
       - application/json
-      description: Completes the account verification process using a token
+      description: Starts the verification process for the account (email or phone)
+      parameters:
+      - description: Verification details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/services.VerifyAccountForm'
+      produces:
+      - application/json
+      responses: {}
+      summary: Initiate account verification
+      tags:
+      - Account
+  /account/verify/complete:
+    post:
+      consumes:
+      - application/json
+      description: Completes the verification process using the received token
       parameters:
       - description: Verification completion details
         in: body
         name: body
         required: true
         schema:
-          $ref: '#/definitions/services.CompleteAccountVerificationForm'
+          $ref: '#/definitions/services.CompleteVerifyAccountForm'
       produces:
       - application/json
       responses: {}
       summary: Complete account verification
       tags:
       - Account
-  /account/verification/send:
-    post:
-      consumes:
-      - application/json
-      description: Sends a verification email or SMS to the user
-      parameters:
-      - description: Verification request details
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/services.AccountVerificationForm'
-      produces:
-      - application/json
-      responses: {}
-      summary: Send account verification
-      tags:
-      - Account
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

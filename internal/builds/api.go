@@ -130,20 +130,6 @@ func (api *Api) registerLogger() error {
 	})
 }
 
-func (api *Api) registerProtector() error {
-	cfg := di.MustGet[*Config](api.container)
-
-	protector, err := helpers.NewProtector([]byte(cfg.EncryptKey))
-
-	if err != nil {
-		return err
-	}
-
-	return api.container.Register(func() *helpers.Protector {
-		return protector
-	})
-}
-
 func (api *Api) registerSmtp() error {
 	cfg := di.MustGet[*Config](api.container)
 
@@ -280,7 +266,6 @@ func (api *Api) RegisterCore() {
 	services := []func() error{
 		api.registerConfig,
 		api.registerLogger,
-		api.registerProtector,
 		api.registerSmtp,
 		api.registerState,
 		api.registerDefaultDB,

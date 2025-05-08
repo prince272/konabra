@@ -71,8 +71,3 @@ func IsEmail(input string) bool {
 	emailPattern := regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
 	return emailPattern.MatchString(input)
 }
-
-func MaybePhoneOrEmail(input string) bool {
-	phonePattern := regexp.MustCompile(`^[-+0-9() ]+$`)
-	return phonePattern.MatchString(input)
-}

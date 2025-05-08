@@ -28,7 +28,7 @@ func NewIdentityRepository(logger *zap.Logger, defaultDB *builds.DefaultDB) *Ide
 func (repository *IdentityRepository) CreateUser(user *models.User) error {
 	result := repository.defaultDB.Create(user)
 	if result.Error != nil {
-		return fmt.Errorf("failed to create user: %w", result.Error)
+		return result.Error
 	}
 	return nil
 }
@@ -36,7 +36,7 @@ func (repository *IdentityRepository) CreateUser(user *models.User) error {
 func (repository *IdentityRepository) UpdateUser(user *models.User) error {
 	result := repository.defaultDB.Save(user)
 	if result.Error != nil {
-		return fmt.Errorf("failed to update user: %w", result.Error)
+		return result.Error
 	}
 	return nil
 }

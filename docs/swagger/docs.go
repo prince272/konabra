@@ -15,6 +15,70 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/account/change": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Starts the process of changing account email or phone number",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Initiate account change",
+                "parameters": [
+                    {
+                        "description": "Account change details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.ChangeAccountForm"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/account/change/complete": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Completes the process of changing account email or phone number",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Complete account change",
+                "parameters": [
+                    {
+                        "description": "Account change completion details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.CompleteChangeAccountForm"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/account/create": {
             "post": {
                 "description": "Creates a new user account with the provided details",
@@ -90,6 +154,33 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/account/signin/refresh": {
+            "post": {
+                "description": "Authenticates a user using a refresh token to obtain new access tokens",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Sign in using a refresh token",
+                "parameters": [
+                    {
+                        "description": "Refresh token details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.SignInWithRefreshTokenForm"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/account/signout": {
             "post": {
                 "description": "Logs out the user and invalidates the session/token",
@@ -117,9 +208,36 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/account/verification/complete": {
+        "/account/verify": {
             "post": {
-                "description": "Completes the account verification process using a token",
+                "description": "Starts the verification process for the account (email or phone)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Initiate account verification",
+                "parameters": [
+                    {
+                        "description": "Verification details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.VerifyAccountForm"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/account/verify/complete": {
+            "post": {
+                "description": "Completes the verification process using the received token",
                 "consumes": [
                     "application/json"
                 ],
@@ -137,34 +255,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/services.CompleteAccountVerificationForm"
-                        }
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/account/verification/send": {
-            "post": {
-                "description": "Sends a verification email or SMS to the user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Account"
-                ],
-                "summary": "Send account verification",
-                "parameters": [
-                    {
-                        "description": "Verification request details",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/services.AccountVerificationForm"
+                            "$ref": "#/definitions/services.CompleteVerifyAccountForm"
                         }
                     }
                 ],
@@ -173,26 +264,42 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "services.AccountVerificationForm": {
+        "services.ChangeAccountForm": {
             "type": "object",
             "required": [
-                "username"
+                "newUsername"
             ],
             "properties": {
-                "username": {
+                "newUsername": {
                     "type": "string",
                     "maxLength": 256
                 }
             }
         },
-        "services.CompleteAccountVerificationForm": {
+        "services.CompleteChangeAccountForm": {
             "type": "object",
             "required": [
-                "code",
+                "newUsername",
+                "token"
+            ],
+            "properties": {
+                "newUsername": {
+                    "type": "string",
+                    "maxLength": 256
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "services.CompleteVerifyAccountForm": {
+            "type": "object",
+            "required": [
+                "token",
                 "username"
             ],
             "properties": {
-                "code": {
+                "token": {
                     "type": "string"
                 },
                 "username": {
@@ -243,16 +350,49 @@ const docTemplate = `{
                 }
             }
         },
+        "services.SignInWithRefreshTokenForm": {
+            "type": "object",
+            "required": [
+                "refreshToken"
+            ],
+            "properties": {
+                "refreshToken": {
+                    "type": "string"
+                }
+            }
+        },
         "services.SignOutForm": {
             "type": "object",
+            "required": [
+                "refreshToken"
+            ],
             "properties": {
                 "global": {
                     "type": "boolean"
                 },
-                "token": {
+                "refreshToken": {
                     "type": "string"
                 }
             }
+        },
+        "services.VerifyAccountForm": {
+            "type": "object",
+            "required": [
+                "username"
+            ],
+            "properties": {
+                "username": {
+                    "type": "string",
+                    "maxLength": 256
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
