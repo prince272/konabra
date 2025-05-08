@@ -162,7 +162,7 @@ func (handler *IdentityHandler) CompleteChangeAccount(context *gin.Context) (any
 func (handler *IdentityHandler) ResetPassword(context *gin.Context) (any, *problems.Problem) {
 	var form services.ResetPasswordForm
 	if err := context.ShouldBindJSON(&form); err != nil {
-		return nil, problems.NewProblem(http.StatusBadRequest, "The request form is incorrect.")
+		return nil, problems.FromError(err)
 	}
 
 	if problem := handler.identityService.ResetPassword(form); problem != nil {

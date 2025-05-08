@@ -1,6 +1,7 @@
 package problems
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -43,6 +44,15 @@ func FromError(err error) *Problem {
 	if errs, ok := err.(validator.ValidationErrors); ok {
 		errors = getProcessValidationErrors(errs)
 		return NewValidationProblem(errors)
+	} else if _, ok := err.(*json.SyntaxError); ok {
+		status := http.StatusBadRequest
+		return &Problem{
+			Type:    buildTypeURL(status),
+			Message: "The request body is not valid JSON.",
+			Status:  status,
+			Errors:  map[string]string{},
+			Reason:  getReasonPhrase(status),
+		}
 	} else {
 		status := http.StatusInternalServerError
 		return &Problem{
