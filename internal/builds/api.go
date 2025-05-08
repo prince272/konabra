@@ -215,6 +215,10 @@ func (api *Api) registerRouter() error {
 		c.JSON(http.StatusInternalServerError, problems.FromError(err))
 	}))
 
+	router.NoRoute(func(c *gin.Context) {
+		c.JSON(http.StatusNotFound, problems.NewProblem(http.StatusNotFound, "The requested resource was not found on this server."))
+	})
+
 	return api.container.Register(func() *gin.Engine {
 		return router
 	})
