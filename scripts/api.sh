@@ -8,7 +8,6 @@ BUILD_OUTPUT="$BIN_DIR/api.exe"
 # Define source-destination pairs
 declare -A FILES_TO_COPY=(
   [".env"]="$BIN_DIR/.env"
-  ["data/default.db"]="$BIN_DIR/data/default.db"
 )
 
 # Check if swag is installed
