@@ -49,6 +49,14 @@ type Config struct {
 	SmtpPassword string `koanf:"SMTP_PASSWORD"`
 }
 
+func (config *Config) IsDevelopment() bool {
+	return config.Env == "development"
+}
+
+func (config *Config) IsProduction() bool {
+	return config.Env == "production"
+}
+
 func (api *Api) registerConfig() error {
 
 	k := koanf.New(".")
@@ -96,7 +104,7 @@ func (api *Api) registerLogger() error {
 		level = zapcore.InfoLevel
 	}
 
-	isDev := cfg.Env == "development"
+	isDev := cfg.IsDevelopment()
 	encoderCfg := zap.NewProductionEncoderConfig()
 	if isDev {
 		encoderCfg = zap.NewDevelopmentEncoderConfig()
