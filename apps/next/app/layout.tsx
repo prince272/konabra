@@ -3,11 +3,13 @@ import { Metadata, Viewport } from "next";
 import { Link } from "@heroui/link";
 import clsx from "clsx";
 
-import { Providers } from "./providers";
+import { Providers } from "../components/providers";
 
 import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
 import { Navbar } from "@/components/navbar";
+import { SignUpModalRouter } from "./account/signup-modal";
+import { SignInModalRouter } from "./account/signin-modal";
 
 export const metadata: Metadata = {
   title: {
@@ -59,6 +61,8 @@ export default function RootLayout({
               </Link>
             </footer>
           </div>
+          <SignUpModalRouter />
+          <SignInModalRouter />
         </Providers>
       </body>
     </html>

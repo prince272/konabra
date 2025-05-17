@@ -1,17 +1,25 @@
 "use client";
 
-import { useHashState } from "@/hooks";
+import { useModalRouter } from "@/components/common/models";
 import { Button } from "@heroui/button";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter
+} from "@heroui/modal";
 import NextLink from "next/link";
 import { useEffect } from "react";
 
-export default function SignUpModal({ isOpen, onClose } : { isOpen: boolean,   onClose?: () => void; }) {
-  useEffect(() => {
-    return () => {
-      console.log("Unmounting SignUpModal");
-    }
-  }, [])
+export default function SignInModal({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose?: () => void;
+}) {
+
   return (
     <>
       <Modal isOpen={isOpen} onClose={onClose}>
@@ -19,7 +27,7 @@ export default function SignUpModal({ isOpen, onClose } : { isOpen: boolean,   o
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                SignUp Page
+                SignIn Page
               </ModalHeader>
               <ModalBody>
                 <p>
@@ -45,7 +53,7 @@ export default function SignUpModal({ isOpen, onClose } : { isOpen: boolean,   o
                 <Button color="danger" variant="light" onPress={onClose}>
                   Close
                 </Button>
-                <Button color="primary"  as={NextLink} href="#signin">
+                <Button color="primary" as={NextLink} href="#signup">
                   Action
                 </Button>
               </ModalFooter>
@@ -53,6 +61,18 @@ export default function SignUpModal({ isOpen, onClose } : { isOpen: boolean,   o
           )}
         </ModalContent>
       </Modal>
+    </>
+  );
+}
+
+export function SignInModalRouter() {
+  const { closeModal, currentModal, mountedModal } = useModalRouter();
+
+  return (
+    <>
+      {mountedModal ? (
+        <SignInModal isOpen={currentModal === "signin"} onClose={closeModal} />
+      ) : null}
     </>
   );
 }

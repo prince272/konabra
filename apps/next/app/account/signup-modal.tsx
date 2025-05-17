@@ -1,30 +1,23 @@
 "use client";
 
-import { useHashState } from "@/hooks";
+import { useModalRouter } from "@/components/common/models";
 import { Button } from "@heroui/button";
 import {
   Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
-  ModalFooter,
-  useDisclosure,
+  ModalFooter
 } from "@heroui/modal";
 import NextLink from "next/link";
-import { useEffect } from "react";
 
-export default function SignInModal({
+export default function SignUpModal({
   isOpen,
   onClose,
 }: {
   isOpen: boolean;
   onClose?: () => void;
 }) {
-  useEffect(() => {
-    return () => {
-      console.log("Unmounting SignInModal");
-    };
-  }, []);
 
   return (
     <>
@@ -33,7 +26,7 @@ export default function SignInModal({
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                SignIn Page
+                SignUp Page
               </ModalHeader>
               <ModalBody>
                 <p>
@@ -59,7 +52,7 @@ export default function SignInModal({
                 <Button color="danger" variant="light" onPress={onClose}>
                   Close
                 </Button>
-                <Button color="primary" as={NextLink} href="#signup">
+                <Button color="primary" as={NextLink} href="#signin">
                   Action
                 </Button>
               </ModalFooter>
@@ -67,6 +60,18 @@ export default function SignInModal({
           )}
         </ModalContent>
       </Modal>
+    </>
+  );
+}
+
+export function SignUpModalRouter() {
+  const { closeModal, currentModal, mountedModal } = useModalRouter();
+
+  return (
+    <>
+      {mountedModal ? (
+        <SignUpModal isOpen={currentModal === "signup"} onClose={closeModal} />
+      ) : null}
     </>
   );
 }

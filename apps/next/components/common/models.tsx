@@ -8,8 +8,6 @@ import React, {
   useCallback,
 } from "react";
 import { useHashState, useQueue } from "@/hooks";
-import SignInModal from "@/app/auth/signin-modal";
-import SignUpModal from "@/app/auth/signup-modal";
 
 interface ModalQueueContextValue {
   currentModal: string | null;
@@ -75,7 +73,7 @@ function useModalQueue() {
   return context;
 }
 
-export function useModalManager() {
+export function useModalRouter() {
   const [modalHash, setModalHash, removeModalHash] = useHashState();
   const { openModal, closeModal, currentModal, mountedModal } = useModalQueue();
 

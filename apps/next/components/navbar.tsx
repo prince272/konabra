@@ -63,7 +63,7 @@ export const Navbar = () => {
               <NextLink
                 className={clsx(
                   linkStyles({ color: "foreground" }),
-                  "data-[active=true]:text-primary data-[active=true]:font-medium",
+                  "data-[active=true]:text-primary data-[active=true]:font-medium"
                 )}
                 color="foreground"
                 href={item.href}
@@ -102,6 +102,16 @@ export const Navbar = () => {
             variant="flat"
           >
             Sponsor
+          </Button>
+        </NavbarItem>
+        <NavbarItem className="hidden md:flex">
+          <Button
+            as={NextLink}
+            color="primary"
+            variant="solid"
+            href="#signin"
+          >
+            Sign In
           </Button>
         </NavbarItem>
       </NavbarContent>
