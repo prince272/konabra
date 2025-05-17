@@ -22,7 +22,7 @@ export function ModalQueueProvider({ children }: { children: React.ReactNode }) 
       modalQueue.add(async () => {
         if (currentModal) {
           setCurrentModal(null);
-          await new Promise((resolve) => setTimeout(resolve, 300));
+          await new Promise((resolve) => setTimeout(resolve, 100));
           setMountedModal(null);
         }
         setCurrentModal(modalName);
