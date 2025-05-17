@@ -9,7 +9,7 @@ const config = {
   tabWidth: 2,
   trailingComma: "none",
   printWidth: 100,
-  plugins: [],
+  plugins: ["prettier-plugin-tailwindcss", "@ianvs/prettier-plugin-sort-imports"],
   importOrder: [
     "^.+\\.(css|scss)$",
     "^(react/(.*)$)|^(react$)",

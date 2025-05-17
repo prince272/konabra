@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useState } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 export const useHashState = () => {
   const router = useRouter();
@@ -9,12 +9,12 @@ export const useHashState = () => {
   const searchParams = useSearchParams();
 
   const getCurrentHash = () =>
-    typeof window !== 'undefined' ? window.location.hash.replace(/^#!?/, '') : '';
+    typeof window !== "undefined" ? window.location.hash.replace(/^#!?/, "") : "";
 
   const [hash, setHashState] = useState<string>(getCurrentHash());
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     const handleHashChange = () => {
       setHashState(getCurrentHash());
@@ -32,10 +32,10 @@ export const useHashState = () => {
       setTimeout(handleHashChange, 0);
     };
 
-    window.addEventListener('hashchange', handleHashChange);
+    window.addEventListener("hashchange", handleHashChange);
 
     return () => {
-      window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener("hashchange", handleHashChange);
       window.history.pushState = pushState;
       window.history.replaceState = replaceState;
     };
@@ -43,24 +43,23 @@ export const useHashState = () => {
 
   const setHash = useCallback(
     (newHash: string) => {
-      if (typeof window === 'undefined') return;
-      const cleanHash = newHash.startsWith('#') ? newHash : `#${newHash}`;
+      if (typeof window === "undefined") return;
+      const cleanHash = newHash.startsWith("#") ? newHash : `#${newHash}`;
       if (cleanHash !== window.location.hash) {
         setHashState(cleanHash.slice(1));
-        router.replace(
-          `${pathname}${searchParams ? `?${searchParams}` : ''}${cleanHash}`,
-          { scroll: false }
-        );
+        router.replace(`${pathname}${searchParams ? `?${searchParams}` : ""}${cleanHash}`, {
+          scroll: false
+        });
       }
     },
     [router, pathname, searchParams]
   );
 
   const removeHash = useCallback(() => {
-    if (typeof window === 'undefined') return;
-    setHashState('');
-    router.replace(`${pathname}${searchParams ? `?${searchParams}` : ''}`, {
-      scroll: false,
+    if (typeof window === "undefined") return;
+    setHashState("");
+    router.replace(`${pathname}${searchParams ? `?${searchParams}` : ""}`, {
+      scroll: false
     });
   }, [router, pathname, searchParams]);
 

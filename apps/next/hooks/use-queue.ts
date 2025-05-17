@@ -1,5 +1,5 @@
 // useQueue.ts
-import { useRef, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import PQueue from "p-queue";
 
 export function useQueue(options?: ConstructorParameters<typeof PQueue>[0]) {
@@ -8,7 +8,7 @@ export function useQueue(options?: ConstructorParameters<typeof PQueue>[0]) {
   if (!queueRef.current) {
     queueRef.current = new PQueue({
       concurrency: 1,
-      ...options,
+      ...options
     });
   }
 
@@ -39,6 +39,6 @@ export function useQueue(options?: ConstructorParameters<typeof PQueue>[0]) {
     start,
     isPaused,
     size,
-    pending,
+    pending
   };
 }

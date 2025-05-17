@@ -1,30 +1,29 @@
-import {
-  Navbar as HeroUINavbar,
-  NavbarContent,
-  NavbarMenu,
-  NavbarMenuToggle,
-  NavbarBrand,
-  NavbarItem,
-  NavbarMenuItem,
-} from "@heroui/navbar";
+import NextLink from "next/link";
+import { siteConfig } from "@/config/site";
 import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
 import { Kbd } from "@heroui/kbd";
 import { Link } from "@heroui/link";
-import { Input } from "@heroui/input";
-import { link as linkStyles } from "@heroui/theme";
-import NextLink from "next/link";
-import clsx from "clsx";
-
-import { siteConfig } from "@/config/site";
-import { ThemeSwitch } from "@/components/theme-switch";
 import {
-  TwitterIcon,
-  GithubIcon,
+  Navbar as HeroUINavbar,
+  NavbarBrand,
+  NavbarContent,
+  NavbarItem,
+  NavbarMenu,
+  NavbarMenuItem,
+  NavbarMenuToggle
+} from "@heroui/navbar";
+import { link as linkStyles } from "@heroui/theme";
+import clsx from "clsx";
+import {
   DiscordIcon,
+  GithubIcon,
   HeartFilledIcon,
-  SearchIcon,
   Logo,
+  SearchIcon,
+  TwitterIcon
 } from "@/components/icons";
+import { ThemeSwitch } from "@/components/theme-switch";
 
 export const Navbar = () => {
   const searchInput = (
@@ -32,7 +31,7 @@ export const Navbar = () => {
       aria-label="Search"
       classNames={{
         inputWrapper: "bg-default-100",
-        input: "text-sm",
+        input: "text-sm"
       }}
       endContent={
         <Kbd className="hidden lg:inline-block" keys={["command"]}>
@@ -75,10 +74,7 @@ export const Navbar = () => {
         </ul>
       </NavbarContent>
 
-      <NavbarContent
-        className="hidden sm:flex basis-1/5 sm:basis-full"
-        justify="end"
-      >
+      <NavbarContent className="hidden sm:flex basis-1/5 sm:basis-full" justify="end">
         <NavbarItem className="hidden sm:flex gap-2">
           <Link isExternal aria-label="Twitter" href={siteConfig.links.twitter}>
             <TwitterIcon className="text-default-500" />
@@ -105,12 +101,7 @@ export const Navbar = () => {
           </Button>
         </NavbarItem>
         <NavbarItem className="hidden md:flex">
-          <Button
-            as={NextLink}
-            color="primary"
-            variant="solid"
-            href="#signin"
-          >
+          <Button as={NextLink} color="primary" variant="solid" href="#signin">
             Sign In
           </Button>
         </NavbarItem>

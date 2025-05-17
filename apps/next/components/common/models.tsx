@@ -1,12 +1,6 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  useCallback,
-} from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useHashState, useQueue } from "@/hooks";
 
 interface ModalQueueContextValue {
@@ -16,30 +10,27 @@ interface ModalQueueContextValue {
   closeModal: () => void;
 }
 
-const ModalQueueContext = createContext<ModalQueueContextValue | undefined>(
-  undefined
-);
+const ModalQueueContext = createContext<ModalQueueContextValue | undefined>(undefined);
 
-export function ModalQueueProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function ModalQueueProvider({ children }: { children: React.ReactNode }) {
   const [currentModal, setCurrentModal] = useState<string | null>(null);
   const [mountedModal, setMountedModal] = useState<string | null>(null);
   const modalQueue = useQueue();
 
-  const openModal = useCallback((modalName: string) => {
-    modalQueue.add(async () => {
-      if (currentModal) {
-        setCurrentModal(null);
-        await new Promise((resolve) => setTimeout(resolve, 300));
-        setMountedModal(null);
-      }
-      setCurrentModal(modalName);
-      setMountedModal(modalName);
-    });
-  }, [currentModal, modalQueue]);
+  const openModal = useCallback(
+    (modalName: string) => {
+      modalQueue.add(async () => {
+        if (currentModal) {
+          setCurrentModal(null);
+          await new Promise((resolve) => setTimeout(resolve, 300));
+          setMountedModal(null);
+        }
+        setCurrentModal(modalName);
+        setMountedModal(modalName);
+      });
+    },
+    [currentModal, modalQueue]
+  );
 
   const closeModal = useCallback(() => {
     modalQueue.add(async () => {
@@ -55,14 +46,10 @@ export function ModalQueueProvider({
     currentModal,
     mountedModal,
     openModal,
-    closeModal,
+    closeModal
   };
 
-  return (
-    <ModalQueueContext.Provider value={value}>
-      {children}
-    </ModalQueueContext.Provider>
-  );
+  return <ModalQueueContext.Provider value={value}>{children}</ModalQueueContext.Provider>;
 }
 
 function useModalQueue() {
@@ -102,6 +89,6 @@ export function useModalRouter() {
     mountedModal,
     currentModal,
     openModal: handleOpenModal,
-    closeModal: handleCloseModal,
+    closeModal: handleCloseModal
   };
 }
