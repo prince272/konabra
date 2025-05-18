@@ -392,37 +392,23 @@ func (service *IdentityService) VerifyAccount(form VerifyAccountForm) *problems.
 
 	secret := fmt.Sprintf("%v-%v-%v", user.Id, PurposeVerifyAccount, user.SecurityStamp)
 
+	tp, err := otp.NewCodeProvider(secret)
+	if err != nil {
+		service.logger.Error("Code provider error: ", zap.Error(err))
+		return problems.FromError(err)
+	}
+
+	code, err := tp.GenerateCode()
+
+	if err != nil {
+		service.logger.Error("Code generation error: ", zap.Error(err))
+		return problems.FromError(err)
+	}
+
 	if accountType == AccountTypeEmail {
-		tp, err := otp.NewTokenProvider(secret)
-		if err != nil {
-			service.logger.Error("Token provider error: ", zap.Error(err))
-			return problems.FromError(err)
-		}
-
-		token, err := tp.GenerateToken(map[string]any{})
-		if err != nil {
-			service.logger.Error("Token generation error: ", zap.Error(err))
-			return problems.FromError(err)
-		}
-
-		// TODO: Send token via email
-
-		service.logger.Debug("Email verification token: " + token)
+		service.logger.Debug("Email verification code: " + code)
 
 	} else if accountType == AccountTypePhoneNumber {
-		tp, err := otp.NewCodeProvider(secret)
-		if err != nil {
-			service.logger.Error("Code provider error: ", zap.Error(err))
-			return problems.FromError(err)
-		}
-
-		code, err := tp.GenerateCode()
-		if err != nil {
-			service.logger.Error("Code generation error: ", zap.Error(err))
-			return problems.FromError(err)
-		}
-
-		// TODO: Send code via SMS
 		service.logger.Debug("Phone verification code: " + code)
 	} else {
 		return problems.NewValidationProblem(map[string]string{"username": "Username is not a valid email or phone number."})
@@ -444,36 +430,25 @@ func (service *IdentityService) CompleteVerifyAccount(form CompleteVerifyAccount
 
 	secret := fmt.Sprintf("%v-%v-%v", user.Id, PurposeVerifyAccount, user.SecurityStamp)
 
+	tp, err := otp.NewCodeProvider(secret)
+	if err != nil {
+		service.logger.Error("Code provider error: ", zap.Error(err))
+		return problems.FromError(err)
+	}
+
+	valid, err := tp.ValidateCode(form.Code)
+
+	if err != nil {
+		service.logger.Error("Code validation error: ", zap.Error(err))
+		return problems.FromError(err)
+	}
+	if !valid {
+		return problems.NewValidationProblem(map[string]string{"code": "Verification code is invalid."})
+	}
+
 	if accountType == AccountTypeEmail {
-		tp, err := otp.NewTokenProvider(secret)
-		if err != nil {
-			service.logger.Error("Token provider error: ", zap.Error(err))
-			return problems.FromError(err)
-		}
-
-		if _, err := tp.ValidateToken(form.Code); err != nil {
-			service.logger.Error("Token validation error: ", zap.Error(err))
-			return problems.NewValidationProblem(map[string]string{"code": "Verification code is invalid."})
-		}
-
 		user.EmailVerified = true
-
 	} else if accountType == AccountTypePhoneNumber {
-		tp, err := otp.NewCodeProvider(secret)
-		if err != nil {
-			service.logger.Error("Code provider error: ", zap.Error(err))
-			return problems.FromError(err)
-		}
-
-		valid, err := tp.ValidateCode(form.Code)
-		if err != nil {
-			service.logger.Error("Code validation error: ", zap.Error(err))
-			return problems.FromError(err)
-		}
-		if !valid {
-			return problems.NewValidationProblem(map[string]string{"code": "Verification code is invalid."})
-		}
-
 		user.PhoneNumberVerified = true
 
 	} else {
@@ -511,34 +486,22 @@ func (service *IdentityService) ChangeAccount(userId string, form ChangeAccountF
 
 	secret := fmt.Sprintf("%v-%v-%v-%v", user.Id, PurposeChangeAccount, user.SecurityStamp, form.NewUsername)
 
+	tp, err := otp.NewCodeProvider(secret)
+	if err != nil {
+		service.logger.Error("Code provider error: ", zap.Error(err))
+		return problems.FromError(err)
+	}
+
+	code, err := tp.GenerateCode()
+
+	if err != nil {
+		service.logger.Error("Code generation error: ", zap.Error(err))
+		return problems.FromError(err)
+	}
+
 	if accountType == AccountTypeEmail {
-		tp, err := otp.NewTokenProvider(secret)
-		if err != nil {
-			service.logger.Error("Token provider error: ", zap.Error(err))
-			return problems.FromError(err)
-		}
-
-		token, err := tp.GenerateToken(map[string]any{})
-
-		if err != nil {
-			service.logger.Error("Token generation error: ", zap.Error(err))
-			return problems.FromError(err)
-		}
-
-		service.logger.Debug("Email change verification token: " + token)
+		service.logger.Debug("Email change verification code: " + code)
 	} else if accountType == AccountTypePhoneNumber {
-		tp, err := otp.NewCodeProvider(secret)
-		if err != nil {
-			service.logger.Error("Code provider error: ", zap.Error(err))
-			return problems.FromError(err)
-		}
-
-		code, err := tp.GenerateCode()
-		if err != nil {
-			service.logger.Error("Code generation error: ", zap.Error(err))
-			return problems.FromError(err)
-		}
-
 		service.logger.Debug("Phone change verification code: " + code)
 	} else {
 		return problems.NewValidationProblem(map[string]string{"username": "Username is not a valid email or phone number."})
@@ -565,37 +528,26 @@ func (service *IdentityService) CompleteChangeAccount(userId string, form Comple
 
 	secret := fmt.Sprintf("%v-%v-%v-%v", user.Id, PurposeChangeAccount, user.SecurityStamp, form.NewUsername)
 
+	tp, err := otp.NewCodeProvider(secret)
+	if err != nil {
+		service.logger.Error("Code provider error: ", zap.Error(err))
+		return problems.FromError(err)
+	}
+
+	valid, err := tp.ValidateCode(form.Code)
+	if err != nil {
+		service.logger.Error("Code validation error: ", zap.Error(err))
+		return problems.FromError(err)
+	}
+	if !valid {
+		return problems.NewValidationProblem(map[string]string{"code": "Verification code is invalid."})
+	}
+
 	if accountType == AccountTypeEmail {
-		tp, err := otp.NewTokenProvider(secret)
-		if err != nil {
-			service.logger.Error("Token provider error: ", zap.Error(err))
-			return problems.FromError(err)
-		}
-
-		if _, err := tp.ValidateToken(form.Code); err != nil {
-			service.logger.Error("Token validation error: ", zap.Error(err))
-			return problems.NewValidationProblem(map[string]string{"code": "Verification code is invalid."})
-		}
-
 		user.Email = form.NewUsername
 		user.EmailVerified = true
 
 	} else if accountType == AccountTypePhoneNumber {
-		tp, err := otp.NewCodeProvider(secret)
-		if err != nil {
-			service.logger.Error("Code provider error: ", zap.Error(err))
-			return problems.FromError(err)
-		}
-
-		valid, err := tp.ValidateCode(form.Code)
-		if err != nil {
-			service.logger.Error("Code validation error: ", zap.Error(err))
-			return problems.FromError(err)
-		}
-		if !valid {
-			return problems.NewValidationProblem(map[string]string{"code": "Verification code is invalid."})
-		}
-
 		user.PhoneNumber = form.NewUsername
 		user.PhoneNumberVerified = true
 
@@ -628,33 +580,21 @@ func (service *IdentityService) ResetPassword(form ResetPasswordForm) *problems.
 
 	secret := fmt.Sprintf("%v-%v-%v", user.Id, PurposeResetPassword, user.SecurityStamp)
 
+	tp, err := otp.NewCodeProvider(secret)
+	if err != nil {
+		service.logger.Error("Code provider error: ", zap.Error(err))
+		return problems.FromError(err)
+	}
+
+	code, err := tp.GenerateCode()
+	if err != nil {
+		service.logger.Error("Code generation error: ", zap.Error(err))
+		return problems.FromError(err)
+	}
+
 	if accountType == AccountTypeEmail {
-		tp, err := otp.NewTokenProvider(secret)
-		if err != nil {
-			service.logger.Error("Token provider error: ", zap.Error(err))
-			return problems.FromError(err)
-		}
-
-		token, err := tp.GenerateToken(map[string]any{})
-		if err != nil {
-			service.logger.Error("Token generation error: ", zap.Error(err))
-			return problems.FromError(err)
-		}
-
-		service.logger.Debug("Email reset password token: " + token)
-
+		service.logger.Debug("Email reset password code: " + code)
 	} else if accountType == AccountTypePhoneNumber {
-		tp, err := otp.NewCodeProvider(secret)
-		if err != nil {
-			service.logger.Error("Code provider error: ", zap.Error(err))
-			return problems.FromError(err)
-		}
-
-		code, err := tp.GenerateCode()
-		if err != nil {
-			service.logger.Error("Code generation error: ", zap.Error(err))
-			return problems.FromError(err)
-		}
 
 		service.logger.Debug("Phone reset password code: " + code)
 	} else {
@@ -678,35 +618,20 @@ func (service *IdentityService) CompleteResetPassword(form CompleteResetPassword
 
 	secret := fmt.Sprintf("%v-%v-%v", user.Id, PurposeResetPassword, user.SecurityStamp)
 
-	if accountType == AccountTypeEmail {
-		tp, err := otp.NewTokenProvider(secret)
-		if err != nil {
-			service.logger.Error("Token provider error: ", zap.Error(err))
-			return problems.FromError(err)
-		}
+	tp, err := otp.NewCodeProvider(secret)
+	if err != nil {
+		service.logger.Error("Code provider error: ", zap.Error(err))
+		return problems.FromError(err)
+	}
 
-		if _, err := tp.ValidateToken(form.Code); err != nil {
-			service.logger.Error("Token validation error: ", zap.Error(err))
-			return problems.NewValidationProblem(map[string]string{"code": "Verification code is invalid."})
-		}
+	valid, err := tp.ValidateCode(form.Code)
 
-	} else if accountType == AccountTypePhoneNumber {
-		tp, err := otp.NewCodeProvider(secret)
-		if err != nil {
-			service.logger.Error("Code provider error: ", zap.Error(err))
-			return problems.FromError(err)
-		}
-
-		valid, err := tp.ValidateCode(form.Code)
-		if err != nil {
-			service.logger.Error("Code validation error: ", zap.Error(err))
-			return problems.FromError(err)
-		}
-		if !valid {
-			return problems.NewValidationProblem(map[string]string{"code": "Verification code is invalid."})
-		}
-	} else {
-		return problems.NewValidationProblem(map[string]string{"username": "Username is not a valid email or phone number."})
+	if err != nil {
+		service.logger.Error("Code validation error: ", zap.Error(err))
+		return problems.FromError(err)
+	}
+	if !valid {
+		return problems.NewValidationProblem(map[string]string{"code": "Verification code is invalid."})
 	}
 
 	if form.ValidateOnly {
