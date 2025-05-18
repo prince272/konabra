@@ -10,14 +10,11 @@ definitions:
     type: object
   services.ChangePasswordForm:
     properties:
-      confirmPassword:
-        type: string
       newPassword:
         type: string
       oldPassword:
         type: string
     required:
-    - confirmPassword
     - newPassword
     - oldPassword
     type: object
@@ -34,8 +31,6 @@ definitions:
     type: object
   services.CompleteResetPasswordForm:
     properties:
-      confirmPassword:
-        type: string
       newPassword:
         type: string
       token:
@@ -44,7 +39,6 @@ definitions:
         maxLength: 256
         type: string
     required:
-    - confirmPassword
     - newPassword
     - token
     - username
@@ -73,6 +67,8 @@ definitions:
       username:
         maxLength: 256
         type: string
+      validateOnly:
+        type: boolean
     required:
     - firstName
     - lastName

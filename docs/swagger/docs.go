@@ -365,14 +365,10 @@ const docTemplate = `{
         "services.ChangePasswordForm": {
             "type": "object",
             "required": [
-                "confirmPassword",
                 "newPassword",
                 "oldPassword"
             ],
             "properties": {
-                "confirmPassword": {
-                    "type": "string"
-                },
                 "newPassword": {
                     "type": "string"
                 },
@@ -400,15 +396,11 @@ const docTemplate = `{
         "services.CompleteResetPasswordForm": {
             "type": "object",
             "required": [
-                "confirmPassword",
                 "newPassword",
                 "token",
                 "username"
             ],
             "properties": {
-                "confirmPassword": {
-                    "type": "string"
-                },
                 "newPassword": {
                     "type": "string"
                 },
@@ -460,6 +452,9 @@ const docTemplate = `{
                 "username": {
                     "type": "string",
                     "maxLength": 256
+                },
+                "validateOnly": {
+                    "type": "boolean"
                 }
             }
         },

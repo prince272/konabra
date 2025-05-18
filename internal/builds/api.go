@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	"github.com/knadh/koanf/parsers/dotenv"
@@ -221,6 +222,14 @@ func (api *Api) registerRouter() error {
 			zap.Int("status_code", http.StatusInternalServerError),
 		)
 		c.JSON(http.StatusInternalServerError, problems.FromError(err))
+	}))
+
+	router.Use(cors.New(cors.Config{
+		AllowAllOrigins:  true,
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
 	}))
 
 	router.NoRoute(func(c *gin.Context) {

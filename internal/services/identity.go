@@ -18,10 +18,11 @@ import (
 )
 
 type CreateAccountForm struct {
-	FirstName string `json:"firstName" validate:"required,max=256"`
-	LastName  string `json:"lastName" validate:"required,max=256"`
-	Username  string `json:"username" validate:"required,max=256,username"`
-	Password  string `json:"password" validate:"required,password"`
+	FirstName    string `json:"firstName" validate:"required,max=256"`
+	LastName     string `json:"lastName" validate:"required,max=256"`
+	Username     string `json:"username" validate:"required,max=256,username"`
+	Password     string `json:"password" validate:"required,password"`
+	ValidateOnly bool   `json:"validateOnly"`
 }
 
 type SignInForm struct {
@@ -39,7 +40,7 @@ type SignOutForm struct {
 }
 
 func (form CreateAccountForm) GetEmail() string {
-	if !helpers.IsEmail(form.Username) {
+	if helpers.IsEmail(form.Username) {
 		return form.Username
 	}
 	return ""
@@ -97,15 +98,13 @@ type ResetPasswordForm struct {
 
 type CompleteResetPasswordForm struct {
 	ResetPasswordForm
-	Token           string `json:"token" validate:"required"`
-	NewPassword     string `json:"newPassword" validate:"required,password"`
-	ConfirmPassword string `json:"confirmPassword" validate:"required,password"`
+	Token       string `json:"token" validate:"required"`
+	NewPassword string `json:"newPassword" validate:"required,password"`
 }
 
 type ChangePasswordForm struct {
-	OldPassword     string `json:"oldPassword" validate:"required"`
-	NewPassword     string `json:"newPassword" validate:"required,password"`
-	ConfirmPassword string `json:"confirmPassword" validate:"required,password"`
+	OldPassword string `json:"oldPassword" validate:"required"`
+	NewPassword string `json:"newPassword" validate:"required,password"`
 }
 
 type AccountType string
@@ -155,7 +154,7 @@ func NewIdentityService(
 	}
 }
 
-func (service *IdentityService) CreateAccount(form CreateAccountForm) (*AccountModel, *problems.Problem) {
+func (service *IdentityService) CreateAccount(form CreateAccountForm) (*AccountWithTokenModel, *problems.Problem) {
 
 	// Validate form
 	if err := service.validator.ValidateStruct(form); err != nil {
@@ -165,6 +164,10 @@ func (service *IdentityService) CreateAccount(form CreateAccountForm) (*AccountM
 	accountType := GetAccountType(form.Username)
 	if usernameExists := service.identityRepository.UsernameExists(form.Username); usernameExists {
 		return nil, problems.NewValidationProblem(map[string]string{"username": fmt.Sprintf("%v already exists.", humanize.Humanize(string(accountType), humanize.SentenceCase))})
+	}
+
+	if form.ValidateOnly {
+		return nil, nil
 	}
 
 	currentTime := time.Now()
@@ -203,10 +206,27 @@ func (service *IdentityService) CreateAccount(form CreateAccountForm) (*AccountM
 		return nil, problems.FromError(err)
 	}
 
-	model := &AccountModel{}
+	// Create JWT token
+	token, err := service.jwtHelper.CreateToken(user.Id, map[string]any{
+		"email":       user.Email,
+		"phoneNumber": user.PhoneNumber,
+		"roles":       user.RoleNames(),
+	})
+
+	if err != nil {
+		service.logger.Error("Error creating token: ", zap.Error(err))
+		return nil, problems.FromError(err)
+	}
+
+	model := &AccountWithTokenModel{}
 
 	if err := copier.Copy(model, user); err != nil {
 		service.logger.Error("Error copying user to model: ", zap.Error(err))
+		return nil, problems.FromError(err)
+	}
+
+	if err := copier.Copy(model, token); err != nil {
+		service.logger.Error("Error copying token to model: ", zap.Error(err))
 		return nil, problems.FromError(err)
 	}
 
@@ -655,10 +675,6 @@ func (service *IdentityService) CompleteResetPassword(form CompleteResetPassword
 		return problems.NewValidationProblem(map[string]string{"username": fmt.Sprintf("%v does not exist.", humanize.Humanize(string(accountType), humanize.SentenceCase))})
 	}
 
-	if form.NewPassword != form.ConfirmPassword {
-		return problems.NewValidationProblem(map[string]string{"confirmPassword": "New password and confirm password do not match."})
-	}
-
 	secret := fmt.Sprintf("%v-%v-%v", user.Id, PurposeResetPassword, user.SecurityStamp)
 
 	if accountType == AccountTypeEmail {
@@ -717,10 +733,6 @@ func (service *IdentityService) ChangePassword(userId string, form ChangePasswor
 
 	if !utils.CheckPasswordHash(form.OldPassword, user.PasswordHash) {
 		return problems.NewValidationProblem(map[string]string{"oldPassword": "Old password is incorrect."})
-	}
-
-	if form.NewPassword != form.ConfirmPassword {
-		return problems.NewValidationProblem(map[string]string{"confirmPassword": "New password and confirm password do not match."})
 	}
 
 	user.PasswordHash = utils.MustHashPassword(form.NewPassword)
