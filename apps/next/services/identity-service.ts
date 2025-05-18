@@ -36,6 +36,11 @@ export type AccountWithTokenModel = {
   refreshTokenExpiresAt: string;
 } & AccountModel;
 
+export type SignInForm = {
+  username: string;
+  password: string;
+};
+
 export class IdentityService {
   public currentAccountKey: string = "current-account";
 
@@ -46,6 +51,17 @@ export class IdentityService {
   ): Promise<readonly [AccountWithTokenModel, Problem?]> {
     try {
       const response = await this.api.post("/account/create", data);
+      return [response.data, undefined] as const;
+    } catch (error) {
+      return [undefined!, parseProblem(error)] as const;
+    }
+  }
+
+  public async signIn(
+    data: SignInForm,
+  ): Promise<readonly [AccountWithTokenModel, Problem?]> {
+    try {
+      const response = await this.api.post("/account/signin", data);
       return [response.data, undefined] as const;
     } catch (error) {
       return [undefined!, parseProblem(error)] as const;
