@@ -80,7 +80,7 @@ type VerifyAccountForm struct {
 
 type CompleteVerifyAccountForm struct {
 	VerifyAccountForm
-	Token string `json:"token" validate:"required"`
+	Code string `json:"code" validate:"required"`
 }
 
 type ChangeAccountForm struct {
@@ -89,7 +89,7 @@ type ChangeAccountForm struct {
 
 type CompleteChangeAccountForm struct {
 	ChangeAccountForm
-	Token string `json:"token" validate:"required"`
+	Code string `json:"code" validate:"required"`
 }
 
 type ResetPasswordForm struct {
@@ -98,8 +98,9 @@ type ResetPasswordForm struct {
 
 type CompleteResetPasswordForm struct {
 	ResetPasswordForm
-	Token       string `json:"token" validate:"required"`
-	NewPassword string `json:"newPassword" validate:"required,password"`
+	Code         string `json:"code" validate:"required"`
+	NewPassword  string `json:"newPassword" validate:"required,password"`
+	ValidateOnly bool   `json:"validateOnly"`
 }
 
 type ChangePasswordForm struct {
@@ -450,9 +451,9 @@ func (service *IdentityService) CompleteVerifyAccount(form CompleteVerifyAccount
 			return problems.FromError(err)
 		}
 
-		if _, err := tp.ValidateToken(form.Token); err != nil {
+		if _, err := tp.ValidateToken(form.Code); err != nil {
 			service.logger.Error("Token validation error: ", zap.Error(err))
-			return problems.FromError(err)
+			return problems.NewValidationProblem(map[string]string{"code": "Verification code is invalid."})
 		}
 
 		user.EmailVerified = true
@@ -464,13 +465,13 @@ func (service *IdentityService) CompleteVerifyAccount(form CompleteVerifyAccount
 			return problems.FromError(err)
 		}
 
-		valid, err := tp.ValidateCode(form.Token)
+		valid, err := tp.ValidateCode(form.Code)
 		if err != nil {
 			service.logger.Error("Code validation error: ", zap.Error(err))
 			return problems.FromError(err)
 		}
 		if !valid {
-			return problems.NewValidationProblem(map[string]string{"token": "Token is invalid."})
+			return problems.NewValidationProblem(map[string]string{"code": "Verification code is invalid."})
 		}
 
 		user.PhoneNumberVerified = true
@@ -571,9 +572,9 @@ func (service *IdentityService) CompleteChangeAccount(userId string, form Comple
 			return problems.FromError(err)
 		}
 
-		if _, err := tp.ValidateToken(form.Token); err != nil {
+		if _, err := tp.ValidateToken(form.Code); err != nil {
 			service.logger.Error("Token validation error: ", zap.Error(err))
-			return problems.FromError(err)
+			return problems.NewValidationProblem(map[string]string{"code": "Verification code is invalid."})
 		}
 
 		user.Email = form.NewUsername
@@ -586,13 +587,13 @@ func (service *IdentityService) CompleteChangeAccount(userId string, form Comple
 			return problems.FromError(err)
 		}
 
-		valid, err := tp.ValidateCode(form.Token)
+		valid, err := tp.ValidateCode(form.Code)
 		if err != nil {
 			service.logger.Error("Code validation error: ", zap.Error(err))
 			return problems.FromError(err)
 		}
 		if !valid {
-			return problems.NewValidationProblem(map[string]string{"token": "Token is invalid."})
+			return problems.NewValidationProblem(map[string]string{"code": "Verification code is invalid."})
 		}
 
 		user.PhoneNumber = form.NewUsername
@@ -684,9 +685,9 @@ func (service *IdentityService) CompleteResetPassword(form CompleteResetPassword
 			return problems.FromError(err)
 		}
 
-		if _, err := tp.ValidateToken(form.Token); err != nil {
+		if _, err := tp.ValidateToken(form.Code); err != nil {
 			service.logger.Error("Token validation error: ", zap.Error(err))
-			return problems.FromError(err)
+			return problems.NewValidationProblem(map[string]string{"code": "Verification code is invalid."})
 		}
 
 	} else if accountType == AccountTypePhoneNumber {
@@ -696,16 +697,20 @@ func (service *IdentityService) CompleteResetPassword(form CompleteResetPassword
 			return problems.FromError(err)
 		}
 
-		valid, err := tp.ValidateCode(form.Token)
+		valid, err := tp.ValidateCode(form.Code)
 		if err != nil {
 			service.logger.Error("Code validation error: ", zap.Error(err))
 			return problems.FromError(err)
 		}
 		if !valid {
-			return problems.NewValidationProblem(map[string]string{"token": "Token is invalid."})
+			return problems.NewValidationProblem(map[string]string{"code": "Verification code is invalid."})
 		}
 	} else {
 		return problems.NewValidationProblem(map[string]string{"username": "Username is not a valid email or phone number."})
+	}
+
+	if form.ValidateOnly {
+		return nil
 	}
 
 	user.PasswordHash = utils.MustHashPassword(form.NewPassword)

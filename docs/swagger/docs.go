@@ -380,47 +380,50 @@ const docTemplate = `{
         "services.CompleteChangeAccountForm": {
             "type": "object",
             "required": [
-                "newUsername",
-                "token"
+                "code",
+                "newUsername"
             ],
             "properties": {
+                "code": {
+                    "type": "string"
+                },
                 "newUsername": {
                     "type": "string",
                     "maxLength": 256
-                },
-                "token": {
-                    "type": "string"
                 }
             }
         },
         "services.CompleteResetPasswordForm": {
             "type": "object",
             "required": [
+                "code",
                 "newPassword",
-                "token",
                 "username"
             ],
             "properties": {
-                "newPassword": {
+                "code": {
                     "type": "string"
                 },
-                "token": {
+                "newPassword": {
                     "type": "string"
                 },
                 "username": {
                     "type": "string",
                     "maxLength": 256
+                },
+                "validateOnly": {
+                    "type": "boolean"
                 }
             }
         },
         "services.CompleteVerifyAccountForm": {
             "type": "object",
             "required": [
-                "token",
+                "code",
                 "username"
             ],
             "properties": {
-                "token": {
+                "code": {
                     "type": "string"
                 },
                 "username": {

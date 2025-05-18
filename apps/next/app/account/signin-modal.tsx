@@ -33,11 +33,10 @@ export default function SignInModal({
   const [direction, setDirection] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isInitialRender, setIsInitialRender] = useState<boolean>(true);
-  const [currentAccount, setAccount] =
-    useCookieState<AccountWithTokenModel | null>(
-      identityService.currentAccountKey,
-      null,
-    );
+  const [_, setAccount] = useCookieState<AccountWithTokenModel | null>(
+    identityService.currentAccountKey,
+    null,
+  );
 
   const form = useForm<SignInForm>({
     mode: "onChange",
@@ -179,7 +178,8 @@ export default function SignInModal({
                         </p>
                       </div>
                       <Button
-                        variant="flat"
+                        variant="solid"
+                        color="primary"
                         radius="full"
                         fullWidth
                         startContent={
@@ -240,13 +240,27 @@ export default function SignInModal({
                         type="text"
                         autoFocus
                       />
-                      <Input
-                        {...form.register("password")}
-                        label="Password"
-                        isInvalid={!!form.formState.errors.password?.message}
-                        errorMessage={form.formState.errors.password?.message}
-                        type="password"
-                      />
+                      <div className="flex flex-col">
+                        <Input
+                          {...form.register("password")}
+                          label="Password"
+                          isInvalid={!!form.formState.errors.password?.message}
+                          errorMessage={form.formState.errors.password?.message}
+                          type="password"
+                          className="mb-2"
+                        />
+                        <div className="flex justify-end">
+                          <Button
+                            variant="light"
+                            size="sm"
+                            className="text-sm text-primary"
+                            as={NextLink}
+                            href="#reset-password"
+                          >
+                            Forgot password?
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </motion.div>
@@ -274,18 +288,6 @@ export default function SignInModal({
                   onPress={() => handleSubmit()}
                 >
                   Sign In
-                </Button>
-              )}
-              {step === 3 && (
-                <Button
-                  color="primary"
-                  isDisabled={isLoading}
-                  isLoading={isLoading}
-                  onPress={() => {
-                    onClose?.();
-                  }}
-                >
-                  Go to Dashboard
                 </Button>
               )}
             </ModalFooter>

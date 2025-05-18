@@ -11,6 +11,7 @@ import { SignUpModalRouter } from "./account/signup-modal";
 import { cookies as getCookiesStore } from "next/headers";
 import { AccountWithTokenModel } from "@/services/identity-service";
 import { identityService } from "@/services";
+import { ResetPasswordModalRouter } from "./account/reset-password";
 
 export const metadata: Metadata = {
   title: {
@@ -72,6 +73,7 @@ export default async function RootLayout({
           </div>
           <SignUpModalRouter />
           <SignInModalRouter />
+          <ResetPasswordModalRouter />
         </Providers>
       </body>
     </html>

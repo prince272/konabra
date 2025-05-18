@@ -20,38 +20,40 @@ definitions:
     type: object
   services.CompleteChangeAccountForm:
     properties:
+      code:
+        type: string
       newUsername:
         maxLength: 256
         type: string
-      token:
-        type: string
     required:
+    - code
     - newUsername
-    - token
     type: object
   services.CompleteResetPasswordForm:
     properties:
-      newPassword:
+      code:
         type: string
-      token:
+      newPassword:
         type: string
       username:
         maxLength: 256
         type: string
+      validateOnly:
+        type: boolean
     required:
+    - code
     - newPassword
-    - token
     - username
     type: object
   services.CompleteVerifyAccountForm:
     properties:
-      token:
+      code:
         type: string
       username:
         maxLength: 256
         type: string
     required:
-    - token
+    - code
     - username
     type: object
   services.CreateAccountForm:

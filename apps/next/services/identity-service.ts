@@ -41,6 +41,18 @@ export type SignInForm = {
   password: string;
 };
 
+export type ResetPasswordForm = {
+  username: string;
+};
+
+export type CompleteResetPasswordForm = {
+  username: string;
+  newPassword: string;
+  confirmPassword: string;
+  code: string;
+  validateOnly: boolean;
+};
+
 export class IdentityService {
   public currentAccountKey: string = "current-account";
 
@@ -65,6 +77,28 @@ export class IdentityService {
       return [response.data, undefined] as const;
     } catch (error) {
       return [undefined!, parseProblem(error)] as const;
+    }
+  }
+
+  public async resetPassword(
+    form: ResetPasswordForm,
+  ): Promise<Problem | undefined> {
+    try {
+      const _ = await this.api.post("/account/password/reset", form);
+      return undefined;
+    } catch (error) {
+      return parseProblem(error);
+    }
+  }
+
+  public async completeResetPassword(
+    form: CompleteResetPasswordForm,
+  ): Promise<Problem | undefined> {
+    try {
+      const _ = await this.api.post("/account/password/reset/complete", form);
+      return undefined;
+    } catch (error) {
+      return parseProblem(error);
     }
   }
 

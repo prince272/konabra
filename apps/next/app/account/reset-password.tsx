@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
-import NextLink from "next/link";
 import { Icon } from "@iconify/react";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
@@ -14,19 +13,12 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@heroui/modal";
-import { Divider } from "@heroui/divider";
-
-import { useModalRouter } from "@/components/common/models";
-import { Logo } from "@/components/icons";
 import { identityService } from "@/services";
-import {
-  AccountWithTokenModel,
-  CreateAccountForm,
-} from "@/services/identity-service";
 import { addToast } from "@heroui/toast";
-import { useCookieState } from "@/hooks";
+import { useModalRouter } from "@/components/common/models";
+import { CompleteResetPasswordForm } from "@/services/identity-service";
 
-export default function SignUpModal({
+export default function ResetPasswordModal({
   isOpen,
   onClose,
 }: {
@@ -34,16 +26,12 @@ export default function SignUpModal({
   onClose?: () => void;
 }) {
   const [step, setStep] = useState<number>(1);
-  const steps = [[], ["username"], ["firstName", "lastName"], ["password"]];
+  const steps = [["username"], ["code"], ["newPassword", "confirmPassword"]];
   const [direction, setDirection] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isInitialRender, setIsInitialRender] = useState<boolean>(true);
-  const [_, setAccount] = useCookieState<AccountWithTokenModel | null>(
-    identityService.currentAccountKey,
-    null,
-  );
 
-  const form = useForm<CreateAccountForm>({
+  const form = useForm<CompleteResetPasswordForm>({
     mode: "onChange",
   });
 
@@ -71,12 +59,48 @@ export default function SignUpModal({
     [step],
   );
 
-  const handleSubmit = useCallback(
-    form.handleSubmit(async (formData: CreateAccountForm) => {
+  const handleSendVerificationCode = useCallback(
+    form.handleSubmit(async (formData) => {
       setIsLoading(true);
       try {
-        const validateOnly = step != 4;
-        const [account, problem] = await identityService.createAccount({
+        const problem = await identityService.resetPassword(formData);
+
+        if (problem) {
+          const errors = Object.entries(problem.errors || {});
+
+          if (errors.length > 0) {
+            errors.forEach(([name, message]) => {
+              form.setError(name as keyof CompleteResetPasswordForm, {
+                type: "manual",
+                message,
+              });
+            });
+          }
+
+          addToast({
+            title: problem.message,
+            color: "danger",
+          });
+        } else {
+          addToast({
+            title: "Verification code sent successfully.",
+            color: "success",
+          });
+          handleNext();
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }),
+    [],
+  );
+
+  const handleResetPasswordSubmit = useCallback(
+    form.handleSubmit(async (formData) => {
+      setIsLoading(true);
+      try {
+        const validateOnly = step != 3;
+        const problem = await identityService.completeResetPassword({
           ...formData,
           validateOnly,
         });
@@ -104,7 +128,7 @@ export default function SignUpModal({
 
               if (step >= firstErrorStep) {
                 stepErrors.forEach(([field, message]) => {
-                  form.setError(field as keyof CreateAccountForm, {
+                  form.setError(field as keyof CompleteResetPasswordForm, {
                     type: "manual",
                     message,
                   });
@@ -121,13 +145,10 @@ export default function SignUpModal({
           if (validateOnly) {
             handleNext();
           } else {
-            setAccount(account);
-
             addToast({
-              title: "Account created successfully.",
+              title: "Password reset successfully.",
               color: "success",
             });
-
             onClose?.();
           }
         }
@@ -147,19 +168,19 @@ export default function SignUpModal({
         <Button
           isIconOnly
           variant="light"
-          onPress={handlePrev}
+          onPress={onClose}
           className="rounded-full text-foreground-500"
         >
           <Icon icon="material-symbols:close-rounded" width="24" height="24" />
         </Button>
       }
     >
-      <ModalContent className="max-w-md min-h-[512px]">
+      <ModalContent className="max-w-md">
         {(onClose) => (
           <>
             <ModalHeader className="flex flex-col gap-3 pt-6">
               <div className="flex justify-between items-center absolute top-1 start-1">
-                {step > 1 && step < 5 ? (
+                {(step == 2 || step == 3) && (
                   <Button
                     isIconOnly
                     variant="light"
@@ -172,8 +193,6 @@ export default function SignUpModal({
                       height="24"
                     />
                   </Button>
-                ) : (
-                  <div className="w-8" />
                 )}
               </div>
             </ModalHeader>
@@ -206,77 +225,13 @@ export default function SignUpModal({
                   exit="exit"
                   className="h-full"
                 >
-                  {step === 1 && (
-                    <div className="space-y-5">
-                      <div className="text-center flex justify-center flex-col items-center pb-3">
-                        <Logo
-                          className="flex justify-start items-center gap-1"
-                          size={64}
-                        />
-                        <h3 className="text-lg font-medium">
-                          Create an account
-                        </h3>
-                        <p className="text-default-500 text-sm">
-                          Sign up quickly using your email, phone, or social
-                          account.
-                        </p>
-                      </div>
-                      <div className="grid grid-cols-1 gap-2">
-                        <Button
-                          variant="solid"
-                          color="primary"
-                          radius="full"
-                          fullWidth
-                          startContent={
-                            <Icon
-                              icon="solar:user-bold-duotone"
-                              width="24"
-                              height="24"
-                            />
-                          }
-                          onPress={handleNext}
-                        >
-                          Sign up with Email or Phone
-                        </Button>
-                      </div>
-                      <div className="flex items-center justify-center gap-3 text-sm text-default-500 w-full">
-                        <Divider className="flex-1" />
-                        <span>or</span>
-                        <Divider className="flex-1" />
-                      </div>
-                      <div className="grid grid-cols-1 gap-4">
-                        <Button
-                          className="dark dark:light"
-                          variant="solid"
-                          radius="full"
-                          startContent={
-                            <Icon icon="flat-color-icons:google" width={20} />
-                          }
-                        >
-                          Continue with Google
-                        </Button>
-                        <Button
-                          variant="flat"
-                          radius="full"
-                          startContent={
-                            <Icon icon="logos:facebook" width={20} />
-                          }
-                        >
-                          Continue with Facebook
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  {step === 2 && (
+                  {step == 1 && (
                     <div className="space-y-6 py-4">
                       <div className="flex flex-col">
-                        <h3 className="text-lg font-medium">
-                          Enter your email or phone number
-                        </h3>
+                        <h3 className="text-lg font-medium">Reset Password</h3>
                         <p className="text-default-500 text-sm">
-                          We'll use this to verify your identity and keep your
-                          account secure.
+                          Enter your email or phone number to receive a
+                          verification code.
                         </p>
                       </div>
                       <Input
@@ -290,61 +245,51 @@ export default function SignUpModal({
                     </div>
                   )}
 
-                  {step === 3 && (
+                  {step == 2 && (
                     <div className="space-y-6 py-4">
                       <div className="flex flex-col">
                         <h3 className="text-lg font-medium">
-                          Enter your profile info
+                          Verify Your Identity
                         </h3>
                         <p className="text-default-500 text-sm">
-                          Tell us a bit about yourself to help personalize your
-                          experience.
+                          Enter the verification code sent to your email or
+                          phone.
                         </p>
                       </div>
                       <Input
-                        {...form.register("firstName")}
-                        label="First name"
-                        isInvalid={!!form.formState.errors.firstName?.message}
-                        errorMessage={form.formState.errors.firstName?.message}
+                        {...form.register("code")}
+                        label="Verification Code"
+                        isInvalid={!!form.formState.errors.code?.message}
+                        errorMessage={form.formState.errors.code?.message}
                         type="text"
                         autoFocus
-                      />
-                      <Input
-                        {...form.register("lastName")}
-                        label="Last name"
-                        isInvalid={!!form.formState.errors.lastName?.message}
-                        errorMessage={form.formState.errors.lastName?.message}
-                        type="text"
                       />
                     </div>
                   )}
 
-                  {step === 4 && (
+                  {step == 3 && (
                     <div className="space-y-6 py-4">
                       <div className="flex flex-col">
                         <h3 className="text-lg font-medium">
-                          Create a Secure Password
+                          Create New Password
                         </h3>
                         <p className="text-default-500 text-sm">
-                          Use a combination of letters, numbers, and symbols for
-                          a strong password.
+                          Enter and confirm your new password.
                         </p>
                       </div>
                       <Input
-                        {...form.register("password")}
-                        label="Password"
-                        isInvalid={!!form.formState.errors.password?.message}
-                        errorMessage={form.formState.errors.password?.message}
+                        {...form.register("newPassword")}
+                        label="New Password"
+                        isInvalid={!!form.formState.errors.newPassword?.message}
+                        errorMessage={
+                          form.formState.errors.newPassword?.message
+                        }
                         type="password"
                         autoFocus
                       />
                       <Input
-                        {...form.register("confirmPassword", {
-                          validate: (value) =>
-                            value === form.watch("password") ||
-                            "Password don't match",
-                        })}
-                        label="Confirm password"
+                        {...form.register("confirmPassword")}
+                        label="Confirm Password"
                         isInvalid={
                           !!form.formState.errors.confirmPassword?.message
                         }
@@ -362,22 +307,20 @@ export default function SignUpModal({
             <ModalFooter className="px-6 pb-6 pt-2 flex-col gap-3">
               {step == 1 && (
                 <Button
-                  variant="light"
-                  size="sm"
-                  className="text-sm text-center w-fit mx-auto"
-                  as={NextLink}
-                  href="#signin"
+                  color="primary"
+                  isDisabled={isLoading}
+                  isLoading={isLoading}
+                  onPress={() => handleSendVerificationCode()}
                 >
-                  Already created account?{" "}
-                  <span className="text-primary">Sign In</span>
+                  Continue
                 </Button>
               )}
-              {(step == 2 || step == 3 || step == 4) && (
+              {(step == 2 || step == 3) && (
                 <Button
                   color="primary"
                   isDisabled={isLoading}
                   isLoading={isLoading}
-                  onPress={() => handleSubmit()}
+                  onPress={() => handleResetPasswordSubmit()}
                 >
                   Continue
                 </Button>
@@ -390,13 +333,16 @@ export default function SignUpModal({
   );
 }
 
-export function SignUpModalRouter() {
+export function ResetPasswordModalRouter() {
   const { closeModal, currentModal, mountedModal } = useModalRouter();
 
   return (
     <>
-      {mountedModal == "signup" ? (
-        <SignUpModal isOpen={currentModal == "signup"} onClose={closeModal} />
+      {mountedModal == "reset-password" ? (
+        <ResetPasswordModal
+          isOpen={currentModal == "reset-password"}
+          onClose={closeModal}
+        />
       ) : null}
     </>
   );
