@@ -42,26 +42,51 @@ export const useHashState = () => {
   }, []);
 
   const setHash = useCallback(
-    (newHash: string) => {
+    (newHash: string, shallow: boolean = false) => {
       if (typeof window === "undefined") return;
       const cleanHash = newHash.startsWith("#") ? newHash : `#${newHash}`;
+
       if (cleanHash !== window.location.hash) {
-        setHashState(cleanHash.slice(1));
-        router.replace(`${pathname}${searchParams ? `?${searchParams}` : ""}${cleanHash}`, {
+        if (shallow) {
+          // Update the URL without triggering state change or navigation
+          window.history.replaceState(
+            window.history.state,
+            "",
+            `${pathname}${searchParams ? `?${searchParams}` : ""}${cleanHash}`
+          );
+        } else {
+          // Normal update that triggers state change
+          setHashState(cleanHash.slice(1));
+          router.replace(`${pathname}${searchParams ? `?${searchParams}` : ""}${cleanHash}`, {
+            scroll: false
+          });
+        }
+      }
+    },
+    [router, pathname, searchParams]
+  );
+
+  const removeHash = useCallback(
+    (shallow: boolean = false) => {
+      if (typeof window === "undefined") return;
+
+      if (shallow) {
+        // Remove hash without triggering state change or navigation
+        window.history.replaceState(
+          window.history.state,
+          "",
+          `${pathname}${searchParams ? `?${searchParams}` : ""}`
+        );
+      } else {
+        // Normal hash removal that triggers state change
+        setHashState("");
+        router.replace(`${pathname}${searchParams ? `?${searchParams}` : ""}`, {
           scroll: false
         });
       }
     },
     [router, pathname, searchParams]
   );
-
-  const removeHash = useCallback(() => {
-    if (typeof window === "undefined") return;
-    setHashState("");
-    router.replace(`${pathname}${searchParams ? `?${searchParams}` : ""}`, {
-      scroll: false
-    });
-  }, [router, pathname, searchParams]);
 
   return [hash, setHash, removeHash] as const;
 };

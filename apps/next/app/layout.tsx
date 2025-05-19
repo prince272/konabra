@@ -8,6 +8,7 @@ import { Metadata, Viewport } from "next";
 import { cookies as getCookiesStore } from "next/headers";
 import { Providers } from "../components/providers";
 import { ResetPasswordModalRouter } from "./account/reset-password-modal";
+import { SettingsModalRouter } from "./account/settings-modal";
 import { SignInModalRouter } from "./account/signin-modal";
 import { SignUpModalRouter } from "./account/signup-modal";
 
@@ -59,6 +60,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <SignUpModalRouter />
           <SignInModalRouter />
           <ResetPasswordModalRouter />
+          <SettingsModalRouter />
         </Providers>
       </body>
     </html>

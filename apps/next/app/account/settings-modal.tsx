@@ -1,0 +1,815 @@
+"use client";
+
+import { useModalRouter } from "@/components/common/models";
+import { useBreakpoint, useHashState, useTimer } from "@/hooks";
+import { identityService } from "@/services";
+import { CompleteChangeAccountForm } from "@/services/identity-service";
+import { useAccountState } from "@/states";
+import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
+import { Modal, ModalBody, ModalContent, ModalHeader } from "@heroui/modal";
+import { Switch } from "@heroui/switch";
+import { addToast } from "@heroui/toast";
+import { Icon } from "@iconify/react";
+import { AnimatePresence, motion } from "framer-motion";
+import { cloneDeep } from "lodash";
+import { createContext, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+
+interface ViewContextType {
+  title: string;
+  icon: string;
+}
+
+const ViewContext = createContext<ViewContextType>({
+  title: "Settings",
+  icon: "solar:settings-bold-duotone"
+});
+
+interface ViewProps {
+  id: string;
+  children: ReactNode;
+  currentView: string;
+}
+
+function View({ id, children, currentView }: ViewProps) {
+  return currentView === id ? <>{children}</> : null;
+}
+
+interface BaseViewProps {
+  navigateTo: (view: string) => void;
+  currentView: string;
+}
+
+interface AccountViewProps extends BaseViewProps {
+  currentAccount: any;
+}
+function AccountView({ currentAccount, navigateTo, currentView }: AccountViewProps) {
+  return (
+    <View id="account" currentView={currentView}>
+      <div className="grid grid-cols-1 gap-6">
+        {/* Email Section */}
+        <div className="bg-default-100 rounded-xl p-4 shadow-sm">
+          <div className="flex justify-between items-start">
+            <div className="flex items-center gap-2">
+              <Icon icon="solar:user-bold-duotone" width="20" height="20" />
+              <h4 className="font-medium">Email Address</h4>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 mt-3">
+            <div className="text-sm font-medium">
+              {currentAccount?.email ? (
+                <>
+                  <span className="mr-2">{currentAccount?.email}</span>
+                </>
+              ) : (
+                <span className="text-default-500">No email address added</span>
+              )}
+            </div>
+            {!currentAccount?.emailVerified && (
+              <Button radius="full" size="sm" variant="flat" color="warning">
+                Verify
+              </Button>
+            )}
+            <Button
+              radius="full"
+              variant="flat"
+              color="primary"
+              size="sm"
+              onPress={() => navigateTo("account:email")}
+            >
+              {currentAccount?.email ? "Change" : "Add"}
+            </Button>
+          </div>
+        </div>
+
+        {/* Phone Number Section */}
+        <div className="bg-default-100 rounded-xl p-4 shadow-sm">
+          <div className="flex justify-between items-start">
+            <div className="flex items-center gap-2">
+              <Icon icon="solar:phone-bold-duotone" width="20" height="20" />
+              <h4 className="font-medium">Phone Number</h4>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 mt-3">
+            <div className="text-sm font-medium">
+              {currentAccount?.phoneNumber ? (
+                <>
+                  <span className="mr-2">{currentAccount?.phoneNumber}</span>
+                </>
+              ) : (
+                <span className="text-default-500">No phone number added</span>
+              )}
+            </div>
+            {currentAccount?.phoneNumber && !currentAccount?.phoneNumberVerified && (
+              <Button radius="full" size="sm" variant="flat" color="warning">
+                Verify
+              </Button>
+            )}
+            <Button
+              radius="full"
+              variant="flat"
+              color="primary"
+              size="sm"
+              onPress={() => navigateTo("account:change-phone-number")}
+            >
+              {currentAccount?.phoneNumber ? "Change" : "Add"}
+            </Button>
+          </div>
+        </div>
+
+        {/* Password Section */}
+        <div className="bg-default-100 rounded-xl p-4 shadow-sm">
+          <div className="flex justify-between items-start">
+            <div className="flex items-center gap-2">
+              <Icon icon="solar:key-bold-duotone" width="20" height="20" />
+              <h4 className="font-medium">Password</h4>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 mt-3">
+            <div className="text-sm font-medium">
+              <span className="text-default-500">Last changed: 2 weeks ago</span>
+            </div>
+            <Button
+              radius="full"
+              variant="flat"
+              color="primary"
+              size="sm"
+              onPress={() => navigateTo("account:password")}
+            >
+              Change
+            </Button>
+          </div>
+        </div>
+
+        {/* Danger Zone Sections */}
+        <div className="space-y-6">
+          <div className="bg-warning-100 rounded-xl p-4 shadow-sm">
+            <div className="flex items-center gap-2">
+              <Icon
+                icon="solar:power-bold-duotone"
+                width="20"
+                height="20"
+                className="text-warning-700 dark:text-warning"
+              />
+              <h4 className="font-medium text-warning-700 dark:text-warning">Deactivate Account</h4>
+            </div>
+            <p className="text-sm text-warning-600 mt-2">
+              Temporarily disable your account. You can reactivate it by logging in again.
+            </p>
+            <Button
+              radius="full"
+              variant="solid"
+              color="warning"
+              fullWidth
+              onPress={() => navigateTo("account:deactivate")}
+              className="font-medium mt-3"
+            >
+              Deactivate Account
+            </Button>
+          </div>
+          <div className="bg-danger-50 rounded-xl p-4 shadow-sm">
+            <div className="flex items-center gap-2">
+              <Icon
+                icon="solar:trash-bin-trash-bold-duotone"
+                width="24"
+                height="24"
+                className="text-danger"
+              />
+              <h4 className="font-medium text-danger">Delete Account</h4>
+            </div>
+            <p className="text-sm text-danger-600 mt-2">
+              Permanently delete your account and all associated data. This action cannot be undone.
+            </p>
+            <Button
+              radius="full"
+              variant="solid"
+              color="danger"
+              fullWidth
+              startContent={<Icon icon="solar:trash-bin-bold-duotone" width="20" height="20" />}
+              onPress={() => navigateTo("account:delete")}
+              className="font-medium mt-3"
+            >
+              Delete Account
+            </Button>
+          </div>
+        </div>
+      </div>
+    </View>
+  );
+}
+
+function CreateChangeAccountView(accountType: "email" | "phone-number") {
+  return function AccountEmailView({ currentAccount, navigateTo, currentView }: AccountViewProps) {
+    const form = useForm<CompleteChangeAccountForm>({
+      mode: "onChange"
+    });
+
+    const formErrors = useMemo(
+      () => cloneDeep(form.formState.errors),
+      [form.formState.isValid, form.formState.isSubmitting, form.formState.isDirty]
+    );
+
+    const [codeSending, setCodeSending] = useState(false);
+    const [codeSent, setCodeSent] = useState(false);
+    const [formSubmitting, setFormSubmitting] = useState(false);
+
+    const sendCodeTimer = useTimer({
+      timerType: "DECREMENTAL",
+      initialTime: 60,
+      endTime: 0
+    });
+
+    const handleGetCode = useCallback(
+      form.handleSubmit(async (formData) => {
+        setCodeSending(true);
+
+        try {
+          const problem = await identityService.changeAccount(formData);
+          if (problem) {
+            const errors = Object.entries(problem.errors || {});
+
+            if (errors.length > 0) {
+              errors.forEach(([name, message]) => {
+                form.setError(name as keyof CompleteChangeAccountForm, {
+                  message: message
+                });
+              });
+            } else {
+              addToast({
+                title: problem.message,
+                color: "danger"
+              });
+            }
+          } else {
+            addToast({
+              title: "Verification code sent!",
+              color: "success"
+            });
+            sendCodeTimer.start();
+            setCodeSent(true);
+          }
+        } finally {
+          setCodeSending(false);
+        }
+      }),
+      [form, sendCodeTimer]
+    );
+
+    const handleSubmit = useCallback(
+      form.handleSubmit(async (formData: CompleteChangeAccountForm) => {
+        setFormSubmitting(true);
+
+        const problem = await identityService.completeChangeAccount(formData);
+        setFormSubmitting(false);
+
+        if (problem) {
+          const errors = Object.entries(problem.errors || {});
+
+          if (errors.length > 0) {
+            errors.forEach(([name, message]) => {
+              form.setError(name as keyof CompleteChangeAccountForm, {
+                message: message
+              });
+            });
+          } else {
+            addToast({
+              title: problem.message,
+              color: "danger"
+            });
+          }
+        } else {
+          addToast({
+            title: "Email address updated successfully.",
+            color: "success"
+          });
+
+          navigateTo("account");
+        }
+      }),
+      [form, navigateTo]
+    );
+
+    return (
+      <View id={`account:${accountType}`} currentView={currentView}>
+        <div>
+          {accountType === "email" && (
+            <>
+              <h3 className="text-lg font-medium">
+                {currentAccount?.email ? "Change" : "Add"} Email Address
+              </h3>
+              <p className="text-default-500 mb-4 text-sm">
+                {currentAccount?.email
+                  ? "Changing your email address will require verification of the new email."
+                  : "Adding an email address will help you recover your account if you forget your password."}
+              </p>
+            </>
+          )}
+          {accountType === "phone-number" && (
+            <>
+              <h3 className="text-lg font-medium">
+                {currentAccount?.phoneNumber ? "Change" : "Add"} Phone Number
+              </h3>
+              <p className="text-default-500 mb-4 text-sm">
+                {currentAccount?.phoneNumber
+                  ? "Changing your phone number will require verification of the new number."
+                  : "Adding a phone number will help you recover your account if you forget your password."}
+              </p>
+            </>
+          )}
+        </div>
+
+        <div className="space-y-4">
+          <Input label="Current Email" value={currentAccount?.email} disabled />
+
+          <Controller
+            name="newUsername"
+            control={form.control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                label={accountType === "email" ? "New Email" : "New Phone Number"}
+                placeholder={accountType === "email" ? "Enter new email" : "Enter new phone number"}
+                type="text"
+                autoFocus
+                isInvalid={!!formErrors.newUsername}
+                errorMessage={formErrors.newUsername?.message}
+              />
+            )}
+          />
+
+          <Controller
+            name="code"
+            control={form.control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                label="Verification Code"
+                placeholder="Enter code"
+                isInvalid={!!formErrors.code}
+                errorMessage={formErrors.code?.message}
+                description={`A verification code will be sent to your ${accountType === "email" ? "email address" : "phone number"}.`}
+                endContent={
+                  <Button
+                    size="sm"
+                    variant="flat"
+                    color="primary"
+                    disabled={codeSending || sendCodeTimer.isRunning}
+                    isLoading={codeSending}
+                    onPress={() => handleGetCode()}
+                  >
+                    {sendCodeTimer.isRunning
+                      ? `Resend (${sendCodeTimer.time}s)`
+                      : codeSent
+                        ? "Resend Code"
+                        : "Get Code"}
+                  </Button>
+                }
+              />
+            )}
+          />
+        </div>
+
+        <div className="flex gap-3 mt-4 justify-end">
+          <Button
+            className="hidden md:flex"
+            radius="full"
+            variant="flat"
+            onPress={() => navigateTo("account")}
+          >
+            Cancel
+          </Button>
+          <Button
+            className="flex-1 md:flex-none"
+            radius="full"
+            color="primary"
+            type="submit"
+            isLoading={formSubmitting}
+            isDisabled={formSubmitting}
+            onPress={() => handleSubmit()}
+          >
+            Change Email
+          </Button>
+        </div>
+      </View>
+    );
+  };
+}
+
+const AccountChangeEmailView = CreateChangeAccountView("email");
+const AccountChangePhoneNumberView = CreateChangeAccountView("phone-number");
+
+function AccountPasswordView({ navigateTo, currentView }: BaseViewProps) {
+  return (
+    <View id="account:password" currentView={currentView}>
+      <div>
+        <h3 className="text-lg font-medium">Change password</h3>
+        <p className="text-default-500 mb-4 text-sm">
+          Changing your password will require you to log in again with the new password.
+        </p>
+      </div>
+      <div className="space-y-4">
+        <Input label="Current Password" type="password" placeholder="Enter current password" />
+        <Input label="New Password" type="password" placeholder="Enter new password" />
+        <Input label="Confirm New Password" type="password" placeholder="Confirm new password" />
+        <div className="flex gap-3 mt-4">
+          <Button radius="full" variant="light" onPress={() => navigateTo("account")}>
+            Cancel
+          </Button>
+          <Button radius="full" color="primary">
+            Update Password
+          </Button>
+        </div>
+      </div>
+    </View>
+  );
+}
+
+function AccountDeactivateView({ navigateTo, currentView }: BaseViewProps) {
+  return (
+    <View id="account:deactivate" currentView={currentView}>
+      <div>
+        <h3 className="text-lg font-medium">Deactivate account</h3>
+        <p className="text-default-500 mb-4 text-sm">
+          Deactivating your account will hide your profile and data from other users. You can
+          reactivate it by logging in again.
+        </p>
+      </div>
+      <Input label="Enter your password to confirm" type="password" placeholder="Your password" />
+      <div className="flex gap-3 mt-4">
+        <Button radius="full" variant="light" onPress={() => navigateTo("account")}>
+          Cancel
+        </Button>
+        <Button radius="full" color="warning">
+          Deactivate Account
+        </Button>
+      </div>
+    </View>
+  );
+}
+
+function AccountDeleteView({ navigateTo, currentView }: BaseViewProps) {
+  return (
+    <View id="account:delete" currentView={currentView}>
+      <div>
+        <h3 className="text-lg font-medium">Delete account</h3>
+        <p className="text-default-500 mb-4 text-sm">
+          Deleting your account is permanent and cannot be undone. All your data will be lost.
+        </p>
+      </div>
+      <Input label="Enter your password to confirm" type="password" placeholder="Your password" />
+      <div className="flex gap-3 mt-4">
+        <Button radius="full" variant="light" onPress={() => navigateTo("account")}>
+          Cancel
+        </Button>
+        <Button radius="full" color="danger">
+          Delete Account Permanently
+        </Button>
+      </div>
+    </View>
+  );
+}
+
+function NotificationsView({ currentView }: BaseViewProps) {
+  return (
+    <View id="notifications" currentView={currentView}>
+      <div className="space-y-6">
+        <div className="bg-default-100 rounded-xl p-4 shadow-sm">
+          <div className="flex items-center gap-2">
+            <Icon icon="solar:bell-bing-bold-duotone" width="20" height="20" />
+            <h4 className="font-medium">General Notifications</h4>
+          </div>
+          <div className="space-y-3 mt-3">
+            <div className="flex justify-between items-center">
+              <span>System notifications</span>
+              <Switch defaultSelected />
+            </div>
+            <div className="flex justify-between items-center">
+              <span>App notifications</span>
+              <Switch defaultSelected />
+            </div>
+            <div className="flex justify-between items-center">
+              <span>Email notifications</span>
+              <Switch />
+            </div>
+          </div>
+        </div>
+        <div className="bg-default-100 rounded-xl p-4 shadow-sm">
+          <div className="flex items-center gap-2">
+            <Icon icon="solar:moon-bold-duotone" width="20" height="20" />
+            <h4 className="font-medium">Do Not Disturb</h4>
+          </div>
+          <div className="space-y-3 mt-3">
+            <div className="flex justify-between items-center">
+              <span>Enable Do Not Disturb</span>
+              <Switch />
+            </div>
+            <div className="flex justify-between items-center">
+              <span>Schedule</span>
+              <Switch />
+            </div>
+          </div>
+        </div>
+      </div>
+    </View>
+  );
+}
+
+function DisplayView({ currentView }: BaseViewProps) {
+  return (
+    <View id="display" currentView={currentView}>
+      <div className="space-y-6">
+        <div className="bg-default-100 rounded-xl p-4 shadow-sm">
+          <h4 className="font-medium">Theme</h4>
+          <div className="space-y-3 mt-3">
+            <div className="flex justify-between items-center">
+              <span>Dark Mode</span>
+              <Switch />
+            </div>
+          </div>
+        </div>
+      </div>
+    </View>
+  );
+}
+
+function SoundView({ currentView }: BaseViewProps) {
+  return (
+    <View id="sound" currentView={currentView}>
+      <div className="space-y-6">
+        <div className="bg-default-100 rounded-xl p-4 shadow-sm">
+          <h4 className="font-medium">Sound Preferences</h4>
+          <div className="space-y-3 mt-3">
+            <div className="flex justify-between items-center">
+              <span>Notification Sounds</span>
+              <Switch defaultSelected />
+            </div>
+          </div>
+        </div>
+      </div>
+    </View>
+  );
+}
+
+function StorageView({ currentView }: BaseViewProps) {
+  return (
+    <View id="storage" currentView={currentView}>
+      <div className="space-y-6">
+        <div className="bg-default-100 rounded-xl p-4 shadow-sm">
+          <h4 className="font-medium">Storage Usage</h4>
+          <div className="mt-3">
+            <p className="text-sm">Total used: 1.2 GB of 5 GB</p>
+          </div>
+        </div>
+      </div>
+    </View>
+  );
+}
+
+function PrivacyView({ currentView }: BaseViewProps) {
+  return (
+    <View id="privacy" currentView={currentView}>
+      <div className="space-y-6">
+        <div className="bg-default-100 rounded-xl p-4 shadow-sm">
+          <h4 className="font-medium">Privacy Settings</h4>
+          <div className="space-y-3 mt-3">
+            <div className="flex justify-between items-center">
+              <span>Analytics Tracking</span>
+              <Switch />
+            </div>
+          </div>
+        </div>
+      </div>
+    </View>
+  );
+}
+
+interface SettingsModalProps {
+  isOpen: boolean;
+  onClose?: () => void;
+  onSignOut?: () => void;
+}
+
+export default function SettingsModal({ isOpen, onClose, onSignOut }: SettingsModalProps) {
+  const [hash, setHash] = useHashState();
+  const [currentAccount] = useAccountState();
+  const [currentView, setCurrentView] = useState<string>(hash.split(":").slice(1).join(":") || "");
+  const [showSidebar, setShowSidebar] = useState<boolean>(false);
+  const [isMenuSelected, setIsMenuSelected] = useState<boolean>(false);
+  const [viewInfo, setViewInfo] = useState<{ title: string; icon: string }>({
+    title: "Settings",
+    icon: "solar:settings-bold-duotone"
+  });
+
+  const isSmallScreen = useBreakpoint("md", "down");
+
+  const menuItems = [
+    { id: "account", label: "Account", icon: "solar:user-bold-duotone" },
+    { id: "notifications", label: "Notifications", icon: "solar:bell-bing-bold-duotone" },
+    { id: "display", label: "Display", icon: "solar:monitor-bold-duotone" },
+    { id: "sound", label: "Sound", icon: "solar:soundwave-bold-duotone" },
+    { id: "storage", label: "Storage", icon: "solar:folder-bold-duotone" },
+    { id: "privacy", label: "Privacy", icon: "solar:lock-bold-duotone" }
+  ];
+
+  const viewInfoMap: Record<string, { title: string; icon: string }> = {
+    "": { title: "Settings", icon: "solar:settings-bold-duotone" },
+    account: { title: "Account", icon: "solar:user-bold-duotone" },
+    notifications: { title: "Notifications", icon: "solar:bell-bing-bold-duotone" },
+    display: { title: "Display", icon: "solar:monitor-bold-duotone" },
+    sound: { title: "Sound", icon: "solar:soundwave-bold-duotone" },
+    storage: { title: "Storage", icon: "solar:folder-bold-duotone" },
+    privacy: { title: "Privacy", icon: "solar:lock-bold-duotone" }
+  };
+
+  useEffect(() => {
+    const mainViewId = currentView.split(":")[0] || "";
+    const info = viewInfoMap[mainViewId] || {
+      title: "Settings",
+      icon: "solar:settings-bold-duotone"
+    };
+    setViewInfo(info);
+  }, [currentView]);
+
+  const navigateTo = (view: string) => {
+    setCurrentView(view);
+    setIsMenuSelected(true);
+    if (isSmallScreen) {
+      setShowSidebar(false);
+    }
+  };
+
+  const backToMenu = () => {
+    setIsMenuSelected(false);
+    setShowSidebar(true);
+    setCurrentView("");
+  };
+
+  const backToParent = () => {
+    const parentView = currentView.split(":").slice(0, -1).join(":");
+    navigateTo(parentView || "");
+  };
+
+  useEffect(() => {
+    setShowSidebar(isSmallScreen ? !isMenuSelected : true);
+  }, [isSmallScreen, isMenuSelected]);
+
+  return (
+    <ViewContext.Provider value={viewInfo}>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        size="3xl"
+        scrollBehavior="inside"
+        closeButton={
+          <Button
+            isIconOnly
+            variant="light"
+            onPress={onClose}
+            className="rounded-full text-foreground-500"
+          >
+            <Icon icon="material-symbols:close-rounded" width="24" height="24" />
+          </Button>
+        }
+      >
+        <ModalContent className="min-h-[600px]">
+          <ModalHeader className="pb-1">
+            <div className="flex items-center gap-2 min-h-10">
+              {isSmallScreen && isMenuSelected && currentView.split(":").length === 1 ? (
+                <Button isIconOnly variant="light" onPress={backToMenu}>
+                  <Icon icon="material-symbols:arrow-back" width="24" height="24" />
+                </Button>
+              ) : currentView.includes(":") ? (
+                <Button isIconOnly variant="light" onPress={backToParent}>
+                  <Icon icon="material-symbols:arrow-back" width="24" height="24" />
+                </Button>
+              ) : isSmallScreen && !showSidebar ? (
+                <Button isIconOnly variant="light" onPress={() => setShowSidebar(true)}>
+                  <Icon icon="material-symbols:menu" width="24" height="24" />
+                </Button>
+              ) : (
+                <Button isIconOnly variant="light">
+                  <Icon icon={viewInfo.icon} width="24" height="24" />
+                </Button>
+              )}
+              <h2 className="text-xl font-bold">{viewInfo.title}</h2>
+            </div>
+          </ModalHeader>
+          <ModalBody className="px-0 pt-0 flex flex-col md:flex-row overflow-x-hidden">
+            {showSidebar && (
+              <motion.div
+                className="w-full md:w-64 p-4"
+                initial={{ x: -300, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -300, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              >
+                <div className="space-y-1">
+                  {menuItems.map((item) => (
+                    <Button
+                      radius="full"
+                      key={item.id}
+                      variant={
+                        currentView === item.id || currentView.startsWith(`${item.id}:`)
+                          ? "solid"
+                          : "light"
+                      }
+                      color={
+                        currentView === item.id || currentView.startsWith(`${item.id}:`)
+                          ? "primary"
+                          : "default"
+                      }
+                      size={isSmallScreen ? "lg" : "md"}
+                      fullWidth
+                      className="justify-start"
+                      startContent={<Icon icon={item.icon} width="20" height="20" />}
+                      onPress={() => navigateTo(item.id)}
+                    >
+                      {item.label}
+                    </Button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+            {(!showSidebar || !isSmallScreen) && currentView && (
+              <div
+                className={`flex-1 p-6 md:p-4 overflow-y-auto ${showSidebar ? "md:block" : "w-full"} overflow-x-hidden`}
+              >
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.div
+                    key={currentView}
+                    variants={{
+                      enter: (direction: number) => ({
+                        x: direction > 0 ? "20%" : "-20%",
+                        opacity: 0
+                      }),
+                      center: {
+                        x: 0,
+                        opacity: 1,
+                        transition: { duration: 0.15, ease: "easeOut" }
+                      },
+                      exit: (direction: number) => ({
+                        x: direction > 0 ? "-20%" : "20%",
+                        opacity: 0,
+                        transition: { duration: 0.15, ease: "easeIn" }
+                      })
+                    }}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    className="h-full"
+                  >
+                    <div className="space-y-6 flex flex-col">
+                      <AccountView
+                        currentAccount={currentAccount}
+                        navigateTo={navigateTo}
+                        currentView={currentView}
+                      />
+                      <AccountChangeEmailView
+                        currentAccount={currentAccount}
+                        navigateTo={navigateTo}
+                        currentView={currentView}
+                      />
+                      <AccountChangePhoneNumberView
+                        currentAccount={currentAccount}
+                        navigateTo={navigateTo}
+                        currentView={currentView}
+                      />
+                      <AccountPasswordView navigateTo={navigateTo} currentView={currentView} />
+                      <AccountDeactivateView navigateTo={navigateTo} currentView={currentView} />
+                      <AccountDeleteView navigateTo={navigateTo} currentView={currentView} />
+                      <NotificationsView navigateTo={navigateTo} currentView={currentView} />
+                      <DisplayView navigateTo={navigateTo} currentView={currentView} />
+                      <SoundView navigateTo={navigateTo} currentView={currentView} />
+                      <StorageView navigateTo={navigateTo} currentView={currentView} />
+                      <PrivacyView navigateTo={navigateTo} currentView={currentView} />
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+    </ViewContext.Provider>
+  );
+}
+
+export function SettingsModalRouter() {
+  const { closeModal, currentModal, mountedModal } = useModalRouter();
+  const [account] = useAccountState();
+
+  useEffect(() => {
+    if (currentModal?.split(":")[0] === "settings" && !account) {
+      closeModal();
+    }
+  }, [account, currentModal, closeModal]);
+
+  return (
+    <>
+      {mountedModal?.split(":")[0] === "settings" ? (
+        <SettingsModal isOpen={currentModal?.split(":")[0] === "settings"} onClose={closeModal} />
+      ) : null}
+    </>
+  );
+}

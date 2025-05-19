@@ -36,7 +36,7 @@ export default function SignInModal({
 
   const formErrors = useMemo(
     () => cloneDeep(form.formState.errors),
-    [form.formState.isValid, form.formState.isSubmitting]
+    [form.formState.isValid, form.formState.isSubmitting, form.formState.isDirty]
   );
 
   useEffect(() => {
@@ -239,6 +239,7 @@ export default function SignInModal({
                         />
                         <div className="flex justify-end">
                           <Button
+                            radius="full"
                             variant="light"
                             size="sm"
                             className="text-sm text-primary"
@@ -258,6 +259,7 @@ export default function SignInModal({
             <ModalFooter className="px-6 pb-6 pt-2 flex-col gap-3">
               {step === 1 && (
                 <Button
+                  radius="full"
                   variant="light"
                   size="sm"
                   className="text-sm text-center w-fit mx-auto"
@@ -269,6 +271,7 @@ export default function SignInModal({
               )}
               {step === 2 && (
                 <Button
+                  radius="full"
                   color="primary"
                   isDisabled={isLoading}
                   isLoading={isLoading}

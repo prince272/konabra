@@ -52,9 +52,16 @@ export type CompleteResetPasswordForm = {
   validateOnly: boolean;
 };
 
-export class IdentityService {
-  public currentAccountKey: string = "current-account";
+export type ChangeAccountForm = {
+  newUsername: string;
+};
 
+export type CompleteChangeAccountForm = {
+  newUsername: string;
+  code: string;
+};
+
+export class IdentityService {
   constructor(private readonly api: AxiosInstance) {}
 
   public async createAccount(
@@ -65,6 +72,26 @@ export class IdentityService {
       return [response.data, undefined] as const;
     } catch (error) {
       return [undefined!, parseProblem(error)] as const;
+    }
+  }
+
+  public async changeAccount(data: ChangeAccountForm): Promise<Problem | undefined> {
+    try {
+      const response = await this.api.post("/account/change", data);
+      return undefined;
+    } catch (error) {
+      return parseProblem(error);
+    }
+  }
+
+  public async completeChangeAccount(
+    form: CompleteChangeAccountForm
+  ): Promise<Problem | undefined> {
+    try {
+      const _ = await this.api.post("/account/change/complete", form);
+      return undefined;
+    } catch (error) {
+      return parseProblem(error);
     }
   }
 

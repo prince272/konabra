@@ -54,19 +54,20 @@ func (form CreateAccountForm) GetPhoneNumber() string {
 }
 
 type AccountModel struct {
-	Id                  string    `json:"id"`
-	FirstName           string    `json:"firstName"`
-	LastName            string    `json:"lastName"`
-	UserName            string    `json:"userName"`
-	Email               string    `json:"email"`
-	EmailVerified       bool      `json:"emailVerified"`
-	PhoneNumber         string    `json:"phoneNumber"`
-	PhoneNumberVerified bool      `json:"phoneNumberVerified"`
-	HasPassword         bool      `json:"hasPassword"`
-	CreatedAt           time.Time `json:"createdAt"`
-	UpdatedAt           time.Time `json:"updatedAt"`
-	LastActiveAt        time.Time `json:"lastActiveAt"`
-	Roles               []string  `json:"roles"`
+	Id                   string    `json:"id"`
+	FirstName            string    `json:"firstName"`
+	LastName             string    `json:"lastName"`
+	UserName             string    `json:"userName"`
+	Email                string    `json:"email"`
+	EmailVerified        bool      `json:"emailVerified"`
+	PhoneNumber          string    `json:"phoneNumber"`
+	PhoneNumberVerified  bool      `json:"phoneNumberVerified"`
+	HasPassword          bool      `json:"hasPassword"`
+	LastPasswordChangeAt time.Time `json:"lastPasswordChangeAt"`
+	CreatedAt            time.Time `json:"createdAt"`
+	UpdatedAt            time.Time `json:"updatedAt"`
+	LastActiveAt         time.Time `json:"lastActiveAt"`
+	Roles                []string  `json:"roles"`
 }
 
 type AccountWithTokenModel struct {
@@ -480,7 +481,7 @@ func (service *IdentityService) ChangeAccount(userId string, form ChangeAccountF
 
 	if user.Email == form.NewUsername || user.PhoneNumber == form.NewUsername {
 		return problems.NewValidationProblem(map[string]string{
-			"username": fmt.Sprintf("%v is already associated with your account.", humanize.Humanize(string(accountType), humanize.SentenceCase)),
+			"newUsername": fmt.Sprintf("%v is already associated with your account.", humanize.Humanize(string(accountType), humanize.SentenceCase)),
 		})
 	}
 
@@ -638,9 +639,11 @@ func (service *IdentityService) CompleteResetPassword(form CompleteResetPassword
 		return nil
 	}
 
+	user.HasPassword = true
 	user.PasswordHash = utils.MustHashPassword(form.NewPassword)
 	user.SecurityStamp = uuid.New().String()
 	user.UpdatedAt = time.Now()
+	user.LastPasswordChangeAt = time.Now()
 
 	if err := service.identityRepository.UpdateUser(user); err != nil {
 		service.logger.Error("User update error: ", zap.Error(err))
@@ -665,9 +668,11 @@ func (service *IdentityService) ChangePassword(userId string, form ChangePasswor
 		return problems.NewValidationProblem(map[string]string{"oldPassword": "Old password is incorrect."})
 	}
 
+	user.HasPassword = true
 	user.PasswordHash = utils.MustHashPassword(form.NewPassword)
 	user.SecurityStamp = uuid.New().String()
 	user.UpdatedAt = time.Now()
+	user.LastPasswordChangeAt = time.Now()
 
 	if err := service.identityRepository.UpdateUser(user); err != nil {
 		service.logger.Error("User update error: ", zap.Error(err))

@@ -107,7 +107,7 @@ export const Navbar = () => {
         </NavbarItem>
         <NavbarItem className="hidden md:flex">
           {currentAccount ? (
-            <Button as={NextLink} color="primary" variant="solid" href="#account">
+            <Button as={NextLink} color="primary" variant="solid" href="#settings">
               Account
             </Button>
           ) : (

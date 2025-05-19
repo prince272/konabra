@@ -8,6 +8,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState
 } from "react";
 import Cookies from "universal-cookie";
@@ -31,25 +32,29 @@ function emitCookieChange(key: string, value: any) {
   }
 }
 
-const CookiesContext = createContext<string | object | null | undefined>(undefined);
+type CookiesContextValue = string | object | null | undefined;
+
+const CookiesContext = createContext<CookiesContextValue>(undefined);
 
 export const CookiesProvider = ({
   children,
   value
 }: {
   children: ReactNode;
-  value?: string | object | null;
+  value?: CookiesContextValue;
 }) => {
   return <CookiesContext.Provider value={value}>{children}</CookiesContext.Provider>;
 };
 
-export const useCookiesContext = () => {
+export const useCookies = () => {
   const context = useContext(CookiesContext);
-  if (!context) {
-    throw new Error("useCookiesContext must be used within a CookiesProvider");
+  const cookiesRef = useRef<Cookies>();
+
+  if (!cookiesRef.current) {
+    cookiesRef.current = new Cookies(context ?? {}, { path: "/" });
   }
-  const cookies = new Cookies(context, { path: "/" });
-  return cookies;
+
+  return cookiesRef.current;
 };
 
 type CookieOptions = {
@@ -65,18 +70,23 @@ export function useCookieState<S>(
   initialState: S | (() => S),
   options?: CookieOptions
 ): [S, Dispatch<SetStateAction<S>>] {
-  const cookiesContext = useCookiesContext();
+  const cookies = useCookies();
+  const optionsRef = useRef(options);
 
-  const [state, setState] = useState<S>(() => {
-    const cookieValue = cookiesContext.get(key);
-    if (cookieValue !== undefined) return cookieValue;
-    return typeof initialState === "function" ? (initialState as () => S)() : initialState;
-  });
+  const getInitialState = useCallback(() => {
+    const cookieValue = cookies.get(key);
+    return cookieValue !== undefined
+      ? cookieValue
+      : typeof initialState === "function"
+        ? (initialState as () => S)()
+        : initialState;
+  }, [cookies, key, initialState]);
 
-  // Sync state with external changes to the same key
+  const [state, setState] = useState<S>(getInitialState);
+
+  // Sync state with external cookie updates
   useEffect(() => {
     const unsubscribe = subscribeToCookie(key, (newValue) => {
-      // Only update state if the new value is different to avoid infinite loops
       setState((prevState) =>
         JSON.stringify(prevState) !== JSON.stringify(newValue) ? newValue : prevState
       );
@@ -84,22 +94,28 @@ export function useCookieState<S>(
     return unsubscribe;
   }, [key]);
 
-  // Update cookie and notify listeners on state change
+  // Update cookie when state changes
+  const stateRef = useRef(state);
   useEffect(() => {
-    cookiesContext.set(key, state, { path: "/", ...options });
-    emitCookieChange(key, state);
-  }, [key, state, options, cookiesContext]);
+    stateRef.current = state;
+  }, [state]);
+
+  useEffect(() => {
+    cookies.set(key, stateRef.current, { path: "/", ...optionsRef.current });
+    emitCookieChange(key, stateRef.current);
+  }, [key, cookies]);
 
   const setCookieState: Dispatch<SetStateAction<S>> = useCallback(
-    (action: SetStateAction<S>) => {
+    (action) => {
       setState((prevState) => {
         const newValue =
           typeof action === "function" ? (action as (prevState: S) => S)(prevState) : action;
-        // Cookie update and listener notification handled by useEffect
+        cookies.set(key, newValue, { path: "/", ...optionsRef.current });
+        emitCookieChange(key, newValue);
         return newValue;
       });
     },
-    [key]
+    [key, cookies]
   );
 
   return [state, setCookieState];

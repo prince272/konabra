@@ -48,7 +48,7 @@ export default function ResetPasswordModal({
 
   const formErrors = useMemo(
     () => cloneDeep(form.formState.errors),
-    [form.formState.isValid, form.formState.isSubmitting]
+    [form.formState.isValid, form.formState.isSubmitting, form.formState.isDirty]
   );
 
   useEffect(() => {
@@ -317,6 +317,7 @@ export default function ResetPasswordModal({
                         />
                         <div className="flex justify-center">
                           <Button
+                            radius="full"
                             variant="light"
                             size="sm"
                             className={cn("text-sm", !(resendTime > 0) && "text-primary")}
@@ -379,6 +380,7 @@ export default function ResetPasswordModal({
             <ModalFooter className="px-6 pb-6 pt-2 flex-col gap-3">
               {step == 1 && (
                 <Button
+                  radius="full"
                   color="primary"
                   isDisabled={isLoading}
                   isLoading={isLoading}
@@ -389,6 +391,7 @@ export default function ResetPasswordModal({
               )}
               {(step == 2 || step == 3) && (
                 <Button
+                  radius="full"
                   color="primary"
                   isDisabled={isLoading}
                   isLoading={isLoading}
