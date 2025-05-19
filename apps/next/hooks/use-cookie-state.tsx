@@ -8,7 +8,7 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useState,
+  useState
 } from "react";
 import Cookies from "universal-cookie";
 
@@ -31,22 +31,16 @@ function emitCookieChange(key: string, value: any) {
   }
 }
 
-const CookiesContext = createContext<string | object | null | undefined>(
-  undefined,
-);
+const CookiesContext = createContext<string | object | null | undefined>(undefined);
 
 export const CookiesProvider = ({
   children,
-  value,
+  value
 }: {
   children: ReactNode;
   value?: string | object | null;
 }) => {
-  return (
-    <CookiesContext.Provider value={value}>
-      {children}
-    </CookiesContext.Provider>
-  );
+  return <CookiesContext.Provider value={value}>{children}</CookiesContext.Provider>;
 };
 
 export const useCookiesContext = () => {
@@ -69,16 +63,14 @@ type CookieOptions = {
 export function useCookieState<S>(
   key: string,
   initialState: S | (() => S),
-  options?: CookieOptions,
+  options?: CookieOptions
 ): [S, Dispatch<SetStateAction<S>>] {
   const cookiesContext = useCookiesContext();
 
   const [state, setState] = useState<S>(() => {
     const cookieValue = cookiesContext.get(key);
     if (cookieValue !== undefined) return cookieValue;
-    return typeof initialState === "function"
-      ? (initialState as () => S)()
-      : initialState;
+    return typeof initialState === "function" ? (initialState as () => S)() : initialState;
   });
 
   // Sync state with external changes to the same key
@@ -86,9 +78,7 @@ export function useCookieState<S>(
     const unsubscribe = subscribeToCookie(key, (newValue) => {
       // Only update state if the new value is different to avoid infinite loops
       setState((prevState) =>
-        JSON.stringify(prevState) !== JSON.stringify(newValue)
-          ? newValue
-          : prevState,
+        JSON.stringify(prevState) !== JSON.stringify(newValue) ? newValue : prevState
       );
     });
     return unsubscribe;
@@ -104,14 +94,12 @@ export function useCookieState<S>(
     (action: SetStateAction<S>) => {
       setState((prevState) => {
         const newValue =
-          typeof action === "function"
-            ? (action as (prevState: S) => S)(prevState)
-            : action;
+          typeof action === "function" ? (action as (prevState: S) => S)(prevState) : action;
         // Cookie update and listener notification handled by useEffect
         return newValue;
       });
     },
-    [key],
+    [key]
   );
 
   return [state, setCookieState];

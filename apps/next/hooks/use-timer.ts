@@ -28,7 +28,7 @@ export const useTimer = ({
   step = 1,
   timerType = "INCREMENTAL",
   endTime,
-  onTimeOver,
+  onTimeOver
 }: Partial<TimerConfig> = {}): TimerControls => {
   const [time, setTime] = useState(initialTime);
   const [isRunning, setIsRunning] = useState(false);
@@ -63,9 +63,7 @@ export const useTimer = ({
     let intervalId: NodeJS.Timeout | null = null;
     if (isRunning) {
       intervalId = setInterval(() => {
-        setTime((time) =>
-          timerType === "DECREMENTAL" ? time - step : time + step,
-        );
+        setTime((time) => (timerType === "DECREMENTAL" ? time - step : time + step));
       }, interval);
     } else if (!isRunning) {
       if (intervalId) clearInterval(intervalId);

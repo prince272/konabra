@@ -1,29 +1,23 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Controller, useForm } from "react-hook-form";
-import { Icon } from "@iconify/react";
+import { useCallback, useEffect, useState } from "react";
+import { useTimer } from "@/hooks";
+import { identityService } from "@/services";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
-import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-} from "@heroui/modal";
-import { identityService } from "@/services";
-import { addToast } from "@heroui/toast";
-import { useModalRouter } from "@/components/common/models";
-import { CompleteResetPasswordForm } from "@/services/identity-service";
-import { useTimer } from "@/hooks";
-import { cn } from "@heroui/theme";
 import { InputOtp } from "@heroui/input-otp";
+import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
+import { cn } from "@heroui/theme";
+import { addToast } from "@heroui/toast";
+import { Icon } from "@iconify/react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Controller, useForm } from "react-hook-form";
+import { CompleteResetPasswordForm } from "@/services/identity-service";
+import { useModalRouter } from "@/components/common/models";
 
 export default function ResetPasswordModal({
   isOpen,
-  onClose,
+  onClose
 }: {
   isOpen: boolean;
   onClose?: () => void;
@@ -38,18 +32,20 @@ export default function ResetPasswordModal({
   const {
     time: resendTime,
     start: startResendTimer,
-    reset: resetResendTimer,
+    reset: resetResendTimer
   } = useTimer({
     initialTime: 60,
     interval: 1000,
     step: 1,
     timerType: "DECREMENTAL",
-    endTime: 0,
+    endTime: 0
   });
 
   const form = useForm<CompleteResetPasswordForm>({
-    mode: "onChange",
+    mode: "onChange"
   });
+
+  const formErrors = form.formState.errors;
 
   useEffect(() => {
     if (isOpen) {
@@ -72,7 +68,7 @@ export default function ResetPasswordModal({
       setDirection(newStep > step ? 1 : -1);
       setStep(newStep);
     },
-    [step],
+    [step]
   );
 
   const handleSendVerificationCode = useCallback(
@@ -88,19 +84,19 @@ export default function ResetPasswordModal({
             errors.forEach(([name, message]) => {
               form.setError(name as keyof CompleteResetPasswordForm, {
                 type: "manual",
-                message,
+                message
               });
             });
           }
 
           addToast({
             title: problem.message,
-            color: "danger",
+            color: "danger"
           });
         } else {
           addToast({
             title: "Verification code sent successfully.",
-            color: "success",
+            color: "success"
           });
           resetResendTimer();
           startResendTimer();
@@ -110,7 +106,7 @@ export default function ResetPasswordModal({
         setIsLoading(false);
       }
     }),
-    [resetResendTimer, startResendTimer],
+    [resetResendTimer, startResendTimer]
   );
 
   const handleResendCode = useCallback(async () => {
@@ -121,12 +117,12 @@ export default function ResetPasswordModal({
       if (problem) {
         addToast({
           title: problem.message,
-          color: "danger",
+          color: "danger"
         });
       } else {
         addToast({
           title: "Verification code resent successfully.",
-          color: "success",
+          color: "success"
         });
         resetResendTimer();
         startResendTimer();
@@ -143,7 +139,7 @@ export default function ResetPasswordModal({
         const validateOnly = step != 3;
         const problem = await identityService.completeResetPassword({
           ...formData,
-          validateOnly,
+          validateOnly
         });
 
         if (problem) {
@@ -154,7 +150,7 @@ export default function ResetPasswordModal({
             const stepsWithErrors = steps
               .map((fields, index) => ({
                 stepNumber: index + 1,
-                hasError: fields.some((field) => errorFields.has(field)),
+                hasError: fields.some((field) => errorFields.has(field))
               }))
               .filter((_) => _.hasError)
               .map((_) => _.stepNumber);
@@ -164,14 +160,14 @@ export default function ResetPasswordModal({
               handleStep(firstErrorStep);
 
               const stepErrors = errors.filter(([field]) =>
-                (steps[firstErrorStep - 1] || []).includes(field),
+                (steps[firstErrorStep - 1] || []).includes(field)
               );
 
               if (step >= firstErrorStep) {
                 stepErrors.forEach(([field, message]) => {
                   form.setError(field as keyof CompleteResetPasswordForm, {
                     type: "manual",
-                    message,
+                    message
                   });
                 });
               }
@@ -179,7 +175,7 @@ export default function ResetPasswordModal({
           } else {
             addToast({
               title: problem.message,
-              color: "danger",
+              color: "danger"
             });
           }
         } else {
@@ -188,7 +184,7 @@ export default function ResetPasswordModal({
           } else {
             addToast({
               title: "Password reset successfully.",
-              color: "success",
+              color: "success"
             });
             onClose?.();
           }
@@ -197,7 +193,7 @@ export default function ResetPasswordModal({
         setIsLoading(false);
       }
     }),
-    [step],
+    [step]
   );
 
   return (
@@ -228,11 +224,7 @@ export default function ResetPasswordModal({
                     onPress={handlePrev}
                     className="rounded-full text-foreground-500"
                   >
-                    <Icon
-                      icon="material-symbols:arrow-back-rounded"
-                      width="24"
-                      height="24"
-                    />
+                    <Icon icon="material-symbols:arrow-back-rounded" width="24" height="24" />
                   </Button>
                 )}
               </div>
@@ -246,20 +238,20 @@ export default function ResetPasswordModal({
                   variants={{
                     enter: (direction: number) => ({
                       x: direction > 0 ? "20%" : "-20%",
-                      opacity: 0,
+                      opacity: 0
                     }),
                     center: {
                       x: 0,
                       opacity: 1,
                       transition: isInitialRender
                         ? { duration: 0 }
-                        : { duration: 0.15, ease: "easeOut" },
+                        : { duration: 0.15, ease: "easeOut" }
                     },
                     exit: (direction: number) => ({
                       x: direction > 0 ? "-20%" : "20%",
                       opacity: 0,
-                      transition: { duration: 0.15, ease: "easeIn" },
-                    }),
+                      transition: { duration: 0.15, ease: "easeIn" }
+                    })
                   }}
                   initial="enter"
                   animate="center"
@@ -271,8 +263,7 @@ export default function ResetPasswordModal({
                       <div className="flex flex-col">
                         <h3 className="text-lg font-medium">Reset Password</h3>
                         <p className="text-default-500 text-sm">
-                          Enter your email or phone number to receive a
-                          verification code.
+                          Enter your email or phone number to receive a verification code.
                         </p>
                       </div>
                       <Controller
@@ -282,12 +273,8 @@ export default function ResetPasswordModal({
                           <Input
                             {...field}
                             label="Email or Phone number"
-                            isInvalid={
-                              !!form.formState.errors.username?.message
-                            }
-                            errorMessage={
-                              form.formState.errors.username?.message
-                            }
+                            isInvalid={!!formErrors.username?.message}
+                            errorMessage={formErrors.username?.message}
                             type="text"
                             autoFocus
                           />
@@ -299,15 +286,10 @@ export default function ResetPasswordModal({
                   {step == 2 && (
                     <div className="space-y-6 py-4">
                       <div className="flex flex-col">
-                        <h3 className="text-lg font-medium">
-                          Verify Your Identity
-                        </h3>
+                        <h3 className="text-lg font-medium">Verify Your Identity</h3>
                         <p className="text-default-500 text-sm">
                           Enter the verification code sent to{" "}
-                          <span className="break-all font-semibold">
-                            {form.watch("username")}
-                          </span>
-                          .
+                          <span className="break-all font-semibold">{form.watch("username")}</span>.
                         </p>
                       </div>
                       <div className="flex flex-col space-y-3">
@@ -320,12 +302,8 @@ export default function ResetPasswordModal({
                                 {...field}
                                 length={6}
                                 label="Code"
-                                isInvalid={
-                                  !!form.formState.errors.code?.message
-                                }
-                                errorMessage={
-                                  form.formState.errors.code?.message
-                                }
+                                isInvalid={!!formErrors.code?.message}
+                                errorMessage={formErrors.code?.message}
                                 type="text"
                                 autoFocus
                                 className="flex justify-center"
@@ -337,17 +315,12 @@ export default function ResetPasswordModal({
                           <Button
                             variant="light"
                             size="sm"
-                            className={cn(
-                              "text-sm",
-                              !(resendTime > 0) && "text-primary",
-                            )}
+                            className={cn("text-sm", !(resendTime > 0) && "text-primary")}
                             onPress={handleResendCode}
                             isLoading={isResending}
                             isDisabled={isResending || resendTime > 0}
                           >
-                            {resendTime > 0
-                              ? `Resend code (${resendTime}s)`
-                              : "Resend code"}
+                            {resendTime > 0 ? `Resend code (${resendTime}s)` : "Resend code"}
                           </Button>
                         </div>
                       </div>
@@ -357,9 +330,7 @@ export default function ResetPasswordModal({
                   {step == 3 && (
                     <div className="space-y-6 py-4">
                       <div className="flex flex-col">
-                        <h3 className="text-lg font-medium">
-                          Create New Password
-                        </h3>
+                        <h3 className="text-lg font-medium">Create New Password</h3>
                         <p className="text-default-500 text-sm">
                           Enter and confirm your new password.
                         </p>
@@ -371,12 +342,8 @@ export default function ResetPasswordModal({
                           <Input
                             {...field}
                             label="New Password"
-                            isInvalid={
-                              !!form.formState.errors.newPassword?.message
-                            }
-                            errorMessage={
-                              form.formState.errors.newPassword?.message
-                            }
+                            isInvalid={!!formErrors.newPassword?.message}
+                            errorMessage={formErrors.newPassword?.message}
                             type="password"
                             autoFocus
                           />
@@ -387,19 +354,14 @@ export default function ResetPasswordModal({
                         control={form.control}
                         rules={{
                           validate: (value) =>
-                            value === form.watch("newPassword") ||
-                            "Passwords don't match",
+                            value === form.watch("newPassword") || "Passwords don't match"
                         }}
                         render={({ field }) => (
                           <Input
                             {...field}
                             label="Confirm password"
-                            isInvalid={
-                              !!form.formState.errors.confirmPassword?.message
-                            }
-                            errorMessage={
-                              form.formState.errors.confirmPassword?.message
-                            }
+                            isInvalid={!!formErrors.confirmPassword?.message}
+                            errorMessage={formErrors.confirmPassword?.message}
                             type="password"
                           />
                         )}
@@ -445,10 +407,7 @@ export function ResetPasswordModalRouter() {
   return (
     <>
       {mountedModal == "reset-password" ? (
-        <ResetPasswordModal
-          isOpen={currentModal == "reset-password"}
-          onClose={closeModal}
-        />
+        <ResetPasswordModal isOpen={currentModal == "reset-password"} onClose={closeModal} />
       ) : null}
     </>
   );

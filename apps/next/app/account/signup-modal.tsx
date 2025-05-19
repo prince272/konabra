@@ -1,34 +1,24 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Controller, useForm } from "react-hook-form";
+import { useCallback, useEffect, useRef, useState } from "react";
 import NextLink from "next/link";
-import { Icon } from "@iconify/react";
+import { useCookieState } from "@/hooks";
+import { identityService } from "@/services";
 import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-} from "@heroui/modal";
 import { Divider } from "@heroui/divider";
-
+import { Input } from "@heroui/input";
+import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
+import { addToast } from "@heroui/toast";
+import { Icon } from "@iconify/react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Controller, useForm } from "react-hook-form";
+import { AccountWithTokenModel, CreateAccountForm } from "@/services/identity-service";
 import { useModalRouter } from "@/components/common/models";
 import { Logo } from "@/components/icons";
-import { identityService } from "@/services";
-import {
-  AccountWithTokenModel,
-  CreateAccountForm,
-} from "@/services/identity-service";
-import { addToast } from "@heroui/toast";
-import { useCookieState } from "@/hooks";
 
 export default function SignUpModal({
   isOpen,
-  onClose,
+  onClose
 }: {
   isOpen: boolean;
   onClose?: () => void;
@@ -40,12 +30,14 @@ export default function SignUpModal({
   const [isInitialRender, setIsInitialRender] = useState<boolean>(true);
   const [_, setAccount] = useCookieState<AccountWithTokenModel | null>(
     identityService.currentAccountKey,
-    null,
+    null
   );
 
   const form = useForm<CreateAccountForm>({
-    mode: "onChange",
+    mode: "onChange"
   });
+
+  const formErrors = form.formState.errors;
 
   useEffect(() => {
     if (isOpen) {
@@ -68,7 +60,7 @@ export default function SignUpModal({
       setDirection(newStep > step ? 1 : -1);
       setStep(newStep);
     },
-    [step],
+    [step]
   );
 
   const handleSubmit = useCallback(
@@ -78,7 +70,7 @@ export default function SignUpModal({
         const validateOnly = step != 4;
         const [account, problem] = await identityService.createAccount({
           ...formData,
-          validateOnly,
+          validateOnly
         });
 
         if (problem) {
@@ -89,7 +81,7 @@ export default function SignUpModal({
             const stepsWithErrors = steps
               .map((fields, index) => ({
                 stepNumber: index + 1,
-                hasError: fields.some((field) => errorFields.has(field)),
+                hasError: fields.some((field) => errorFields.has(field))
               }))
               .filter((_) => _.hasError)
               .map((_) => _.stepNumber);
@@ -99,14 +91,14 @@ export default function SignUpModal({
               handleStep(firstErrorStep);
 
               const stepErrors = errors.filter(([field]) =>
-                (steps[firstErrorStep - 1] || []).includes(field),
+                (steps[firstErrorStep - 1] || []).includes(field)
               );
 
               if (step >= firstErrorStep) {
                 stepErrors.forEach(([field, message]) => {
                   form.setError(field as keyof CreateAccountForm, {
                     type: "manual",
-                    message,
+                    message
                   });
                 });
               }
@@ -114,7 +106,7 @@ export default function SignUpModal({
           } else {
             addToast({
               title: problem.message,
-              color: "danger",
+              color: "danger"
             });
           }
         } else {
@@ -125,7 +117,7 @@ export default function SignUpModal({
 
             addToast({
               title: "Account created successfully.",
-              color: "success",
+              color: "success"
             });
 
             onClose?.();
@@ -135,7 +127,7 @@ export default function SignUpModal({
         setIsLoading(false);
       }
     }),
-    [step],
+    [step]
   );
 
   return (
@@ -166,11 +158,7 @@ export default function SignUpModal({
                     onPress={handlePrev}
                     className="rounded-full text-foreground-500"
                   >
-                    <Icon
-                      icon="material-symbols:arrow-back-rounded"
-                      width="24"
-                      height="24"
-                    />
+                    <Icon icon="material-symbols:arrow-back-rounded" width="24" height="24" />
                   </Button>
                 ) : (
                   <div className="w-8" />
@@ -186,20 +174,20 @@ export default function SignUpModal({
                   variants={{
                     enter: (direction: number) => ({
                       x: direction > 0 ? "20%" : "-20%",
-                      opacity: 0,
+                      opacity: 0
                     }),
                     center: {
                       x: 0,
                       opacity: 1,
                       transition: isInitialRender
                         ? { duration: 0 }
-                        : { duration: 0.15, ease: "easeOut" },
+                        : { duration: 0.15, ease: "easeOut" }
                     },
                     exit: (direction: number) => ({
                       x: direction > 0 ? "-20%" : "20%",
                       opacity: 0,
-                      transition: { duration: 0.15, ease: "easeIn" },
-                    }),
+                      transition: { duration: 0.15, ease: "easeIn" }
+                    })
                   }}
                   initial="enter"
                   animate="center"
@@ -209,16 +197,10 @@ export default function SignUpModal({
                   {step === 1 && (
                     <div className="space-y-5">
                       <div className="text-center flex justify-center flex-col items-center pb-3">
-                        <Logo
-                          className="flex justify-start items-center gap-1"
-                          size={64}
-                        />
-                        <h3 className="text-lg font-medium">
-                          Create an account
-                        </h3>
+                        <Logo className="flex justify-start items-center gap-1" size={64} />
+                        <h3 className="text-lg font-medium">Create an account</h3>
                         <p className="text-default-500 text-sm">
-                          Sign up quickly using your email, phone, or social
-                          account.
+                          Sign up quickly using your email, phone, or social account.
                         </p>
                       </div>
                       <div className="grid grid-cols-1 gap-2">
@@ -228,11 +210,7 @@ export default function SignUpModal({
                           radius="full"
                           fullWidth
                           startContent={
-                            <Icon
-                              icon="solar:user-bold-duotone"
-                              width="24"
-                              height="24"
-                            />
+                            <Icon icon="solar:user-bold-duotone" width="24" height="24" />
                           }
                           onPress={handleNext}
                         >
@@ -249,18 +227,14 @@ export default function SignUpModal({
                           className="dark dark:light"
                           variant="solid"
                           radius="full"
-                          startContent={
-                            <Icon icon="flat-color-icons:google" width={20} />
-                          }
+                          startContent={<Icon icon="flat-color-icons:google" width={20} />}
                         >
                           Continue with Google
                         </Button>
                         <Button
                           variant="flat"
                           radius="full"
-                          startContent={
-                            <Icon icon="logos:facebook" width={20} />
-                          }
+                          startContent={<Icon icon="logos:facebook" width={20} />}
                         >
                           Continue with Facebook
                         </Button>
@@ -271,12 +245,9 @@ export default function SignUpModal({
                   {step === 2 && (
                     <div className="space-y-6 py-4">
                       <div className="flex flex-col">
-                        <h3 className="text-lg font-medium">
-                          Enter your email or phone number
-                        </h3>
+                        <h3 className="text-lg font-medium">Enter your email or phone number</h3>
                         <p className="text-default-500 text-sm">
-                          We'll use this to verify your identity and keep your
-                          account secure.
+                          We'll use this to verify your identity and keep your account secure.
                         </p>
                       </div>
                       <Controller
@@ -286,12 +257,8 @@ export default function SignUpModal({
                           <Input
                             {...field}
                             label="Email or Phone number"
-                            isInvalid={
-                              !!form.formState.errors.username?.message
-                            }
-                            errorMessage={
-                              form.formState.errors.username?.message
-                            }
+                            isInvalid={!!formErrors.username?.message}
+                            errorMessage={formErrors.username?.message}
                             type="text"
                             autoFocus
                           />
@@ -303,12 +270,9 @@ export default function SignUpModal({
                   {step === 3 && (
                     <div className="space-y-6 py-4">
                       <div className="flex flex-col">
-                        <h3 className="text-lg font-medium">
-                          Enter your profile info
-                        </h3>
+                        <h3 className="text-lg font-medium">Enter your profile info</h3>
                         <p className="text-default-500 text-sm">
-                          Tell us a bit about yourself to help personalize your
-                          experience.
+                          Tell us a bit about yourself to help personalize your experience.
                         </p>
                       </div>
                       <Controller
@@ -318,12 +282,8 @@ export default function SignUpModal({
                           <Input
                             {...field}
                             label="First name"
-                            isInvalid={
-                              !!form.formState.errors.firstName?.message
-                            }
-                            errorMessage={
-                              form.formState.errors.firstName?.message
-                            }
+                            isInvalid={!!formErrors.firstName?.message}
+                            errorMessage={formErrors.firstName?.message}
                             type="text"
                             autoFocus
                           />
@@ -336,12 +296,8 @@ export default function SignUpModal({
                           <Input
                             {...field}
                             label="Last name"
-                            isInvalid={
-                              !!form.formState.errors.lastName?.message
-                            }
-                            errorMessage={
-                              form.formState.errors.lastName?.message
-                            }
+                            isInvalid={!!formErrors.lastName?.message}
+                            errorMessage={formErrors.lastName?.message}
                             type="text"
                           />
                         )}
@@ -352,12 +308,9 @@ export default function SignUpModal({
                   {step === 4 && (
                     <div className="space-y-6 py-4">
                       <div className="flex flex-col">
-                        <h3 className="text-lg font-medium">
-                          Create a Secure Password
-                        </h3>
+                        <h3 className="text-lg font-medium">Create a Secure Password</h3>
                         <p className="text-default-500 text-sm">
-                          Use a combination of letters, numbers, and symbols for
-                          a strong password.
+                          Use a combination of letters, numbers, and symbols for a strong password.
                         </p>
                       </div>
                       <Controller
@@ -367,12 +320,8 @@ export default function SignUpModal({
                           <Input
                             {...field}
                             label="Password"
-                            isInvalid={
-                              !!form.formState.errors.password?.message
-                            }
-                            errorMessage={
-                              form.formState.errors.password?.message
-                            }
+                            isInvalid={!!formErrors.password?.message}
+                            errorMessage={formErrors.password?.message}
                             type="password"
                             autoFocus
                           />
@@ -383,19 +332,14 @@ export default function SignUpModal({
                         control={form.control}
                         rules={{
                           validate: (value) =>
-                            value === form.watch("password") ||
-                            "Passwords don't match",
+                            value === form.watch("password") || "Passwords don't match"
                         }}
                         render={({ field }) => (
                           <Input
                             {...field}
                             label="Confirm password"
-                            isInvalid={
-                              !!form.formState.errors.confirmPassword?.message
-                            }
-                            errorMessage={
-                              form.formState.errors.confirmPassword?.message
-                            }
+                            isInvalid={!!formErrors.confirmPassword?.message}
+                            errorMessage={formErrors.confirmPassword?.message}
                             type="password"
                           />
                         )}
@@ -415,8 +359,7 @@ export default function SignUpModal({
                   as={NextLink}
                   href="#signin"
                 >
-                  Already created account?{" "}
-                  <span className="text-primary">Sign In</span>
+                  Already created account? <span className="text-primary">Sign In</span>
                 </Button>
               )}
               {(step == 2 || step == 3 || step == 4) && (

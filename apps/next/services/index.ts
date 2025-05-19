@@ -1,7 +1,7 @@
 import axios from "axios";
 import { IdentityService } from "./identity-service";
 
-const isDev = process.env.NODE_ENV === 'development';
+const isDev = process.env.NODE_ENV === "development";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_SERVER_URL,

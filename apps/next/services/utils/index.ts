@@ -6,14 +6,14 @@ const DEFAULT_PROBLEM: Problem = {
   message: "An unknown error occurred.",
   status: -999,
   errors: {},
-  reason: "Unknown error",
+  reason: "Unknown error"
 };
 
 const NETWORK_ERROR: Problem = {
   ...DEFAULT_PROBLEM,
   message: "A network error occurred.",
   status: -1,
-  reason: "Network error",
+  reason: "Network error"
 };
 
 export function parseProblem(error: unknown): Problem {
@@ -37,7 +37,7 @@ export function parseProblem(error: unknown): Problem {
       message: (data.message as string) ?? DEFAULT_PROBLEM.message,
       status: (data.status as number) ?? DEFAULT_PROBLEM.status,
       errors: (data.errors as Record<string, any>) ?? DEFAULT_PROBLEM.errors,
-      reason: (data.reason as string) ?? DEFAULT_PROBLEM.reason,
+      reason: (data.reason as string) ?? DEFAULT_PROBLEM.reason
     };
   }
 

@@ -59,7 +59,7 @@ export class IdentityService {
   constructor(private readonly api: AxiosInstance) {}
 
   public async createAccount(
-    data: CreateAccountForm,
+    data: CreateAccountForm
   ): Promise<readonly [AccountWithTokenModel, Problem?]> {
     try {
       const response = await this.api.post("/account/create", data);
@@ -69,9 +69,7 @@ export class IdentityService {
     }
   }
 
-  public async signIn(
-    data: SignInForm,
-  ): Promise<readonly [AccountWithTokenModel, Problem?]> {
+  public async signIn(data: SignInForm): Promise<readonly [AccountWithTokenModel, Problem?]> {
     try {
       const response = await this.api.post("/account/signin", data);
       return [response.data, undefined] as const;
@@ -80,9 +78,7 @@ export class IdentityService {
     }
   }
 
-  public async resetPassword(
-    form: ResetPasswordForm,
-  ): Promise<Problem | undefined> {
+  public async resetPassword(form: ResetPasswordForm): Promise<Problem | undefined> {
     try {
       const _ = await this.api.post("/account/password/reset", form);
       return undefined;
@@ -92,7 +88,7 @@ export class IdentityService {
   }
 
   public async completeResetPassword(
-    form: CompleteResetPasswordForm,
+    form: CompleteResetPasswordForm
   ): Promise<Problem | undefined> {
     try {
       const _ = await this.api.post("/account/password/reset/complete", form);

@@ -1,7 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import NextLink from "next/link";
 import { siteConfig } from "@/config/site";
+import { useCookieState } from "@/hooks";
+import { identityService } from "@/services";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Kbd } from "@heroui/kbd";
@@ -13,37 +16,33 @@ import {
   NavbarItem,
   NavbarMenu,
   NavbarMenuItem,
-  NavbarMenuToggle,
+  NavbarMenuToggle
 } from "@heroui/navbar";
 import { link as linkStyles } from "@heroui/theme";
 import clsx from "clsx";
+import { AccountWithTokenModel } from "@/services/identity-service";
 import {
   DiscordIcon,
   GithubIcon,
   HeartFilledIcon,
   Logo,
   SearchIcon,
-  TwitterIcon,
+  TwitterIcon
 } from "@/components/icons";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { useEffect, useState } from "react";
-import { identityService } from "@/services";
-import { AccountWithTokenModel } from "@/services/identity-service";
-import { useCookieState } from "@/hooks";
 
 export const Navbar = () => {
-  const [currentAccount, setAccount] =
-    useCookieState<AccountWithTokenModel | null>(
-      identityService.currentAccountKey,
-      null,
-    );
+  const [currentAccount, setAccount] = useCookieState<AccountWithTokenModel | null>(
+    identityService.currentAccountKey,
+    null
+  );
 
   const searchInput = (
     <Input
       aria-label="Search"
       classNames={{
         inputWrapper: "bg-default-100",
-        input: "text-sm",
+        input: "text-sm"
       }}
       endContent={
         <Kbd className="hidden lg:inline-block" keys={["command"]}>
@@ -74,7 +73,7 @@ export const Navbar = () => {
               <NextLink
                 className={clsx(
                   linkStyles({ color: "foreground" }),
-                  "data-[active=true]:text-primary data-[active=true]:font-medium",
+                  "data-[active=true]:text-primary data-[active=true]:font-medium"
                 )}
                 color="foreground"
                 href={item.href}
@@ -86,10 +85,7 @@ export const Navbar = () => {
         </ul>
       </NavbarContent>
 
-      <NavbarContent
-        className="hidden sm:flex basis-1/5 sm:basis-full"
-        justify="end"
-      >
+      <NavbarContent className="hidden sm:flex basis-1/5 sm:basis-full" justify="end">
         <NavbarItem className="hidden sm:flex gap-2">
           <Link isExternal aria-label="Twitter" href={siteConfig.links.twitter}>
             <TwitterIcon className="text-default-500" />
@@ -117,21 +113,11 @@ export const Navbar = () => {
         </NavbarItem>
         <NavbarItem className="hidden md:flex">
           {currentAccount ? (
-            <Button
-              as={NextLink}
-              color="primary"
-              variant="solid"
-              href="#account"
-            >
+            <Button as={NextLink} color="primary" variant="solid" href="#account">
               Account
             </Button>
           ) : (
-            <Button
-              as={NextLink}
-              color="primary"
-              variant="solid"
-              href="#signin"
-            >
+            <Button as={NextLink} color="primary" variant="solid" href="#signin">
               Sign In
             </Button>
           )}

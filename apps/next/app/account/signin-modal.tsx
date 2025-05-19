@@ -1,30 +1,24 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Controller, useForm } from "react-hook-form";
+import { useCallback, useEffect, useState } from "react";
 import NextLink from "next/link";
-import { Icon } from "@iconify/react";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-} from "@heroui/modal";
-import { Logo } from "@/components/icons";
-import { identityService } from "@/services";
-import { AccountWithTokenModel, SignInForm } from "@/services/identity-service";
-import { addToast } from "@heroui/toast";
 import { useCookieState } from "@/hooks";
-import { useModalRouter } from "@/components/common/models";
+import { identityService } from "@/services";
+import { Button } from "@heroui/button";
 import { Divider } from "@heroui/divider";
+import { Input } from "@heroui/input";
+import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
+import { addToast } from "@heroui/toast";
+import { Icon } from "@iconify/react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Controller, useForm } from "react-hook-form";
+import { AccountWithTokenModel, SignInForm } from "@/services/identity-service";
+import { useModalRouter } from "@/components/common/models";
+import { Logo } from "@/components/icons";
 
 export default function SignInModal({
   isOpen,
-  onClose,
+  onClose
 }: {
   isOpen: boolean;
   onClose?: () => void;
@@ -35,12 +29,14 @@ export default function SignInModal({
   const [isInitialRender, setIsInitialRender] = useState<boolean>(true);
   const [_, setAccount] = useCookieState<AccountWithTokenModel | null>(
     identityService.currentAccountKey,
-    null,
+    null
   );
 
   const form = useForm<SignInForm>({
-    mode: "onChange",
+    mode: "onChange"
   });
+
+  const formErrors = form.formState.errors;
 
   useEffect(() => {
     if (isOpen) {
@@ -71,20 +67,20 @@ export default function SignInModal({
             errors.forEach(([name, message]) => {
               form.setError(name as keyof SignInForm, {
                 type: "manual",
-                message,
+                message
               });
             });
           } else {
             addToast({
               title: problem.message,
-              color: "danger",
+              color: "danger"
             });
           }
         } else {
           setAccount(account);
           addToast({
             title: "Sign in successfully.",
-            color: "success",
+            color: "success"
           });
           onClose?.();
         }
@@ -92,7 +88,7 @@ export default function SignInModal({
         setIsLoading(false);
       }
     }),
-    [],
+    []
   );
 
   return (
@@ -124,11 +120,7 @@ export default function SignInModal({
                     onPress={handlePrev}
                     className="rounded-full text-foreground-500"
                   >
-                    <Icon
-                      icon="material-symbols:arrow-back-rounded"
-                      width="24"
-                      height="24"
-                    />
+                    <Icon icon="material-symbols:arrow-back-rounded" width="24" height="24" />
                   </Button>
                 )}
               </div>
@@ -142,20 +134,20 @@ export default function SignInModal({
                   variants={{
                     enter: (direction: number) => ({
                       x: direction > 0 ? "20%" : "-20%",
-                      opacity: 0,
+                      opacity: 0
                     }),
                     center: {
                       x: 0,
                       opacity: 1,
                       transition: isInitialRender
                         ? { duration: 0 }
-                        : { duration: 0.15, ease: "easeOut" },
+                        : { duration: 0.15, ease: "easeOut" }
                     },
                     exit: (direction: number) => ({
                       x: direction > 0 ? "-20%" : "20%",
                       opacity: 0,
-                      transition: { duration: 0.15, ease: "easeIn" },
-                    }),
+                      transition: { duration: 0.15, ease: "easeIn" }
+                    })
                   }}
                   initial="enter"
                   animate="center"
@@ -165,16 +157,10 @@ export default function SignInModal({
                   {step === 1 && (
                     <div className="space-y-5">
                       <div className="text-center flex justify-center flex-col items-center pb-3">
-                        <Logo
-                          className="flex justify-start items-center gap-1"
-                          size={64}
-                        />
-                        <h3 className="text-lg font-medium">
-                          Sign into account
-                        </h3>
+                        <Logo className="flex justify-start items-center gap-1" size={64} />
+                        <h3 className="text-lg font-medium">Sign into account</h3>
                         <p className="text-default-500 text-sm">
-                          Enter your email or phone number to sign in to your
-                          account.
+                          Enter your email or phone number to sign in to your account.
                         </p>
                       </div>
                       <Button
@@ -183,11 +169,7 @@ export default function SignInModal({
                         radius="full"
                         fullWidth
                         startContent={
-                          <Icon
-                            icon="solar:user-bold-duotone"
-                            width="24"
-                            height="24"
-                          />
+                          <Icon icon="solar:user-bold-duotone" width="24" height="24" />
                         }
                         onPress={handleNext}
                       >
@@ -203,18 +185,14 @@ export default function SignInModal({
                           className="dark dark:light"
                           variant="solid"
                           radius="full"
-                          startContent={
-                            <Icon icon="flat-color-icons:google" width={20} />
-                          }
+                          startContent={<Icon icon="flat-color-icons:google" width={20} />}
                         >
                           Continue with Google
                         </Button>
                         <Button
                           variant="flat"
                           radius="full"
-                          startContent={
-                            <Icon icon="logos:facebook" width={20} />
-                          }
+                          startContent={<Icon icon="logos:facebook" width={20} />}
                         >
                           Continue with Facebook
                         </Button>
@@ -225,9 +203,7 @@ export default function SignInModal({
                   {step === 2 && (
                     <div className="space-y-6 py-4">
                       <div className="flex flex-col">
-                        <h3 className="text-lg font-medium">
-                          Enter your credentials
-                        </h3>
+                        <h3 className="text-lg font-medium">Enter your credentials</h3>
                         <p className="text-default-500 text-sm">
                           Provide your email or phone number and password.
                         </p>
@@ -239,8 +215,8 @@ export default function SignInModal({
                           <Input
                             {...field}
                             label="Email or Phone number"
-                            isInvalid={!!form.formState.errors.username?.message}
-                            errorMessage={form.formState.errors.username?.message}
+                            isInvalid={!!formErrors.username?.message}
+                            errorMessage={formErrors.username?.message}
                             type="text"
                             autoFocus
                           />
@@ -254,8 +230,8 @@ export default function SignInModal({
                             <Input
                               {...field}
                               label="Password"
-                              isInvalid={!!form.formState.errors.password?.message}
-                              errorMessage={form.formState.errors.password?.message}
+                              isInvalid={!!formErrors.password?.message}
+                              errorMessage={formErrors.password?.message}
                               type="password"
                             />
                           )}
@@ -287,8 +263,7 @@ export default function SignInModal({
                   as={NextLink}
                   href={`#${encodeURIComponent("signup")}`}
                 >
-                  Don't have an account?{" "}
-                  <span className="text-primary">Sign Up</span>
+                  Don't have an account? <span className="text-primary">Sign Up</span>
                 </Button>
               )}
               {step === 2 && (

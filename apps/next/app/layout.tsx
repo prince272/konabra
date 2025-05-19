@@ -1,64 +1,51 @@
 import "@/styles/globals.css";
 import { Metadata, Viewport } from "next";
+import { cookies as getCookiesStore } from "next/headers";
 import { fontSans } from "@/config/fonts";
 import { siteConfig } from "@/config/site";
+import { identityService } from "@/services";
 import { Link } from "@heroui/link";
 import clsx from "clsx";
+import { AccountWithTokenModel } from "@/services/identity-service";
 import { Navbar } from "@/components/navbar";
 import { Providers } from "../components/providers";
+import { ResetPasswordModalRouter } from "./account/reset-password";
 import { SignInModalRouter } from "./account/signin-modal";
 import { SignUpModalRouter } from "./account/signup-modal";
-import { cookies as getCookiesStore } from "next/headers";
-import { AccountWithTokenModel } from "@/services/identity-service";
-import { identityService } from "@/services";
-import { ResetPasswordModalRouter } from "./account/reset-password";
 
 export const metadata: Metadata = {
   title: {
     default: siteConfig.name,
-    template: `%s - ${siteConfig.name}`,
+    template: `%s - ${siteConfig.name}`
   },
   description: siteConfig.description,
   icons: {
-    icon: "/favicon.ico",
-  },
+    icon: "/favicon.ico"
+  }
 };
 
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "black" },
-  ],
+    { media: "(prefers-color-scheme: dark)", color: "black" }
+  ]
 };
 
-export default async function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cookiesStore = await getCookiesStore();
-  const cookies = cookiesStore
-    .getAll()
-    .reduce<Record<string, any>>((acc, { name, value }) => {
-      acc[name] = value;
-      return acc;
-    }, {});
+  const cookies = cookiesStore.getAll().reduce<Record<string, any>>((acc, { name, value }) => {
+    acc[name] = value;
+    return acc;
+  }, {});
 
   return (
     <html suppressHydrationWarning lang="en">
       <head />
-      <body
-        className={clsx(
-          "min-h-screen bg-background font-sans antialiased",
-          fontSans.variable,
-        )}
-      >
+      <body className={clsx("min-h-screen bg-background font-sans antialiased", fontSans.variable)}>
         <Providers cookies={cookies} themeProps={{ attribute: "class", defaultTheme: "dark" }}>
           <div className="relative flex flex-col h-screen">
             <Navbar />
-            <main className="container mx-auto max-w-7xl pt-16 px-6 flex-grow">
-              {children}
-            </main>
+            <main className="container mx-auto max-w-7xl pt-16 px-6 flex-grow">{children}</main>
             <footer className="w-full flex items-center justify-center py-3">
               <Link
                 isExternal

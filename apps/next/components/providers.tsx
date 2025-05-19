@@ -2,12 +2,12 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { CookiesProvider } from "@/hooks";
 import { HeroUIProvider } from "@heroui/system";
+import { ToastProvider } from "@heroui/toast";
 import type { ThemeProviderProps } from "next-themes";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { ModalQueueProvider } from "@/components/common/models";
-import { ToastProvider } from "@heroui/toast";
-import { CookiesProvider } from "@/hooks";
 
 export interface ProvidersProps {
   children: React.ReactNode;
@@ -17,9 +17,7 @@ export interface ProvidersProps {
 
 declare module "@react-types/shared" {
   interface RouterConfig {
-    routerOptions: NonNullable<
-      Parameters<ReturnType<typeof useRouter>["push"]>[1]
-    >;
+    routerOptions: NonNullable<Parameters<ReturnType<typeof useRouter>["push"]>[1]>;
   }
 }
 
