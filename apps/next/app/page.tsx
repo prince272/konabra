@@ -1,10 +1,10 @@
+import { GithubIcon } from "@/components/icons";
+import { subtitle, title } from "@/components/primitives";
 import { siteConfig } from "@/config/site";
 import { Code } from "@heroui/code";
 import { Link } from "@heroui/link";
 import { Snippet } from "@heroui/snippet";
 import { button as buttonStyles } from "@heroui/theme";
-import { GithubIcon } from "@/components/icons";
-import { subtitle, title } from "@/components/primitives";
 
 export default function Home() {
   return (

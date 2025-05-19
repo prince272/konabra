@@ -1,15 +1,13 @@
-import "@/styles/globals.css";
-import { Metadata, Viewport } from "next";
-import { cookies as getCookiesStore } from "next/headers";
+import { Navbar } from "@/components/navbar";
 import { fontSans } from "@/config/fonts";
 import { siteConfig } from "@/config/site";
-import { identityService } from "@/services";
+import "@/styles/globals.css";
 import { Link } from "@heroui/link";
 import clsx from "clsx";
-import { AccountWithTokenModel } from "@/services/identity-service";
-import { Navbar } from "@/components/navbar";
+import { Metadata, Viewport } from "next";
+import { cookies as getCookiesStore } from "next/headers";
 import { Providers } from "../components/providers";
-import { ResetPasswordModalRouter } from "./account/reset-password";
+import { ResetPasswordModalRouter } from "./account/reset-password-modal";
 import { SignInModalRouter } from "./account/signin-modal";
 import { SignUpModalRouter } from "./account/signup-modal";
 

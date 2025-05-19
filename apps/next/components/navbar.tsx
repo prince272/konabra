@@ -1,10 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import NextLink from "next/link";
+import {
+  DiscordIcon,
+  GithubIcon,
+  HeartFilledIcon,
+  Logo,
+  SearchIcon,
+  TwitterIcon
+} from "@/components/icons";
+import { ThemeSwitch } from "@/components/theme-switch";
 import { siteConfig } from "@/config/site";
-import { useCookieState } from "@/hooks";
-import { identityService } from "@/services";
+import { useAccountState } from "@/states";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Kbd } from "@heroui/kbd";
@@ -20,22 +26,10 @@ import {
 } from "@heroui/navbar";
 import { link as linkStyles } from "@heroui/theme";
 import clsx from "clsx";
-import { AccountWithTokenModel } from "@/services/identity-service";
-import {
-  DiscordIcon,
-  GithubIcon,
-  HeartFilledIcon,
-  Logo,
-  SearchIcon,
-  TwitterIcon
-} from "@/components/icons";
-import { ThemeSwitch } from "@/components/theme-switch";
+import NextLink from "next/link";
 
 export const Navbar = () => {
-  const [currentAccount, setAccount] = useCookieState<AccountWithTokenModel | null>(
-    identityService.currentAccountKey,
-    null
-  );
+  const [currentAccount] = useAccountState();
 
   const searchInput = (
     <Input
