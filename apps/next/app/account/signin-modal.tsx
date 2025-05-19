@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import NextLink from "next/link";
 import { Icon } from "@iconify/react";
 import { Button } from "@heroui/button";
@@ -232,22 +232,33 @@ export default function SignInModal({
                           Provide your email or phone number and password.
                         </p>
                       </div>
-                      <Input
-                        {...form.register("username")}
-                        label="Email or Phone number"
-                        isInvalid={!!form.formState.errors.username?.message}
-                        errorMessage={form.formState.errors.username?.message}
-                        type="text"
-                        autoFocus
+                      <Controller
+                        name="username"
+                        control={form.control}
+                        render={({ field }) => (
+                          <Input
+                            {...field}
+                            label="Email or Phone number"
+                            isInvalid={!!form.formState.errors.username?.message}
+                            errorMessage={form.formState.errors.username?.message}
+                            type="text"
+                            autoFocus
+                          />
+                        )}
                       />
-                      <div className="flex flex-col">
-                        <Input
-                          {...form.register("password")}
-                          label="Password"
-                          isInvalid={!!form.formState.errors.password?.message}
-                          errorMessage={form.formState.errors.password?.message}
-                          type="password"
-                          className="mb-2"
+                      <div className="flex flex-col space-y-3">
+                        <Controller
+                          name="password"
+                          control={form.control}
+                          render={({ field }) => (
+                            <Input
+                              {...field}
+                              label="Password"
+                              isInvalid={!!form.formState.errors.password?.message}
+                              errorMessage={form.formState.errors.password?.message}
+                              type="password"
+                            />
+                          )}
                         />
                         <div className="flex justify-end">
                           <Button

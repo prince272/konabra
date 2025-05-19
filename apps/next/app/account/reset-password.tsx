@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { Icon } from "@iconify/react";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
@@ -17,6 +17,9 @@ import { identityService } from "@/services";
 import { addToast } from "@heroui/toast";
 import { useModalRouter } from "@/components/common/models";
 import { CompleteResetPasswordForm } from "@/services/identity-service";
+import { useTimer } from "@/hooks";
+import { cn } from "@heroui/theme";
+import { InputOtp } from "@heroui/input-otp";
 
 export default function ResetPasswordModal({
   isOpen,
@@ -28,8 +31,21 @@ export default function ResetPasswordModal({
   const [step, setStep] = useState<number>(1);
   const steps = [["username"], ["code"], ["newPassword", "confirmPassword"]];
   const [direction, setDirection] = useState<number>(1);
+  const [isResending, setIsResending] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isInitialRender, setIsInitialRender] = useState<boolean>(true);
+
+  const {
+    time: resendTime,
+    start: startResendTimer,
+    reset: resetResendTimer,
+  } = useTimer({
+    initialTime: 60,
+    interval: 1000,
+    step: 1,
+    timerType: "DECREMENTAL",
+    endTime: 0,
+  });
 
   const form = useForm<CompleteResetPasswordForm>({
     mode: "onChange",
@@ -86,14 +102,39 @@ export default function ResetPasswordModal({
             title: "Verification code sent successfully.",
             color: "success",
           });
+          resetResendTimer();
+          startResendTimer();
           handleNext();
         }
       } finally {
         setIsLoading(false);
       }
     }),
-    [],
+    [resetResendTimer, startResendTimer],
   );
+
+  const handleResendCode = useCallback(async () => {
+    setIsResending(true);
+    try {
+      const problem = await identityService.resetPassword(form.getValues());
+
+      if (problem) {
+        addToast({
+          title: problem.message,
+          color: "danger",
+        });
+      } else {
+        addToast({
+          title: "Verification code resent successfully.",
+          color: "success",
+        });
+        resetResendTimer();
+        startResendTimer();
+      }
+    } finally {
+      setIsResending(false);
+    }
+  }, [form, resetResendTimer, startResendTimer]);
 
   const handleResetPasswordSubmit = useCallback(
     form.handleSubmit(async (formData) => {
@@ -234,13 +275,23 @@ export default function ResetPasswordModal({
                           verification code.
                         </p>
                       </div>
-                      <Input
-                        {...form.register("username")}
-                        label="Email or Phone number"
-                        isInvalid={!!form.formState.errors.username?.message}
-                        errorMessage={form.formState.errors.username?.message}
-                        type="text"
-                        autoFocus
+                      <Controller
+                        name="username"
+                        control={form.control}
+                        render={({ field }) => (
+                          <Input
+                            {...field}
+                            label="Email or Phone number"
+                            isInvalid={
+                              !!form.formState.errors.username?.message
+                            }
+                            errorMessage={
+                              form.formState.errors.username?.message
+                            }
+                            type="text"
+                            autoFocus
+                          />
+                        )}
                       />
                     </div>
                   )}
@@ -252,18 +303,54 @@ export default function ResetPasswordModal({
                           Verify Your Identity
                         </h3>
                         <p className="text-default-500 text-sm">
-                          Enter the verification code sent to your email or
-                          phone.
+                          Enter the verification code sent to{" "}
+                          <span className="break-all font-semibold">
+                            {form.watch("username")}
+                          </span>
+                          .
                         </p>
                       </div>
-                      <Input
-                        {...form.register("code")}
-                        label="Verification Code"
-                        isInvalid={!!form.formState.errors.code?.message}
-                        errorMessage={form.formState.errors.code?.message}
-                        type="text"
-                        autoFocus
-                      />
+                      <div className="flex flex-col space-y-3">
+                        <Controller
+                          name="code"
+                          control={form.control}
+                          render={({ field }) => (
+                            <div className="flex justify-center">
+                              <InputOtp
+                                {...field}
+                                length={6}
+                                label="Code"
+                                isInvalid={
+                                  !!form.formState.errors.code?.message
+                                }
+                                errorMessage={
+                                  form.formState.errors.code?.message
+                                }
+                                type="text"
+                                autoFocus
+                                className="flex justify-center"
+                              />
+                            </div>
+                          )}
+                        />
+                        <div className="flex justify-center">
+                          <Button
+                            variant="light"
+                            size="sm"
+                            className={cn(
+                              "text-sm",
+                              !(resendTime > 0) && "text-primary",
+                            )}
+                            onPress={handleResendCode}
+                            isLoading={isResending}
+                            isDisabled={isResending || resendTime > 0}
+                          >
+                            {resendTime > 0
+                              ? `Resend code (${resendTime}s)`
+                              : "Resend code"}
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   )}
 
@@ -277,26 +364,45 @@ export default function ResetPasswordModal({
                           Enter and confirm your new password.
                         </p>
                       </div>
-                      <Input
-                        {...form.register("newPassword")}
-                        label="New Password"
-                        isInvalid={!!form.formState.errors.newPassword?.message}
-                        errorMessage={
-                          form.formState.errors.newPassword?.message
-                        }
-                        type="password"
-                        autoFocus
+                      <Controller
+                        name="newPassword"
+                        control={form.control}
+                        render={({ field }) => (
+                          <Input
+                            {...field}
+                            label="New Password"
+                            isInvalid={
+                              !!form.formState.errors.newPassword?.message
+                            }
+                            errorMessage={
+                              form.formState.errors.newPassword?.message
+                            }
+                            type="password"
+                            autoFocus
+                          />
+                        )}
                       />
-                      <Input
-                        {...form.register("confirmPassword")}
-                        label="Confirm Password"
-                        isInvalid={
-                          !!form.formState.errors.confirmPassword?.message
-                        }
-                        errorMessage={
-                          form.formState.errors.confirmPassword?.message
-                        }
-                        type="password"
+                      <Controller
+                        name="confirmPassword"
+                        control={form.control}
+                        rules={{
+                          validate: (value) =>
+                            value === form.watch("newPassword") ||
+                            "Passwords don't match",
+                        }}
+                        render={({ field }) => (
+                          <Input
+                            {...field}
+                            label="Confirm password"
+                            isInvalid={
+                              !!form.formState.errors.confirmPassword?.message
+                            }
+                            errorMessage={
+                              form.formState.errors.confirmPassword?.message
+                            }
+                            type="password"
+                          />
+                        )}
                       />
                     </div>
                   )}

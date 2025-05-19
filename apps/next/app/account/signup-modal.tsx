@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import NextLink from "next/link";
 import { Icon } from "@iconify/react";
 import { Button } from "@heroui/button";
@@ -279,13 +279,23 @@ export default function SignUpModal({
                           account secure.
                         </p>
                       </div>
-                      <Input
-                        {...form.register("username")}
-                        label="Email or Phone number"
-                        isInvalid={!!form.formState.errors.username?.message}
-                        errorMessage={form.formState.errors.username?.message}
-                        type="text"
-                        autoFocus
+                      <Controller
+                        name="username"
+                        control={form.control}
+                        render={({ field }) => (
+                          <Input
+                            {...field}
+                            label="Email or Phone number"
+                            isInvalid={
+                              !!form.formState.errors.username?.message
+                            }
+                            errorMessage={
+                              form.formState.errors.username?.message
+                            }
+                            type="text"
+                            autoFocus
+                          />
+                        )}
                       />
                     </div>
                   )}
@@ -301,20 +311,40 @@ export default function SignUpModal({
                           experience.
                         </p>
                       </div>
-                      <Input
-                        {...form.register("firstName")}
-                        label="First name"
-                        isInvalid={!!form.formState.errors.firstName?.message}
-                        errorMessage={form.formState.errors.firstName?.message}
-                        type="text"
-                        autoFocus
+                      <Controller
+                        name="firstName"
+                        control={form.control}
+                        render={({ field }) => (
+                          <Input
+                            {...field}
+                            label="First name"
+                            isInvalid={
+                              !!form.formState.errors.firstName?.message
+                            }
+                            errorMessage={
+                              form.formState.errors.firstName?.message
+                            }
+                            type="text"
+                            autoFocus
+                          />
+                        )}
                       />
-                      <Input
-                        {...form.register("lastName")}
-                        label="Last name"
-                        isInvalid={!!form.formState.errors.lastName?.message}
-                        errorMessage={form.formState.errors.lastName?.message}
-                        type="text"
+                      <Controller
+                        name="lastName"
+                        control={form.control}
+                        render={({ field }) => (
+                          <Input
+                            {...field}
+                            label="Last name"
+                            isInvalid={
+                              !!form.formState.errors.lastName?.message
+                            }
+                            errorMessage={
+                              form.formState.errors.lastName?.message
+                            }
+                            type="text"
+                          />
+                        )}
                       />
                     </div>
                   )}
@@ -330,28 +360,45 @@ export default function SignUpModal({
                           a strong password.
                         </p>
                       </div>
-                      <Input
-                        {...form.register("password")}
-                        label="Password"
-                        isInvalid={!!form.formState.errors.password?.message}
-                        errorMessage={form.formState.errors.password?.message}
-                        type="password"
-                        autoFocus
+                      <Controller
+                        name="password"
+                        control={form.control}
+                        render={({ field }) => (
+                          <Input
+                            {...field}
+                            label="Password"
+                            isInvalid={
+                              !!form.formState.errors.password?.message
+                            }
+                            errorMessage={
+                              form.formState.errors.password?.message
+                            }
+                            type="password"
+                            autoFocus
+                          />
+                        )}
                       />
-                      <Input
-                        {...form.register("confirmPassword", {
+                      <Controller
+                        name="confirmPassword"
+                        control={form.control}
+                        rules={{
                           validate: (value) =>
                             value === form.watch("password") ||
-                            "Password don't match",
-                        })}
-                        label="Confirm password"
-                        isInvalid={
-                          !!form.formState.errors.confirmPassword?.message
-                        }
-                        errorMessage={
-                          form.formState.errors.confirmPassword?.message
-                        }
-                        type="password"
+                            "Passwords don't match",
+                        }}
+                        render={({ field }) => (
+                          <Input
+                            {...field}
+                            label="Confirm password"
+                            isInvalid={
+                              !!form.formState.errors.confirmPassword?.message
+                            }
+                            errorMessage={
+                              form.formState.errors.confirmPassword?.message
+                            }
+                            type="password"
+                          />
+                        )}
                       />
                     </div>
                   )}
