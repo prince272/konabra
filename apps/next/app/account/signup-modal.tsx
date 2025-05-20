@@ -16,6 +16,8 @@ import { CreateAccountForm } from "@/services/identity-service";
 import { useAccountState } from "@/states";
 import { useModalRouter } from "@/components/common/models";
 import { Logo } from "@/components/icons";
+import { useBreakpoint } from "@/hooks";
+import { cn } from "@heroui/theme";
 
 export default function SignUpModal({
   isOpen,
@@ -131,11 +133,14 @@ export default function SignUpModal({
     [step]
   );
 
+  const isSmallScreen = useBreakpoint("sm", "down");
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      size="lg"
+      size={isSmallScreen ? "full" : "lg"}
+         scrollBehavior={isSmallScreen ? "normal" : "inside"}
       closeButton={
         <Button
           isIconOnly
@@ -147,7 +152,7 @@ export default function SignUpModal({
         </Button>
       }
     >
-      <ModalContent className="min-h-[512px] max-w-md">
+      <ModalContent className={cn("min-h-[512px]", isSmallScreen ? "max-w-full" : "max-w-md")}>
         {(onClose) => (
           <>
             <ModalHeader className="flex flex-col gap-3 pt-6">

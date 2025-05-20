@@ -14,8 +14,10 @@ import { Controller, useForm } from "react-hook-form";
 import { identityService } from "@/services";
 import { SignInForm } from "@/services/identity-service";
 import { useAccountState } from "@/states";
+import { useBreakpoint } from "@/hooks";
 import { useModalRouter } from "@/components/common/models";
 import { Logo } from "@/components/icons";
+import { cn } from "@heroui/theme";
 
 export default function SignInModal({
   isOpen,
@@ -29,6 +31,7 @@ export default function SignInModal({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isInitialRender, setIsInitialRender] = useState<boolean>(true);
   const [, setAccount] = useAccountState();
+  const isSmallScreen = useBreakpoint("sm", "down");
 
   const form = useForm<SignInForm>({
     mode: "onChange"
@@ -96,7 +99,8 @@ export default function SignInModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      size="lg"
+      size={isSmallScreen ? "full" : "lg"}
+         scrollBehavior={isSmallScreen ? "normal" : "inside"}
       closeButton={
         <Button
           isIconOnly
@@ -108,7 +112,7 @@ export default function SignInModal({
         </Button>
       }
     >
-      <ModalContent className="min-h-[512px] max-w-md">
+      <ModalContent className={cn("min-h-[512px]", isSmallScreen ? "max-w-full" : "max-w-md")}>
         {(onClose) => (
           <>
             <ModalHeader className="flex flex-col gap-3 pt-6">

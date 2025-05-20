@@ -693,8 +693,8 @@ export default function SettingsModal({ isOpen, onClose, onSignOut }: SettingsMo
       <Modal
         isOpen={isOpen}
         onClose={onClose}
-        size="3xl"
-        scrollBehavior="inside"
+        size={isSmallScreen ? "full" : "3xl"}
+        scrollBehavior={isSmallScreen ? "normal" : "inside"}
         closeButton={
           <Button
             isIconOnly
