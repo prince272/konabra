@@ -5,12 +5,12 @@ import "@/styles/globals.css";
 import { Metadata, Viewport } from "next";
 import { cookies as getCookiesStore } from "next/headers";
 import { Link } from "@heroui/link";
-import clsx from "clsx";
 import { Providers } from "../components/providers";
 import { ResetPasswordModalRouter } from "./account/reset-password-modal";
 import { SettingsModalRouter } from "./account/settings-modal";
 import { SignInModalRouter } from "./account/signin-modal";
 import { SignUpModalRouter } from "./account/signup-modal";
+import { cn } from "@heroui/theme";
 
 export const metadata: Metadata = {
   title: {
@@ -40,7 +40,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html suppressHydrationWarning lang="en">
       <head />
-      <body className={clsx("min-h-screen bg-background font-sans antialiased", fontSans.variable)}>
+      <body className={cn("min-h-screen bg-background font-sans antialiased", fontSans.variable)}>
         <Providers cookies={cookies} themeProps={{ attribute: "class", defaultTheme: "dark" }}>
           <Navbar />
           <main className="container mx-auto max-w-7xl flex-grow px-6 pt-16">{children}</main>

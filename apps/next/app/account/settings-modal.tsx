@@ -709,7 +709,7 @@ export default function SettingsModal({ isOpen, onClose, onSignOut }: SettingsMo
           </Button>
         }
       >
-        <ModalContent className={cn(!isSmallScreen && "min-h-[512px]")}>
+        <ModalContent className={cn(!isSmallScreen && "min-h-[600px]")}>
           <ModalHeader className="pb-1">
             <div className="flex min-h-10 items-center gap-2">
               {isSmallScreen && isMenuSelected && currentView.split(":").length === 1 ? (
