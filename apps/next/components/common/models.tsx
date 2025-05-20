@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useHashState, useQueue } from "@/hooks";
 
 interface ModalQueueContextValue {
@@ -61,7 +61,8 @@ function useModalQueue() {
 }
 
 export function useModalRouter() {
-  const [modalHash, setModalHash, removeModalHash] = useHashState();
+  const [hash, setModalHash, removeModalHash] = useHashState();
+  const modalHash = useMemo(() => hash?.split(":")[0], [hash]);
   const { openModal, closeModal, currentModal, mountedModal } = useModalQueue();
 
   useEffect(() => {

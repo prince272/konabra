@@ -664,6 +664,8 @@ export default function SettingsModal({ isOpen, onClose, onSignOut }: SettingsMo
     if (isSmallScreen) {
       setShowSidebar(false);
     }
+
+    setHash(`settings:${view}`);
   };
 
   const backToMenu = () => {
