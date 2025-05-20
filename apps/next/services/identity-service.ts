@@ -52,6 +52,15 @@ export type CompleteResetPasswordForm = {
   validateOnly: boolean;
 };
 
+export type VerifyAccountForm = {
+  username: string;
+};
+
+export type CompleteVerifyAccountForm = {
+  username: string;
+  code: string;
+};
+
 export type ChangeAccountForm = {
   newUsername: string;
 };
@@ -72,6 +81,26 @@ export class IdentityService {
       return [response.data, undefined] as const;
     } catch (error) {
       return [undefined!, parseProblem(error)] as const;
+    }
+  }
+
+  public async verifyAccount(data: VerifyAccountForm): Promise<Problem | undefined> {
+    try {
+      const response = await this.api.post("/account/verify", data);
+      return undefined;
+    } catch (error) {
+      return parseProblem(error);
+    }
+  }
+
+  public async completeVerifyAccount(
+    form: CompleteVerifyAccountForm
+  ): Promise<Problem | undefined> {
+    try {
+      const _ = await this.api.post("/account/verify/complete", form);
+      return undefined;
+    } catch (error) {
+      return parseProblem(error);
     }
   }
 

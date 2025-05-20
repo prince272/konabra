@@ -3,7 +3,7 @@
 import { useModalRouter } from "@/components/common/models";
 import { useBreakpoint, useHashState, useTimer } from "@/hooks";
 import { identityService } from "@/services";
-import { CompleteChangeAccountForm } from "@/services/identity-service";
+import { CompleteChangeAccountForm, CompleteVerifyAccountForm } from "@/services/identity-service";
 import { useAccountState } from "@/states";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
@@ -41,10 +41,8 @@ interface BaseViewProps {
   currentView: string;
 }
 
-interface AccountViewProps extends BaseViewProps {
-  currentAccount: any;
-}
-function AccountView({ currentAccount, navigateTo, currentView }: AccountViewProps) {
+function AccountView({ navigateTo, currentView }: BaseViewProps) {
+  const [currentAccount] = useAccountState();
   return (
     <View id="account" currentView={currentView}>
       <div className="grid grid-cols-1 gap-6">
@@ -56,7 +54,7 @@ function AccountView({ currentAccount, navigateTo, currentView }: AccountViewPro
               <h4 className="font-medium">Email Address</h4>
             </div>
           </div>
-          <div className="flex items-center gap-2 mt-3">
+          <div className="flex flex-wrap items-center gap-2 mt-3">
             <div className="text-sm font-medium">
               {currentAccount?.email ? (
                 <>
@@ -66,20 +64,28 @@ function AccountView({ currentAccount, navigateTo, currentView }: AccountViewPro
                 <span className="text-default-500">No email address added</span>
               )}
             </div>
-            {!currentAccount?.emailVerified && (
-              <Button radius="full" size="sm" variant="flat" color="warning">
-                Verify
+            <div className="flex items-center gap-2">
+              {!currentAccount?.emailVerified && (
+                <Button
+                  radius="full"
+                  size="sm"
+                  variant="flat"
+                  color="warning"
+                  onPress={() => navigateTo("account:verify-email")}
+                >
+                  Verify
+                </Button>
+              )}
+              <Button
+                radius="full"
+                variant="flat"
+                color="primary"
+                size="sm"
+                onPress={() => navigateTo("account:change-email")}
+              >
+                {currentAccount?.email ? "Change" : "Add"}
               </Button>
-            )}
-            <Button
-              radius="full"
-              variant="flat"
-              color="primary"
-              size="sm"
-              onPress={() => navigateTo("account:email")}
-            >
-              {currentAccount?.email ? "Change" : "Add"}
-            </Button>
+            </div>
           </div>
         </div>
 
@@ -91,7 +97,7 @@ function AccountView({ currentAccount, navigateTo, currentView }: AccountViewPro
               <h4 className="font-medium">Phone Number</h4>
             </div>
           </div>
-          <div className="flex items-center gap-2 mt-3">
+          <div className="flex flex-wrap items-center gap-2 mt-3">
             <div className="text-sm font-medium">
               {currentAccount?.phoneNumber ? (
                 <>
@@ -101,20 +107,22 @@ function AccountView({ currentAccount, navigateTo, currentView }: AccountViewPro
                 <span className="text-default-500">No phone number added</span>
               )}
             </div>
-            {currentAccount?.phoneNumber && !currentAccount?.phoneNumberVerified && (
-              <Button radius="full" size="sm" variant="flat" color="warning">
-                Verify
+            <div className="flex items-center gap-2">
+              {currentAccount?.phoneNumber && !currentAccount?.phoneNumberVerified && (
+                <Button radius="full" size="sm" variant="flat" color="warning">
+                  Verify
+                </Button>
+              )}
+              <Button
+                radius="full"
+                variant="flat"
+                color="primary"
+                size="sm"
+                onPress={() => navigateTo("account:change-phone-number")}
+              >
+                {currentAccount?.phoneNumber ? "Change" : "Add"}
               </Button>
-            )}
-            <Button
-              radius="full"
-              variant="flat"
-              color="primary"
-              size="sm"
-              onPress={() => navigateTo("account:change-phone-number")}
-            >
-              {currentAccount?.phoneNumber ? "Change" : "Add"}
-            </Button>
+            </div>
           </div>
         </div>
 
@@ -199,12 +207,19 @@ function AccountView({ currentAccount, navigateTo, currentView }: AccountViewPro
   );
 }
 
-function CreateChangeAccountView(accountType: "email" | "phone-number") {
-  return function AccountEmailView({ currentAccount, navigateTo, currentView }: AccountViewProps) {
-    const form = useForm<CompleteChangeAccountForm>({
-      mode: "onChange"
-    });
+function CreateAccountView(
+  accountAction: "verify" | "change",
+  accountType: "email" | "phone-number"
+) {
+  return function CreateAccountView({ navigateTo, currentView }: BaseViewProps) {
+    const [currentAccount, setAccount] = useAccountState();
 
+    const form = useForm<CompleteVerifyAccountForm & CompleteChangeAccountForm>({
+      mode: "onChange",
+      defaultValues: {
+        username: accountType === "email" ? currentAccount?.email : currentAccount?.phoneNumber
+      }
+    });
     const formErrors = useMemo(
       () => cloneDeep(form.formState.errors),
       [form.formState.isValid, form.formState.isSubmitting, form.formState.isDirty]
@@ -214,38 +229,27 @@ function CreateChangeAccountView(accountType: "email" | "phone-number") {
     const [codeSent, setCodeSent] = useState(false);
     const [formSubmitting, setFormSubmitting] = useState(false);
 
-    const sendCodeTimer = useTimer({
-      timerType: "DECREMENTAL",
-      initialTime: 60,
-      endTime: 0
-    });
+    const sendCodeTimer = useTimer({ timerType: "DECREMENTAL", initialTime: 60, endTime: 0 });
 
     const handleGetCode = useCallback(
       form.handleSubmit(async (formData) => {
         setCodeSending(true);
-
         try {
-          const problem = await identityService.changeAccount(formData);
-          if (problem) {
-            const errors = Object.entries(problem.errors || {});
+          const problem = await (accountAction === "verify"
+            ? identityService.verifyAccount(formData)
+            : identityService.changeAccount(formData));
 
-            if (errors.length > 0) {
-              errors.forEach(([name, message]) => {
-                form.setError(name as keyof CompleteChangeAccountForm, {
-                  message: message
-                });
-              });
+          if (problem) {
+            const entries = Object.entries(problem.errors || {});
+            if (entries.length > 0) {
+              entries.forEach(([name, message]) =>
+                form.setError(name as keyof CompleteChangeAccountForm, { message })
+              );
             } else {
-              addToast({
-                title: problem.message,
-                color: "danger"
-              });
+              addToast({ title: problem.message, color: "danger" });
             }
           } else {
-            addToast({
-              title: "Verification code sent!",
-              color: "success"
-            });
+            addToast({ title: "Verification code sent!", color: "success" });
             sendCodeTimer.start();
             setCodeSent(true);
           }
@@ -253,90 +257,96 @@ function CreateChangeAccountView(accountType: "email" | "phone-number") {
           setCodeSending(false);
         }
       }),
-      [form, sendCodeTimer]
+      [form, sendCodeTimer, accountAction]
     );
 
     const handleSubmit = useCallback(
-      form.handleSubmit(async (formData: CompleteChangeAccountForm) => {
+      form.handleSubmit(async (formData) => {
         setFormSubmitting(true);
 
-        const problem = await identityService.completeChangeAccount(formData);
-        setFormSubmitting(false);
+        try {
+          const problem = await (accountAction === "verify"
+            ? identityService.completeVerifyAccount(formData)
+            : identityService.completeChangeAccount(formData));
 
-        if (problem) {
-          const errors = Object.entries(problem.errors || {});
-
-          if (errors.length > 0) {
-            errors.forEach(([name, message]) => {
-              form.setError(name as keyof CompleteChangeAccountForm, {
-                message: message
-              });
-            });
+          if (problem) {
+            const entries = Object.entries(problem.errors || {});
+            if (entries.length > 0) {
+              entries.forEach(([name, message]) =>
+                form.setError(name as keyof CompleteChangeAccountForm, { message })
+              );
+            } else {
+              addToast({ title: problem.message, color: "danger" });
+            }
           } else {
-            addToast({
-              title: problem.message,
-              color: "danger"
-            });
-          }
-        } else {
-          addToast({
-            title: "Email address updated successfully.",
-            color: "success"
-          });
+            const label = accountType === "email" ? "Email address" : "Phone number";
+            const successMessage = `${label} ${accountAction === "verify" ? "verified" : "updated"} successfully.`;
 
-          navigateTo("account");
+            addToast({ title: successMessage, color: "success" });
+            navigateTo("account");
+          }
+        } finally {
+          setFormSubmitting(false);
         }
       }),
-      [form, navigateTo]
+      [form, navigateTo, accountAction, accountType]
     );
 
+    const label = accountType === "email" ? "Email" : "Phone Number";
+    const actionLabel =
+      accountAction === "verify" ? "Verify" : !!form.watch("username") ? "Change" : "Add";
+
+    const description =
+      accountAction === "verify"
+        ? `Verifying your ${label.toLowerCase()} will help you recover your account if you forget your password.`
+        : form.watch("username")
+          ? `Changing your ${label.toLowerCase()} will require verification of the new ${label.toLowerCase()}.`
+          : `Adding a ${label.toLowerCase()} will help you recover your account if you forget your password.`;
+
     return (
-      <View id={`account:${accountType}`} currentView={currentView}>
+      <View id={`account:${accountAction}-${accountType}`} currentView={currentView}>
         <div>
-          {accountType === "email" && (
-            <>
-              <h3 className="text-lg font-medium">
-                {currentAccount?.email ? "Change" : "Add"} Email Address
-              </h3>
-              <p className="text-default-500 mb-4 text-sm">
-                {currentAccount?.email
-                  ? "Changing your email address will require verification of the new email."
-                  : "Adding an email address will help you recover your account if you forget your password."}
-              </p>
-            </>
-          )}
-          {accountType === "phone-number" && (
-            <>
-              <h3 className="text-lg font-medium">
-                {currentAccount?.phoneNumber ? "Change" : "Add"} Phone Number
-              </h3>
-              <p className="text-default-500 mb-4 text-sm">
-                {currentAccount?.phoneNumber
-                  ? "Changing your phone number will require verification of the new number."
-                  : "Adding a phone number will help you recover your account if you forget your password."}
-              </p>
-            </>
-          )}
+          <h3 className="text-lg font-medium">
+            {actionLabel} {label}
+          </h3>
+          <p className="text-default-500 mb-4 text-sm">{description}</p>
         </div>
 
         <div className="space-y-4">
-          <Input label="Current Email" value={currentAccount?.email} disabled />
+          {form.watch("username") && (
+            <Controller
+              name="username"
+              control={form.control}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  label={`Current ${label}`}
+                  type="text"
+                  isInvalid={!!formErrors.username}
+                  errorMessage={formErrors.username?.message}
+                  readOnly
+                />
+              )}
+            />
+          )}
 
-          <Controller
-            name="newUsername"
-            control={form.control}
-            render={({ field }) => (
-              <Input
-                {...field}
-                label={accountType === "email" ? "New Email" : "New Phone Number"}
-                placeholder={accountType === "email" ? "Enter new email" : "Enter new phone number"}
-                type="text"
-                autoFocus
-                isInvalid={!!formErrors.newUsername}
-                errorMessage={formErrors.newUsername?.message}
-              />
-            )}
-          />
+          {accountAction == "change" && (
+            <Controller
+              name="newUsername"
+              control={form.control}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  label={`New ${label}`}
+                  placeholder={`Enter new ${label.toLowerCase()}`}
+                  type="text"
+                  autoFocus
+                  isInvalid={!!formErrors.newUsername}
+                  errorMessage={formErrors.newUsername?.message}
+                />
+              )}
+            />
+          )}
 
           <Controller
             name="code"
@@ -348,9 +358,14 @@ function CreateChangeAccountView(accountType: "email" | "phone-number") {
                 placeholder="Enter code"
                 isInvalid={!!formErrors.code}
                 errorMessage={formErrors.code?.message}
-                description={`A verification code will be sent to your ${accountType === "email" ? "email address" : "phone number"}.`}
+                description={
+                  sendCodeTimer.isRunning
+                    ? `Code sent! Resend in ${sendCodeTimer.time}s`
+                    : `A verification code will be sent to your new ${label.toLowerCase()}.`
+                }
                 endContent={
                   <Button
+                    radius="full"
                     size="sm"
                     variant="flat"
                     color="primary"
@@ -358,46 +373,44 @@ function CreateChangeAccountView(accountType: "email" | "phone-number") {
                     isLoading={codeSending}
                     onPress={() => handleGetCode()}
                   >
-                    {sendCodeTimer.isRunning
-                      ? `Resend (${sendCodeTimer.time}s)`
-                      : codeSent
-                        ? "Resend Code"
-                        : "Get Code"}
+                    Send Code
                   </Button>
                 }
               />
             )}
           />
-        </div>
-
-        <div className="flex gap-3 mt-4 justify-end">
-          <Button
-            className="hidden md:flex"
-            radius="full"
-            variant="flat"
-            onPress={() => navigateTo("account")}
-          >
-            Cancel
-          </Button>
-          <Button
-            className="flex-1 md:flex-none"
-            radius="full"
-            color="primary"
-            type="submit"
-            isLoading={formSubmitting}
-            isDisabled={formSubmitting}
-            onPress={() => handleSubmit()}
-          >
-            Change Email
-          </Button>
+          <div className="flex gap-3 mt-4 justify-end">
+            <Button
+              className="hidden md:flex"
+              radius="full"
+              variant="flat"
+              onPress={() => navigateTo("account")}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="flex-1 md:flex-none"
+              radius="full"
+              color="primary"
+              type="submit"
+              isLoading={formSubmitting}
+              isDisabled={formSubmitting}
+              onPress={() => handleSubmit()}
+            >
+              {actionLabel} {label}
+            </Button>
+          </div>
         </div>
       </View>
     );
   };
 }
 
-const AccountChangeEmailView = CreateChangeAccountView("email");
-const AccountChangePhoneNumberView = CreateChangeAccountView("phone-number");
+const AccountChangeEmailView = CreateAccountView("change", "email");
+const AccountChangePhoneNumberView = CreateAccountView("change", "phone-number");
+
+const AccountVerifyEmailView = CreateAccountView("verify", "email");
+const AccountVerifyPhoneNumberView = CreateAccountView("verify", "phone-number");
 
 function AccountPasswordView({ navigateTo, currentView }: BaseViewProps) {
   return (
@@ -452,7 +465,7 @@ function AccountDeleteView({ navigateTo, currentView }: BaseViewProps) {
   return (
     <View id="account:delete" currentView={currentView}>
       <div>
-        <h3 className="text-lg font-medium">Delete account</h3>
+        <h3 className="text-tg font-medium">Delete account</h3>
         <p className="text-default-500 mb-4 text-sm">
           Deleting your account is permanent and cannot be undone. All your data will be lost.
         </p>
@@ -601,7 +614,7 @@ export default function SettingsModal({ isOpen, onClose, onSignOut }: SettingsMo
     icon: "solar:settings-bold-duotone"
   });
 
-  const isSmallScreen = useBreakpoint("md", "down");
+  const isSmallScreen = useBreakpoint("sm", "down");
 
   const menuItems = [
     { id: "account", label: "Account", icon: "solar:user-bold-duotone" },
@@ -651,8 +664,15 @@ export default function SettingsModal({ isOpen, onClose, onSignOut }: SettingsMo
   };
 
   useEffect(() => {
+    // Manage sidebar visibility
     setShowSidebar(isSmallScreen ? !isMenuSelected : true);
-  }, [isSmallScreen, isMenuSelected]);
+
+    // Set default menu to "account" when switching from small to large screen and no menu is selected
+    if (!isSmallScreen && !isMenuSelected && !currentView) {
+      setCurrentView("account");
+      setIsMenuSelected(true);
+    }
+  }, [isSmallScreen, isMenuSelected, currentView]);
 
   return (
     <ViewContext.Provider value={viewInfo}>
@@ -761,17 +781,22 @@ export default function SettingsModal({ isOpen, onClose, onSignOut }: SettingsMo
                   >
                     <div className="space-y-6 flex flex-col">
                       <AccountView
-                        currentAccount={currentAccount}
                         navigateTo={navigateTo}
                         currentView={currentView}
                       />
                       <AccountChangeEmailView
-                        currentAccount={currentAccount}
                         navigateTo={navigateTo}
                         currentView={currentView}
                       />
                       <AccountChangePhoneNumberView
-                        currentAccount={currentAccount}
+                        navigateTo={navigateTo}
+                        currentView={currentView}
+                      />
+                      <AccountVerifyEmailView
+                        navigateTo={navigateTo}
+                        currentView={currentView}
+                      />
+                      <AccountVerifyPhoneNumberView
                         navigateTo={navigateTo}
                         currentView={currentView}
                       />

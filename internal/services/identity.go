@@ -524,7 +524,7 @@ func (service *IdentityService) CompleteChangeAccount(userId string, form Comple
 	}
 
 	if user.Email == form.NewUsername || user.PhoneNumber == form.NewUsername {
-		return problems.NewValidationProblem(map[string]string{"username": fmt.Sprintf("%v is already verified.", humanize.Humanize(string(accountType), humanize.SentenceCase))})
+		return problems.NewValidationProblem(map[string]string{"newUsername": fmt.Sprintf("%v is already verified.", humanize.Humanize(string(accountType), humanize.SentenceCase))})
 	}
 
 	secret := fmt.Sprintf("%v-%v-%v-%v", user.Id, PurposeChangeAccount, user.SecurityStamp, form.NewUsername)
@@ -553,7 +553,7 @@ func (service *IdentityService) CompleteChangeAccount(userId string, form Comple
 		user.PhoneNumberVerified = true
 
 	} else {
-		return problems.NewValidationProblem(map[string]string{"username": "Username is not a valid email or phone number."})
+		return problems.NewValidationProblem(map[string]string{"newUsername": "Username is not a valid email or phone number."})
 	}
 
 	user.SecurityStamp = uuid.New().String()
