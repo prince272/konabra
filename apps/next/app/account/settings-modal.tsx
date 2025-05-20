@@ -20,6 +20,7 @@ import {
 import { useAccountState } from "@/states";
 import { useBreakpoint, useHashState, useTimer } from "@/hooks";
 import { useModalRouter } from "@/components/common/models";
+import { cn } from "@heroui/theme";
 
 interface ViewContextType {
   title: string;
@@ -708,7 +709,7 @@ export default function SettingsModal({ isOpen, onClose, onSignOut }: SettingsMo
           </Button>
         }
       >
-        <ModalContent className="min-h-[600px]">
+        <ModalContent className={cn(!isSmallScreen && "min-h-[512px]")}>
           <ModalHeader className="pb-1">
             <div className="flex min-h-10 items-center gap-2">
               {isSmallScreen && isMenuSelected && currentView.split(":").length === 1 ? (

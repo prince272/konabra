@@ -205,7 +205,7 @@ export default function ResetPasswordModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      size={isSmallScreen ? "full" : "lg"}
+      size={isSmallScreen ? "full" : "md"}
       scrollBehavior={isSmallScreen ? "normal" : "inside"}
       closeButton={
         <Button
@@ -218,193 +218,187 @@ export default function ResetPasswordModal({
         </Button>
       }
     >
-      <ModalContent className={cn(isSmallScreen ? "max-w-full" : "max-w-md")}>
-        {(onClose) => (
-          <>
-            <ModalHeader className="flex flex-col gap-3 pt-6">
-              <div className="absolute start-1 top-1 flex items-center justify-between">
-                {(step == 2 || step == 3) && (
-                  <Button
-                    isIconOnly
-                    variant="light"
-                    onPress={handlePrev}
-                    className="rounded-full text-foreground-500"
-                  >
-                    <Icon icon="material-symbols:arrow-back-rounded" width="24" height="24" />
-                  </Button>
-                )}
-              </div>
-            </ModalHeader>
+      <ModalContent className={cn(!isSmallScreen && "min-h-[512px]")}>
+        <ModalHeader className="flex flex-col gap-3 pt-6">
+          <div className="absolute start-1 top-1 flex items-center justify-between">
+            {(step == 2 || step == 3) && (
+              <Button
+                isIconOnly
+                variant="light"
+                onPress={handlePrev}
+                className="rounded-full text-foreground-500"
+              >
+                <Icon icon="material-symbols:arrow-back-rounded" width="24" height="24" />
+              </Button>
+            )}
+          </div>
+        </ModalHeader>
 
-            <ModalBody className="min-h-[320px] overflow-x-hidden px-6 py-4">
-              <AnimatePresence mode="wait" custom={direction} initial={false}>
-                <motion.div
-                  key={step}
-                  custom={direction}
-                  variants={{
-                    enter: (direction: number) => ({
-                      x: direction > 0 ? "20%" : "-20%",
-                      opacity: 0
-                    }),
-                    center: {
-                      x: 0,
-                      opacity: 1,
-                      transition: isInitialRender
-                        ? { duration: 0 }
-                        : { duration: 0.15, ease: "easeOut" }
-                    },
-                    exit: (direction: number) => ({
-                      x: direction > 0 ? "-20%" : "20%",
-                      opacity: 0,
-                      transition: { duration: 0.15, ease: "easeIn" }
-                    })
-                  }}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  className="h-full"
-                >
-                  {step == 1 && (
-                    <div className="space-y-6 py-4">
-                      <div className="flex flex-col">
-                        <h3 className="text-lg font-medium">Reset Password</h3>
-                        <p className="text-sm text-default-500">
-                          Enter your email or phone number to receive a verification code.
-                        </p>
-                      </div>
-                      <Controller
-                        name="username"
-                        control={form.control}
-                        render={({ field }) => (
-                          <Input
+        <ModalBody className="overflow-x-hidden px-6 py-4">
+          <AnimatePresence mode="wait" custom={direction} initial={false}>
+            <motion.div
+              key={step}
+              custom={direction}
+              variants={{
+                enter: (direction: number) => ({
+                  x: direction > 0 ? "20%" : "-20%",
+                  opacity: 0
+                }),
+                center: {
+                  x: 0,
+                  opacity: 1,
+                  transition: isInitialRender
+                    ? { duration: 0 }
+                    : { duration: 0.15, ease: "easeOut" }
+                },
+                exit: (direction: number) => ({
+                  x: direction > 0 ? "-20%" : "20%",
+                  opacity: 0,
+                  transition: { duration: 0.15, ease: "easeIn" }
+                })
+              }}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              className="h-full"
+            >
+              {step == 1 && (
+                <div className="space-y-6 py-4">
+                  <div className="flex flex-col">
+                    <h3 className="text-lg font-medium">Reset Password</h3>
+                    <p className="text-sm text-default-500">
+                      Enter your email or phone number to receive a verification code.
+                    </p>
+                  </div>
+                  <Controller
+                    name="username"
+                    control={form.control}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        label="Email or Phone number"
+                        isInvalid={!!formErrors.username?.message}
+                        errorMessage={formErrors.username?.message}
+                        type="text"
+                        autoFocus
+                      />
+                    )}
+                  />
+                </div>
+              )}
+
+              {step == 2 && (
+                <div className="space-y-6 py-4">
+                  <div className="flex flex-col">
+                    <h3 className="text-lg font-medium">Verify Your Identity</h3>
+                    <p className="text-sm text-default-500">
+                      Enter the verification code sent to{" "}
+                      <span className="break-all font-semibold">{form.watch("username")}</span>.
+                    </p>
+                  </div>
+                  <div className="flex flex-col space-y-3">
+                    <Controller
+                      name="code"
+                      control={form.control}
+                      render={({ field }) => (
+                        <div className="flex justify-center">
+                          <InputOtp
                             {...field}
-                            label="Email or Phone number"
-                            isInvalid={!!formErrors.username?.message}
-                            errorMessage={formErrors.username?.message}
+                            length={6}
+                            label="Code"
+                            isInvalid={!!formErrors.code?.message}
+                            errorMessage={formErrors.code?.message}
                             type="text"
                             autoFocus
+                            className="flex justify-center"
                           />
-                        )}
-                      />
-                    </div>
-                  )}
-
-                  {step == 2 && (
-                    <div className="space-y-6 py-4">
-                      <div className="flex flex-col">
-                        <h3 className="text-lg font-medium">Verify Your Identity</h3>
-                        <p className="text-sm text-default-500">
-                          Enter the verification code sent to{" "}
-                          <span className="break-all font-semibold">{form.watch("username")}</span>.
-                        </p>
-                      </div>
-                      <div className="flex flex-col space-y-3">
-                        <Controller
-                          name="code"
-                          control={form.control}
-                          render={({ field }) => (
-                            <div className="flex justify-center">
-                              <InputOtp
-                                {...field}
-                                length={6}
-                                label="Code"
-                                isInvalid={!!formErrors.code?.message}
-                                errorMessage={formErrors.code?.message}
-                                type="text"
-                                autoFocus
-                                className="flex justify-center"
-                              />
-                            </div>
-                          )}
-                        />
-                        <div className="flex justify-center">
-                          <Button
-                            radius="full"
-                            variant="light"
-                            size="sm"
-                            className={cn("text-sm", !(resendTime > 0) && "text-primary")}
-                            onPress={handleResendCode}
-                            isLoading={isResending}
-                            isDisabled={isResending || resendTime > 0}
-                          >
-                            {resendTime > 0 ? `Resend code (${resendTime}s)` : "Resend code"}
-                          </Button>
                         </div>
-                      </div>
+                      )}
+                    />
+                    <div className="flex justify-center">
+                      <Button
+                        radius="full"
+                        variant="light"
+                        size="sm"
+                        className={cn("text-sm", !(resendTime > 0) && "text-primary")}
+                        onPress={handleResendCode}
+                        isLoading={isResending}
+                        isDisabled={isResending || resendTime > 0}
+                      >
+                        {resendTime > 0 ? `Resend code (${resendTime}s)` : "Resend code"}
+                      </Button>
                     </div>
-                  )}
-
-                  {step == 3 && (
-                    <div className="space-y-6 py-4">
-                      <div className="flex flex-col">
-                        <h3 className="text-lg font-medium">Create New Password</h3>
-                        <p className="text-sm text-default-500">
-                          Enter and confirm your new password.
-                        </p>
-                      </div>
-                      <Controller
-                        name="newPassword"
-                        control={form.control}
-                        render={({ field }) => (
-                          <Input
-                            {...field}
-                            label="New Password"
-                            isInvalid={!!formErrors.newPassword?.message}
-                            errorMessage={formErrors.newPassword?.message}
-                            type="password"
-                            autoFocus
-                          />
-                        )}
-                      />
-                      <Controller
-                        name="confirmPassword"
-                        control={form.control}
-                        rules={{
-                          validate: (value) =>
-                            value === form.watch("newPassword") || "Passwords don't match"
-                        }}
-                        render={({ field }) => (
-                          <Input
-                            {...field}
-                            label="Confirm password"
-                            isInvalid={!!formErrors.confirmPassword?.message}
-                            errorMessage={formErrors.confirmPassword?.message}
-                            type="password"
-                          />
-                        )}
-                      />
-                    </div>
-                  )}
-                </motion.div>
-              </AnimatePresence>
-            </ModalBody>
-
-            <ModalFooter className="flex-col gap-3 px-6 pb-6 pt-2">
-              {step == 1 && (
-                <Button
-                  radius="full"
-                  color="primary"
-                  isDisabled={isLoading}
-                  isLoading={isLoading}
-                  onPress={() => handleSendVerificationCode()}
-                >
-                  Continue
-                </Button>
+                  </div>
+                </div>
               )}
-              {(step == 2 || step == 3) && (
-                <Button
-                  radius="full"
-                  color="primary"
-                  isDisabled={isLoading}
-                  isLoading={isLoading}
-                  onPress={() => handleResetPasswordSubmit()}
-                >
-                  Continue
-                </Button>
+
+              {step == 3 && (
+                <div className="space-y-6 py-4">
+                  <div className="flex flex-col">
+                    <h3 className="text-lg font-medium">Create New Password</h3>
+                    <p className="text-sm text-default-500">Enter and confirm your new password.</p>
+                  </div>
+                  <Controller
+                    name="newPassword"
+                    control={form.control}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        label="New Password"
+                        isInvalid={!!formErrors.newPassword?.message}
+                        errorMessage={formErrors.newPassword?.message}
+                        type="password"
+                        autoFocus
+                      />
+                    )}
+                  />
+                  <Controller
+                    name="confirmPassword"
+                    control={form.control}
+                    rules={{
+                      validate: (value) =>
+                        value === form.watch("newPassword") || "Passwords don't match"
+                    }}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        label="Confirm password"
+                        isInvalid={!!formErrors.confirmPassword?.message}
+                        errorMessage={formErrors.confirmPassword?.message}
+                        type="password"
+                      />
+                    )}
+                  />
+                </div>
               )}
-            </ModalFooter>
-          </>
-        )}
+            </motion.div>
+          </AnimatePresence>
+        </ModalBody>
+
+        <ModalFooter className="flex-col gap-3 px-6 pb-6 pt-2">
+          {step == 1 && (
+            <Button
+              radius="full"
+              color="primary"
+              isDisabled={isLoading}
+              isLoading={isLoading}
+              onPress={() => handleSendVerificationCode()}
+            >
+              Continue
+            </Button>
+          )}
+          {(step == 2 || step == 3) && (
+            <Button
+              radius="full"
+              color="primary"
+              isDisabled={isLoading}
+              isLoading={isLoading}
+              onPress={() => handleResetPasswordSubmit()}
+            >
+              Continue
+            </Button>
+          )}
+        </ModalFooter>
       </ModalContent>
     </Modal>
   );

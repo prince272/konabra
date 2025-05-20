@@ -6,6 +6,7 @@ import { Button } from "@heroui/button";
 import { Divider } from "@heroui/divider";
 import { Input } from "@heroui/input";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
+import { cn } from "@heroui/theme";
 import { addToast } from "@heroui/toast";
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -17,7 +18,6 @@ import { useAccountState } from "@/states";
 import { useBreakpoint } from "@/hooks";
 import { useModalRouter } from "@/components/common/models";
 import { Logo } from "@/components/icons";
-import { cn } from "@heroui/theme";
 
 export default function SignInModal({
   isOpen,
@@ -99,8 +99,8 @@ export default function SignInModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      size={isSmallScreen ? "full" : "lg"}
-         scrollBehavior={isSmallScreen ? "normal" : "inside"}
+      size={isSmallScreen ? "full" : "md"}
+      scrollBehavior={isSmallScreen ? "normal" : "inside"}
       closeButton={
         <Button
           isIconOnly
@@ -112,181 +112,175 @@ export default function SignInModal({
         </Button>
       }
     >
-      <ModalContent className={cn("min-h-[512px]", isSmallScreen ? "max-w-full" : "max-w-md")}>
-        {(onClose) => (
-          <>
-            <ModalHeader className="flex flex-col gap-3 pt-6">
-              <div className="absolute start-1 top-1 flex items-center justify-between">
-                {step === 1 && <div className="w-8" />}
-                {step === 2 && (
-                  <Button
-                    isIconOnly
-                    variant="light"
-                    onPress={handlePrev}
-                    className="rounded-full text-foreground-500"
-                  >
-                    <Icon icon="material-symbols:arrow-back-rounded" width="24" height="24" />
-                  </Button>
-                )}
-              </div>
-            </ModalHeader>
+      <ModalContent className={cn(!isSmallScreen && "min-h-[512px]")}>
+        <ModalHeader className="flex flex-col gap-3 pt-6">
+          <div className="absolute start-1 top-1 flex items-center justify-between">
+            {step === 1 && <div className="w-8" />}
+            {step === 2 && (
+              <Button
+                isIconOnly
+                variant="light"
+                onPress={handlePrev}
+                className="rounded-full text-foreground-500"
+              >
+                <Icon icon="material-symbols:arrow-back-rounded" width="24" height="24" />
+              </Button>
+            )}
+          </div>
+        </ModalHeader>
 
-            <ModalBody className="min-h-[320px] overflow-x-hidden px-6 py-4">
-              <AnimatePresence mode="wait" custom={direction} initial={false}>
-                <motion.div
-                  key={step}
-                  custom={direction}
-                  variants={{
-                    enter: (direction: number) => ({
-                      x: direction > 0 ? "20%" : "-20%",
-                      opacity: 0
-                    }),
-                    center: {
-                      x: 0,
-                      opacity: 1,
-                      transition: isInitialRender
-                        ? { duration: 0 }
-                        : { duration: 0.15, ease: "easeOut" }
-                    },
-                    exit: (direction: number) => ({
-                      x: direction > 0 ? "-20%" : "20%",
-                      opacity: 0,
-                      transition: { duration: 0.15, ease: "easeIn" }
-                    })
-                  }}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  className="h-full"
-                >
-                  {step === 1 && (
-                    <div className="space-y-5">
-                      <div className="flex flex-col items-center justify-center pb-3 text-center">
-                        <Logo className="flex items-center justify-start gap-1" size={64} />
-                        <h3 className="text-lg font-medium">Sign into account</h3>
-                        <p className="text-sm text-default-500">
-                          Enter your email or phone number to sign in to your account.
-                        </p>
-                      </div>
-                      <Button
-                        variant="solid"
-                        color="primary"
-                        radius="full"
-                        fullWidth
-                        startContent={
-                          <Icon icon="solar:user-bold-duotone" width="24" height="24" />
-                        }
-                        onPress={handleNext}
-                      >
-                        Sign in with Email or Phone
-                      </Button>
-                      <div className="flex w-full items-center justify-center gap-3 text-sm text-default-500">
-                        <Divider className="flex-1" />
-                        <span>or</span>
-                        <Divider className="flex-1" />
-                      </div>
-                      <div className="grid grid-cols-1 gap-4">
-                        <Button
-                          className="dark dark:light"
-                          variant="solid"
-                          radius="full"
-                          startContent={<Icon icon="flat-color-icons:google" width={20} />}
-                        >
-                          Continue with Google
-                        </Button>
-                        <Button
-                          variant="flat"
-                          radius="full"
-                          startContent={<Icon icon="logos:facebook" width={20} />}
-                        >
-                          Continue with Facebook
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  {step === 2 && (
-                    <div className="space-y-6 py-4">
-                      <div className="flex flex-col">
-                        <h3 className="text-lg font-medium">Enter your credentials</h3>
-                        <p className="text-sm text-default-500">
-                          Provide your email or phone number and password.
-                        </p>
-                      </div>
-                      <Controller
-                        name="username"
-                        control={form.control}
-                        render={({ field }) => (
-                          <Input
-                            {...field}
-                            label="Email or Phone number"
-                            isInvalid={!!formErrors.username?.message}
-                            errorMessage={formErrors.username?.message}
-                            type="text"
-                            autoFocus
-                          />
-                        )}
-                      />
-                      <div className="flex flex-col space-y-3">
-                        <Controller
-                          name="password"
-                          control={form.control}
-                          render={({ field }) => (
-                            <Input
-                              {...field}
-                              label="Password"
-                              isInvalid={!!formErrors.password?.message}
-                              errorMessage={formErrors.password?.message}
-                              type="password"
-                            />
-                          )}
-                        />
-                        <div className="flex justify-end">
-                          <Button
-                            radius="full"
-                            variant="light"
-                            size="sm"
-                            className="text-sm text-primary"
-                            as={NextLink}
-                            href="#reset-password"
-                          >
-                            Forgot password?
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </motion.div>
-              </AnimatePresence>
-            </ModalBody>
-
-            <ModalFooter className="flex-col gap-3 px-6 pb-6 pt-2">
+        <ModalBody className="overflow-x-hidden px-6 py-4">
+          <AnimatePresence mode="wait" custom={direction} initial={false}>
+            <motion.div
+              key={step}
+              custom={direction}
+              variants={{
+                enter: (direction: number) => ({
+                  x: direction > 0 ? "20%" : "-20%",
+                  opacity: 0
+                }),
+                center: {
+                  x: 0,
+                  opacity: 1,
+                  transition: isInitialRender
+                    ? { duration: 0 }
+                    : { duration: 0.15, ease: "easeOut" }
+                },
+                exit: (direction: number) => ({
+                  x: direction > 0 ? "-20%" : "20%",
+                  opacity: 0,
+                  transition: { duration: 0.15, ease: "easeIn" }
+                })
+              }}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              className="h-full"
+            >
               {step === 1 && (
-                <Button
-                  radius="full"
-                  variant="light"
-                  size="sm"
-                  className="mx-auto w-fit text-center text-sm"
-                  as={NextLink}
-                  href={`#${encodeURIComponent("signup")}`}
-                >
-                  Don&apos;t have an account? <span className="text-primary">Sign Up</span>
-                </Button>
+                <div className="space-y-5">
+                  <div className="flex flex-col items-center justify-center pb-3 text-center">
+                    <Logo className="flex items-center justify-start gap-1" size={64} />
+                    <h3 className="text-lg font-medium">Sign into account</h3>
+                    <p className="text-sm text-default-500">
+                      Enter your email or phone number to sign in to your account.
+                    </p>
+                  </div>
+                  <Button
+                    variant="solid"
+                    color="primary"
+                    radius="full"
+                    fullWidth
+                    startContent={<Icon icon="solar:user-bold-duotone" width="24" height="24" />}
+                    onPress={handleNext}
+                  >
+                    Sign in with Email or Phone
+                  </Button>
+                  <div className="flex w-full items-center justify-center gap-3 text-sm text-default-500">
+                    <Divider className="flex-1" />
+                    <span>or</span>
+                    <Divider className="flex-1" />
+                  </div>
+                  <div className="grid grid-cols-1 gap-4">
+                    <Button
+                      className="dark dark:light"
+                      variant="solid"
+                      radius="full"
+                      startContent={<Icon icon="flat-color-icons:google" width={20} />}
+                    >
+                      Continue with Google
+                    </Button>
+                    <Button
+                      variant="flat"
+                      radius="full"
+                      startContent={<Icon icon="logos:facebook" width={20} />}
+                    >
+                      Continue with Facebook
+                    </Button>
+                  </div>
+                </div>
               )}
+
               {step === 2 && (
-                <Button
-                  radius="full"
-                  color="primary"
-                  isDisabled={isLoading}
-                  isLoading={isLoading}
-                  onPress={() => handleSubmit()}
-                >
-                  Sign In
-                </Button>
+                <div className="space-y-6 py-4">
+                  <div className="flex flex-col">
+                    <h3 className="text-lg font-medium">Enter your credentials</h3>
+                    <p className="text-sm text-default-500">
+                      Provide your email or phone number and password.
+                    </p>
+                  </div>
+                  <Controller
+                    name="username"
+                    control={form.control}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        label="Email or Phone number"
+                        isInvalid={!!formErrors.username?.message}
+                        errorMessage={formErrors.username?.message}
+                        type="text"
+                        autoFocus
+                      />
+                    )}
+                  />
+                  <div className="flex flex-col space-y-3">
+                    <Controller
+                      name="password"
+                      control={form.control}
+                      render={({ field }) => (
+                        <Input
+                          {...field}
+                          label="Password"
+                          isInvalid={!!formErrors.password?.message}
+                          errorMessage={formErrors.password?.message}
+                          type="password"
+                        />
+                      )}
+                    />
+                    <div className="flex justify-end">
+                      <Button
+                        radius="full"
+                        variant="light"
+                        size="sm"
+                        className="text-sm text-primary"
+                        as={NextLink}
+                        href="#reset-password"
+                      >
+                        Forgot password?
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               )}
-            </ModalFooter>
-          </>
-        )}
+            </motion.div>
+          </AnimatePresence>
+        </ModalBody>
+
+        <ModalFooter className="flex-col gap-3 px-6 pb-6 pt-2">
+          {step === 1 && (
+            <Button
+              radius="full"
+              variant="light"
+              size="sm"
+              className="mx-auto w-fit text-center text-sm"
+              as={NextLink}
+              href={`#${encodeURIComponent("signup")}`}
+            >
+              Don&apos;t have an account? <span className="text-primary">Sign Up</span>
+            </Button>
+          )}
+          {step === 2 && (
+            <Button
+              radius="full"
+              color="primary"
+              isDisabled={isLoading}
+              isLoading={isLoading}
+              onPress={() => handleSubmit()}
+            >
+              Sign In
+            </Button>
+          )}
+        </ModalFooter>
       </ModalContent>
     </Modal>
   );
