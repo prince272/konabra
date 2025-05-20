@@ -139,13 +139,36 @@ export const Navbar = () => {
                       ? "danger"
                       : "foreground"
                 }
-                href="#"
+                href={item.href}
                 size="lg"
               >
                 {item.label}
               </Link>
             </NavbarMenuItem>
           ))}
+          <NavbarMenuItem>
+            {currentAccount ? (
+              <Button
+                as={NextLink}
+                color="primary"
+                variant="solid"
+                fullWidth
+                href="#settings"
+              >
+                Account
+              </Button>
+            ) : (
+              <Button
+                as={NextLink}
+                color="primary"
+                variant="solid"
+                fullWidth
+                href="#signin"
+              >
+                Sign In
+              </Button>
+            )}
+          </NavbarMenuItem>
         </div>
       </NavbarMenu>
     </HeroUINavbar>
