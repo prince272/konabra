@@ -1,8 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useTimer } from "@/hooks";
-import { identityService } from "@/services";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { InputOtp } from "@heroui/input-otp";
@@ -13,7 +11,9 @@ import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cloneDeep } from "lodash";
 import { Controller, useForm } from "react-hook-form";
+import { identityService } from "@/services";
 import { CompleteResetPasswordForm } from "@/services/identity-service";
+import { useTimer } from "@/hooks";
 import { useModalRouter } from "@/components/common/models";
 
 export default function ResetPasswordModal({

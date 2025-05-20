@@ -2,7 +2,6 @@
 
 import NextLink from "next/link";
 import { siteConfig } from "@/config/site";
-import { useAccountState } from "@/states";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Kbd } from "@heroui/kbd";
@@ -18,6 +17,7 @@ import {
 } from "@heroui/navbar";
 import { link as linkStyles } from "@heroui/theme";
 import clsx from "clsx";
+import { useAccountState } from "@/states";
 import {
   DiscordIcon,
   GithubIcon,

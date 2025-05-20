@@ -1,10 +1,6 @@
 "use client";
 
 import { createContext, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
-import { useBreakpoint, useHashState, useTimer } from "@/hooks";
-import { identityService } from "@/services";
-import { useAccountState } from "@/states";
-import { formatInternationalNumber } from "@/utils";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Modal, ModalBody, ModalContent, ModalHeader } from "@heroui/modal";
@@ -14,11 +10,15 @@ import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cloneDeep } from "lodash";
 import { Controller, useForm } from "react-hook-form";
+import { formatInternationalNumber } from "@/utils";
+import { identityService } from "@/services";
 import {
   AccountWithTokenModel,
   CompleteChangeAccountForm,
   CompleteVerifyAccountForm
 } from "@/services/identity-service";
+import { useAccountState } from "@/states";
+import { useBreakpoint, useHashState, useTimer } from "@/hooks";
 import { useModalRouter } from "@/components/common/models";
 
 interface ViewContextType {
