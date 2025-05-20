@@ -30,8 +30,9 @@ type Api struct {
 }
 
 type Config struct {
-	Env  string `koanf:"ENV"`
-	Port string `koanf:"PORT"`
+	Env          string `koanf:"ENV"`
+	Port         string `koanf:"PORT"`
+	AllowOrigins string `koanf:"ALLOW_ORIGINS"`
 
 	DbDefault string `koanf:"DB_DEFAULT"`
 
@@ -203,6 +204,7 @@ func (api *Api) registerRouter() error {
 
 	router := gin.New()
 	logger := di.MustGet[*zap.Logger](api.container)
+	config := di.MustGet[*Config](api.container)
 
 	// Add middlewares
 	router.Use(ginzap.RecoveryWithZap(logger, true))
@@ -225,7 +227,7 @@ func (api *Api) registerRouter() error {
 	}))
 
 	router.Use(cors.New(cors.Config{
-		AllowAllOrigins:  true,
+		AllowOrigins:     strings.Split(config.AllowOrigins, ","),
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
