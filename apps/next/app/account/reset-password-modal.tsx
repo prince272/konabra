@@ -206,7 +206,7 @@ export default function ResetPasswordModal({
       isOpen={isOpen}
       onClose={onClose}
       size={isSmallScreen ? "full" : "md"}
-      scrollBehavior={isSmallScreen ? "normal" : "inside"}
+      scrollBehavior={"inside"}
       closeButton={
         <Button
           isIconOnly
