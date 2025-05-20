@@ -5,6 +5,7 @@ import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Modal, ModalBody, ModalContent, ModalHeader } from "@heroui/modal";
 import { Switch } from "@heroui/switch";
+import { cn } from "@heroui/theme";
 import { addToast } from "@heroui/toast";
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -18,9 +19,8 @@ import {
   CompleteVerifyAccountForm
 } from "@/services/identity-service";
 import { useAccountState } from "@/states";
-import { useBreakpoint, useHashState, useTimer } from "@/hooks";
+import { useBreakpoint, useHashState, useTimer, useWindowSize } from "@/hooks";
 import { useModalRouter } from "@/components/common/models";
-import { cn } from "@heroui/theme";
 
 interface ViewContextType {
   title: string;
@@ -630,6 +630,7 @@ export default function SettingsModal({ isOpen, onClose, onSignOut }: SettingsMo
   });
 
   const isSmallScreen = useBreakpoint("sm", "down");
+  const { height } = useWindowSize();
 
   const menuItems = [
     { id: "account", label: "Account", icon: "solar:user-bold-duotone" },
@@ -697,7 +698,7 @@ export default function SettingsModal({ isOpen, onClose, onSignOut }: SettingsMo
         isOpen={isOpen}
         onClose={onClose}
         size={isSmallScreen ? "full" : "3xl"}
-     scrollBehavior={"inside"}
+        scrollBehavior={"inside"}
         closeButton={
           <Button
             isIconOnly
@@ -709,7 +710,7 @@ export default function SettingsModal({ isOpen, onClose, onSignOut }: SettingsMo
           </Button>
         }
       >
-        <ModalContent className={cn(!isSmallScreen && "min-h-[512px]")}>
+        <ModalContent className={cn(!isSmallScreen && "min-h-[512px]")}       style={isSmallScreen ? { height: height ? `${height}px` : "100vh" } : {}}>
           <ModalHeader className="pb-1">
             <div className="flex min-h-10 items-center gap-2">
               {isSmallScreen && isMenuSelected && currentView.split(":").length === 1 ? (

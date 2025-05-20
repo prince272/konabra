@@ -13,7 +13,7 @@ import { cloneDeep } from "lodash";
 import { Controller, useForm } from "react-hook-form";
 import { identityService } from "@/services";
 import { CompleteResetPasswordForm } from "@/services/identity-service";
-import { useBreakpoint, useTimer } from "@/hooks";
+import { useBreakpoint, useTimer, useWindowSize } from "@/hooks";
 import { useModalRouter } from "@/components/common/models";
 
 export default function ResetPasswordModal({
@@ -30,6 +30,7 @@ export default function ResetPasswordModal({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isInitialRender, setIsInitialRender] = useState<boolean>(true);
   const isSmallScreen = useBreakpoint("sm", "down");
+  const { height } = useWindowSize();
 
   const {
     time: resendTime,
@@ -218,7 +219,10 @@ export default function ResetPasswordModal({
         </Button>
       }
     >
-      <ModalContent className={cn(!isSmallScreen && "min-h-[512px]")}>
+      <ModalContent
+        className={cn(!isSmallScreen && "min-h-[512px]")}
+        style={isSmallScreen ? { height: height ? `${height}px` : "100vh" } : {}}
+      >
         <ModalHeader className="flex flex-col gap-3 pt-6">
           <div className="absolute start-1 top-1 flex items-center justify-between">
             {(step == 2 || step == 3) && (
