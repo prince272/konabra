@@ -148,23 +148,11 @@ export const Navbar = () => {
           ))}
           <NavbarMenuItem>
             {currentAccount ? (
-              <Button
-                as={NextLink}
-                color="primary"
-                variant="solid"
-                fullWidth
-                href="#settings"
-              >
+              <Button as={NextLink} color="primary" variant="solid" fullWidth href="#settings">
                 Account
               </Button>
             ) : (
-              <Button
-                as={NextLink}
-                color="primary"
-                variant="solid"
-                fullWidth
-                href="#signin"
-              >
+              <Button as={NextLink} color="primary" variant="solid" fullWidth href="#signin">
                 Sign In
               </Button>
             )}

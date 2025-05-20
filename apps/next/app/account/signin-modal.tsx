@@ -111,10 +111,11 @@ export default function SignInModal({
           <Icon icon="material-symbols:close-rounded" width="24" height="24" />
         </Button>
       }
+      classNames={{
+        wrapper: cn(isSmallScreen && "h-full")
+      }}
     >
-      <ModalContent
-        className={cn(!isSmallScreen && "min-h-[512px]")}
-      >
+      <ModalContent className={cn(!isSmallScreen && "min-h-[512px]", "top-0")}>
         <ModalHeader className="flex flex-col gap-3 pt-6">
           <div className="absolute start-1 top-1 flex items-center justify-between">
             {step === 1 && <div className="w-8" />}

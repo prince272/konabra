@@ -217,6 +217,9 @@ export default function ResetPasswordModal({
           <Icon icon="material-symbols:close-rounded" width="24" height="24" />
         </Button>
       }
+      classNames={{
+        wrapper: cn(isSmallScreen && "h-full")
+      }}
     >
       <ModalContent className={cn(!isSmallScreen && "min-h-[512px]")}>
         <ModalHeader className="flex flex-col gap-3 pt-6">

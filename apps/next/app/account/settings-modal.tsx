@@ -708,6 +708,9 @@ export default function SettingsModal({ isOpen, onClose, onSignOut }: SettingsMo
             <Icon icon="material-symbols:close-rounded" width="24" height="24" />
           </Button>
         }
+        classNames={{
+          wrapper: cn(isSmallScreen && "h-full")
+        }}
       >
         <ModalContent className={cn(!isSmallScreen && "min-h-[600px]")}>
           <ModalHeader className="pb-1">
