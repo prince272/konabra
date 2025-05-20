@@ -248,7 +248,7 @@ export default function SignUpModal({
                       <div className="flex flex-col">
                         <h3 className="text-lg font-medium">Enter your email or phone number</h3>
                         <p className="text-default-500 text-sm">
-                          We'll use this to verify your identity and keep your account secure.
+                          We&apos;ll use this to verify your identity and keep your account secure.
                         </p>
                       </div>
                       <Controller

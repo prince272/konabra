@@ -101,7 +101,7 @@ export default defineConfig([
       "no-unused-vars": "off",
       "unused-imports/no-unused-vars": "off",
       "unused-imports/no-unused-imports": "warn",
-
+      "jsx-a11y/no-autofocus": "off",
       "@typescript-eslint/no-unused-vars": [
         "warn",
         {

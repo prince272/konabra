@@ -266,7 +266,7 @@ export default function SignInModal({
                   as={NextLink}
                   href={`#${encodeURIComponent("signup")}`}
                 >
-                  Don't have an account? <span className="text-primary">Sign Up</span>
+                  Don&apos;t have an account? <span className="text-primary">Sign Up</span>
                 </Button>
               )}
               {step === 2 && (

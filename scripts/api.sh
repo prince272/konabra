@@ -3,7 +3,7 @@
 set -e
 
 BIN_DIR="./bin"
-BUILD_OUTPUT="$BIN_DIR/api.exe"
+BUILD_OUTPUT="$BIN_DIR/api"
 
 # Define source-destination pairs
 declare -A FILES_TO_COPY=(

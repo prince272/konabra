@@ -3,8 +3,9 @@
 import { useModalRouter } from "@/components/common/models";
 import { useBreakpoint, useHashState, useTimer } from "@/hooks";
 import { identityService } from "@/services";
-import { CompleteChangeAccountForm, CompleteVerifyAccountForm } from "@/services/identity-service";
+import { AccountWithTokenModel, CompleteChangeAccountForm, CompleteVerifyAccountForm } from "@/services/identity-service";
 import { useAccountState } from "@/states";
+import { formatInternationalNumber } from "@/utils";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Modal, ModalBody, ModalContent, ModalHeader } from "@heroui/modal";
@@ -54,7 +55,7 @@ function AccountView({ navigateTo, currentView }: BaseViewProps) {
               <h4 className="font-medium">Email Address</h4>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2 mt-3">
+          <div className="flex flex-wrap justify-between items-center gap-2 mt-3">
             <div className="text-sm font-medium">
               {currentAccount?.email ? (
                 <>
@@ -97,11 +98,11 @@ function AccountView({ navigateTo, currentView }: BaseViewProps) {
               <h4 className="font-medium">Phone Number</h4>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2 mt-3">
+          <div className="flex flex-wrap justify-between items-center gap-2 mt-3">
             <div className="text-sm font-medium">
               {currentAccount?.phoneNumber ? (
                 <>
-                  <span className="mr-2">{currentAccount?.phoneNumber}</span>
+                  <span className="mr-2">{formatInternationalNumber(currentAccount?.phoneNumber)}</span>
                 </>
               ) : (
                 <span className="text-default-500">No phone number added</span>
@@ -134,7 +135,7 @@ function AccountView({ navigateTo, currentView }: BaseViewProps) {
               <h4 className="font-medium">Password</h4>
             </div>
           </div>
-          <div className="flex items-center gap-2 mt-3">
+          <div className="flex justify-between items-center gap-2 mt-3">
             <div className="text-sm font-medium">
               <span className="text-default-500">Last changed: 2 weeks ago</span>
             </div>
@@ -229,6 +230,17 @@ function CreateAccountView(
     const [codeSent, setCodeSent] = useState(false);
     const [formSubmitting, setFormSubmitting] = useState(false);
 
+    const label = accountType === "email" ? "Email" : "Phone Number";
+    const actionLabel =
+      accountAction === "verify" ? "Verify" : !!form.watch("username") ? "Change" : "Add";
+
+    const description =
+      accountAction === "verify"
+        ? `Verifying your ${label.toLowerCase()} will help you recover your account if you forget your password.`
+        : form.watch("username")
+          ? `Changing your ${label.toLowerCase()} will require verification of the new ${label.toLowerCase()}.`
+          : `Adding a ${label.toLowerCase()} will help you recover your account if you forget your password.`;
+
     const sendCodeTimer = useTimer({ timerType: "DECREMENTAL", initialTime: 60, endTime: 0 });
 
     const handleGetCode = useCallback(
@@ -279,10 +291,15 @@ function CreateAccountView(
               addToast({ title: problem.message, color: "danger" });
             }
           } else {
-            const label = accountType === "email" ? "Email address" : "Phone number";
-            const successMessage = `${label} ${accountAction === "verify" ? "verified" : "updated"} successfully.`;
+            const [updatedAccount] = await identityService.getCurrentAccount();
+            if (updatedAccount) {
+              setAccount(prevAccount => ({...prevAccount, ...updatedAccount } as AccountWithTokenModel));
+            }
 
-            addToast({ title: successMessage, color: "success" });
+            addToast({
+              title: `${label} ${accountAction === "verify" ? "verified" : "updated"} successfully.`,
+              color: "success"
+            });
             navigateTo("account");
           }
         } finally {
@@ -291,17 +308,6 @@ function CreateAccountView(
       }),
       [form, navigateTo, accountAction, accountType]
     );
-
-    const label = accountType === "email" ? "Email" : "Phone Number";
-    const actionLabel =
-      accountAction === "verify" ? "Verify" : !!form.watch("username") ? "Change" : "Add";
-
-    const description =
-      accountAction === "verify"
-        ? `Verifying your ${label.toLowerCase()} will help you recover your account if you forget your password.`
-        : form.watch("username")
-          ? `Changing your ${label.toLowerCase()} will require verification of the new ${label.toLowerCase()}.`
-          : `Adding a ${label.toLowerCase()} will help you recover your account if you forget your password.`;
 
     return (
       <View id={`account:${accountAction}-${accountType}`} currentView={currentView}>
@@ -394,7 +400,7 @@ function CreateAccountView(
               color="primary"
               type="submit"
               isLoading={formSubmitting}
-              isDisabled={formSubmitting}
+              isDisabled={formSubmitting || !codeSent}
               onPress={() => handleSubmit()}
             >
               {actionLabel} {label}
@@ -780,22 +786,13 @@ export default function SettingsModal({ isOpen, onClose, onSignOut }: SettingsMo
                     className="h-full"
                   >
                     <div className="space-y-6 flex flex-col">
-                      <AccountView
-                        navigateTo={navigateTo}
-                        currentView={currentView}
-                      />
-                      <AccountChangeEmailView
-                        navigateTo={navigateTo}
-                        currentView={currentView}
-                      />
+                      <AccountView navigateTo={navigateTo} currentView={currentView} />
+                      <AccountChangeEmailView navigateTo={navigateTo} currentView={currentView} />
                       <AccountChangePhoneNumberView
                         navigateTo={navigateTo}
                         currentView={currentView}
                       />
-                      <AccountVerifyEmailView
-                        navigateTo={navigateTo}
-                        currentView={currentView}
-                      />
+                      <AccountVerifyEmailView navigateTo={navigateTo} currentView={currentView} />
                       <AccountVerifyPhoneNumberView
                         navigateTo={navigateTo}
                         currentView={currentView}

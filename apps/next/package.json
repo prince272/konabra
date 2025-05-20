@@ -37,6 +37,7 @@
     "clsx": "2.1.1",
     "framer-motion": "11.13.1",
     "intl-messageformat": "10.7.16",
+    "libphonenumber-js": "^1.12.8",
     "lodash": "^4.17.21",
     "next": "15.3.1",
     "next-themes": "0.4.6",

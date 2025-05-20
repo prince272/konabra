@@ -9,9 +9,10 @@ import {
   useContext,
   useEffect,
   useRef,
-  useState
+  useState,
 } from "react";
 import Cookies from "universal-cookie";
+import { isEqual } from "lodash"; // Add lodash for deep equality checks
 
 // Centralized event emitter for cookie state changes
 const cookieListeners: { [key: string]: Array<(value: any) => void> } = {};
@@ -28,7 +29,9 @@ function subscribeToCookie(key: string, callback: (value: any) => void) {
 
 function emitCookieChange(key: string, value: any) {
   if (cookieListeners[key]) {
-    cookieListeners[key].forEach((callback) => callback(value));
+    requestAnimationFrame(() => {
+      cookieListeners[key].forEach((callback) => callback(value));
+    });
   }
 }
 
@@ -38,7 +41,7 @@ const CookiesContext = createContext<CookiesContextValue>(undefined);
 
 export const CookiesProvider = ({
   children,
-  value
+  value,
 }: {
   children: ReactNode;
   value?: CookiesContextValue;
@@ -72,47 +75,53 @@ export function useCookieState<S>(
 ): [S, Dispatch<SetStateAction<S>>] {
   const cookies = useCookies();
   const optionsRef = useRef(options);
+  const isMountedRef = useRef(false);
 
-  const getInitialState = useCallback(() => {
+  const [state, setState] = useState<S>(() => {
     const cookieValue = cookies.get(key);
-    return cookieValue !== undefined
-      ? cookieValue
-      : typeof initialState === "function"
-        ? (initialState as () => S)()
-        : initialState;
-  }, [cookies, key, initialState]);
-
-  const [state, setState] = useState<S>(getInitialState);
+    // Handle null/undefined cookie values
+    if (cookieValue !== undefined && cookieValue !== null) {
+      return cookieValue;
+    }
+    return typeof initialState === "function" ? (initialState as () => S)() : initialState;
+  });
 
   // Sync state with external cookie updates
   useEffect(() => {
     const unsubscribe = subscribeToCookie(key, (newValue) => {
-      setState((prevState) =>
-        JSON.stringify(prevState) !== JSON.stringify(newValue) ? newValue : prevState
-      );
+      if (isMountedRef.current) {
+        setState((prevState) => (isEqual(prevState, newValue) ? prevState : newValue));
+      }
     });
     return unsubscribe;
   }, [key]);
 
   // Update cookie when state changes
-  const stateRef = useRef(state);
   useEffect(() => {
-    stateRef.current = state;
-  }, [state]);
-
-  useEffect(() => {
-    cookies.set(key, stateRef.current, { path: "/", ...optionsRef.current });
-    emitCookieChange(key, stateRef.current);
-  }, [key, cookies]);
+    if (isMountedRef.current) {
+      // Serialize state to ensure it's safe for cookies
+      const serializedState =
+        typeof state === "object" && state !== null ? JSON.parse(JSON.stringify(state)) : state;
+      cookies.set(key, serializedState, optionsRef.current || { path: "/" });
+      emitCookieChange(key, serializedState);
+    } else {
+      isMountedRef.current = true;
+    }
+  }, [key, state, cookies]);
 
   const setCookieState: Dispatch<SetStateAction<S>> = useCallback(
     (action) => {
       setState((prevState) => {
         const newValue =
           typeof action === "function" ? (action as (prevState: S) => S)(prevState) : action;
-        cookies.set(key, newValue, { path: "/", ...optionsRef.current });
-        emitCookieChange(key, newValue);
-        return newValue;
+        // Serialize newValue to ensure it's safe for cookies
+        const serializedValue =
+          typeof newValue === "object" && newValue !== null
+            ? JSON.parse(JSON.stringify(newValue))
+            : newValue;
+        cookies.set(key, serializedValue, optionsRef.current || { path: "/" });
+        emitCookieChange(key, serializedValue);
+        return serializedValue;
       });
     },
     [key, cookies]
