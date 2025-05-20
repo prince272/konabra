@@ -15,7 +15,7 @@ import { Controller, useForm } from "react-hook-form";
 import { identityService } from "@/services";
 import { CreateAccountForm } from "@/services/identity-service";
 import { useAccountState } from "@/states";
-import { useBreakpoint, useWindowSize } from "@/hooks";
+import { useBreakpoint } from "@/hooks";
 import { useModalRouter } from "@/components/common/models";
 import { Logo } from "@/components/icons";
 
@@ -33,7 +33,6 @@ export default function SignUpModal({
   const [isInitialRender, setIsInitialRender] = useState<boolean>(true);
   const [, setAccount] = useAccountState();
   const isSmallScreen = useBreakpoint("sm", "down");
-  const { height } = useWindowSize();
 
   const form = useForm<CreateAccountForm>({
     mode: "onChange"
@@ -154,7 +153,6 @@ export default function SignUpModal({
     >
       <ModalContent
         className={cn(!isSmallScreen && "min-h-[512px]")}
-        style={isSmallScreen ? { height: height ? `${height}px` : "100vh" } : {}}
       >
         <ModalHeader className="flex flex-col gap-3 pt-6">
           <div className="absolute start-1 top-1 flex items-center justify-between">

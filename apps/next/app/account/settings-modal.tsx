@@ -19,7 +19,7 @@ import {
   CompleteVerifyAccountForm
 } from "@/services/identity-service";
 import { useAccountState } from "@/states";
-import { useBreakpoint, useHashState, useTimer, useWindowSize } from "@/hooks";
+import { useBreakpoint, useHashState, useTimer } from "@/hooks";
 import { useModalRouter } from "@/components/common/models";
 
 interface ViewContextType {
@@ -630,7 +630,6 @@ export default function SettingsModal({ isOpen, onClose, onSignOut }: SettingsMo
   });
 
   const isSmallScreen = useBreakpoint("sm", "down");
-  const { height } = useWindowSize();
 
   const menuItems = [
     { id: "account", label: "Account", icon: "solar:user-bold-duotone" },
@@ -710,7 +709,7 @@ export default function SettingsModal({ isOpen, onClose, onSignOut }: SettingsMo
           </Button>
         }
       >
-        <ModalContent className={cn(!isSmallScreen && "min-h-[512px]")}       style={isSmallScreen ? { height: height ? `${height}px` : "100vh" } : {}}>
+        <ModalContent className={cn(!isSmallScreen && "min-h-[512px]")}>
           <ModalHeader className="pb-1">
             <div className="flex min-h-10 items-center gap-2">
               {isSmallScreen && isMenuSelected && currentView.split(":").length === 1 ? (
