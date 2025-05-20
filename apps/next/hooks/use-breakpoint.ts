@@ -1,7 +1,6 @@
 // source: https://github.com/react-restart/hooks/blob/master/src/useBreakpoint.ts
 
 import { useMemo } from "react";
-
 import useMediaQuery from "./use-media-query";
 
 export type BreakpointDirection = "up" | "down" | true;

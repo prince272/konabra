@@ -1,9 +1,8 @@
 "use client";
 
-import { useModalRouter } from "@/components/common/models";
-import { Logo } from "@/components/icons";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import NextLink from "next/link";
 import { identityService } from "@/services";
-import { CreateAccountForm } from "@/services/identity-service";
 import { useAccountState } from "@/states";
 import { Button } from "@heroui/button";
 import { Divider } from "@heroui/divider";
@@ -13,9 +12,10 @@ import { addToast } from "@heroui/toast";
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cloneDeep } from "lodash";
-import NextLink from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { CreateAccountForm } from "@/services/identity-service";
+import { useModalRouter } from "@/components/common/models";
+import { Logo } from "@/components/icons";
 
 export default function SignUpModal({
   isOpen,
@@ -147,11 +147,11 @@ export default function SignUpModal({
         </Button>
       }
     >
-      <ModalContent className="max-w-md min-h-[512px]">
+      <ModalContent className="min-h-[512px] max-w-md">
         {(onClose) => (
           <>
             <ModalHeader className="flex flex-col gap-3 pt-6">
-              <div className="flex justify-between items-center absolute top-1 start-1">
+              <div className="absolute start-1 top-1 flex items-center justify-between">
                 {step > 1 && step < 5 ? (
                   <Button
                     isIconOnly
@@ -167,7 +167,7 @@ export default function SignUpModal({
               </div>
             </ModalHeader>
 
-            <ModalBody className="px-6 py-4 min-h-[320px] overflow-x-hidden">
+            <ModalBody className="min-h-[320px] overflow-x-hidden px-6 py-4">
               <AnimatePresence mode="wait" custom={direction} initial={false}>
                 <motion.div
                   key={step}
@@ -197,10 +197,10 @@ export default function SignUpModal({
                 >
                   {step === 1 && (
                     <div className="space-y-5">
-                      <div className="text-center flex justify-center flex-col items-center pb-3">
-                        <Logo className="flex justify-start items-center gap-1" size={64} />
+                      <div className="flex flex-col items-center justify-center pb-3 text-center">
+                        <Logo className="flex items-center justify-start gap-1" size={64} />
                         <h3 className="text-lg font-medium">Create an account</h3>
-                        <p className="text-default-500 text-sm">
+                        <p className="text-sm text-default-500">
                           Sign up quickly using your email, phone, or social account.
                         </p>
                       </div>
@@ -218,7 +218,7 @@ export default function SignUpModal({
                           Sign up with Email or Phone
                         </Button>
                       </div>
-                      <div className="flex items-center justify-center gap-3 text-sm text-default-500 w-full">
+                      <div className="flex w-full items-center justify-center gap-3 text-sm text-default-500">
                         <Divider className="flex-1" />
                         <span>or</span>
                         <Divider className="flex-1" />
@@ -247,7 +247,7 @@ export default function SignUpModal({
                     <div className="space-y-6 py-4">
                       <div className="flex flex-col">
                         <h3 className="text-lg font-medium">Enter your email or phone number</h3>
-                        <p className="text-default-500 text-sm">
+                        <p className="text-sm text-default-500">
                           We&apos;ll use this to verify your identity and keep your account secure.
                         </p>
                       </div>
@@ -272,7 +272,7 @@ export default function SignUpModal({
                     <div className="space-y-6 py-4">
                       <div className="flex flex-col">
                         <h3 className="text-lg font-medium">Enter your profile info</h3>
-                        <p className="text-default-500 text-sm">
+                        <p className="text-sm text-default-500">
                           Tell us a bit about yourself to help personalize your experience.
                         </p>
                       </div>
@@ -310,7 +310,7 @@ export default function SignUpModal({
                     <div className="space-y-6 py-4">
                       <div className="flex flex-col">
                         <h3 className="text-lg font-medium">Create a Secure Password</h3>
-                        <p className="text-default-500 text-sm">
+                        <p className="text-sm text-default-500">
                           Use a combination of letters, numbers, and symbols for a strong password.
                         </p>
                       </div>
@@ -351,13 +351,13 @@ export default function SignUpModal({
               </AnimatePresence>
             </ModalBody>
 
-            <ModalFooter className="px-6 pb-6 pt-2 flex-col gap-3">
+            <ModalFooter className="flex-col gap-3 px-6 pb-6 pt-2">
               {step == 1 && (
                 <Button
                   radius="full"
                   variant="light"
                   size="sm"
-                  className="text-sm text-center w-fit mx-auto"
+                  className="mx-auto w-fit text-center text-sm"
                   as={NextLink}
                   href="#signin"
                 >

@@ -1,6 +1,6 @@
 // useQueue.ts
-import PQueue from "p-queue";
 import { useCallback, useEffect, useRef } from "react";
+import PQueue from "p-queue";
 
 export function useQueue(options?: ConstructorParameters<typeof PQueue>[0]) {
   const queueRef = useRef<PQueue>();

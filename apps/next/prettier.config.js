@@ -9,7 +9,27 @@ const config = {
   tabWidth: 2,
   trailingComma: "none",
   printWidth: 100,
-  plugins: ["prettier-plugin-tailwindcss", "prettier-plugin-organize-imports"]
+  plugins: ["@ianvs/prettier-plugin-sort-imports", "prettier-plugin-tailwindcss"],
+  importOrder: [
+    "^.+\\.(css|scss)$",
+    "^(react/(.*)$)|^(react$)",
+    "^(react-native/(.*)$)|^(react-native$)",
+    "^(next/(.*)$)|^(next$)",
+    "<THIRD_PARTY_MODULES>",
+    "^@/configs/(.*)$",
+    "^@/constants/(.*)$",
+    "^@/types/(.*)$",
+    "^@/lib/(.*)$",
+    "^@/utils/(.*)$",
+    "^@/states/(.*)$",
+    "^@/services/(.*)$",
+    "^@/hooks/(.*)$",
+    "^@/components/ui/(.*)$",
+    "^@/components/(.*)$",
+    "^@/app/(.*)$",
+    "^[./]"
+  ],
+  importOrderParserPlugins: ["typescript", "jsx", "decorators-legacy"]
 };
 
 module.exports = config;

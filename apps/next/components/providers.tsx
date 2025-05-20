@@ -1,13 +1,13 @@
 "use client";
 
-import { ModalQueueProvider } from "@/components/common/models";
+import * as React from "react";
+import { useRouter } from "next/navigation";
 import { CookiesProvider } from "@/hooks";
 import { HeroUIProvider } from "@heroui/system";
 import { ToastProvider } from "@heroui/toast";
 import type { ThemeProviderProps } from "next-themes";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
-import { useRouter } from "next/navigation";
-import * as React from "react";
+import { ModalQueueProvider } from "@/components/common/models";
 
 export interface ProvidersProps {
   children: React.ReactNode;

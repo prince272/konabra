@@ -1,15 +1,15 @@
-import { GithubIcon } from "@/components/icons";
-import { subtitle, title } from "@/components/primitives";
 import { siteConfig } from "@/config/site";
 import { Code } from "@heroui/code";
 import { Link } from "@heroui/link";
 import { Snippet } from "@heroui/snippet";
 import { button as buttonStyles } from "@heroui/theme";
+import { GithubIcon } from "@/components/icons";
+import { subtitle, title } from "@/components/primitives";
 
 export default function Home() {
   return (
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-      <div className="inline-block max-w-xl text-center justify-center">
+      <div className="inline-block max-w-xl justify-center text-center">
         <span className={title()}>Make&nbsp;</span>
         <span className={title({ color: "violet" })}>beautiful&nbsp;</span>
         <br />

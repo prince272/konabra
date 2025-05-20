@@ -1,7 +1,7 @@
 "use client";
 
-import { useHashState, useQueue } from "@/hooks";
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { useHashState, useQueue } from "@/hooks";
 
 interface ModalQueueContextValue {
   currentModal: string | null;

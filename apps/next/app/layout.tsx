@@ -1,11 +1,11 @@
-import { Navbar } from "@/components/navbar";
 import { fontSans } from "@/config/fonts";
 import { siteConfig } from "@/config/site";
+import { Navbar } from "@/components/navbar";
 import "@/styles/globals.css";
-import { Link } from "@heroui/link";
-import clsx from "clsx";
 import { Metadata, Viewport } from "next";
 import { cookies as getCookiesStore } from "next/headers";
+import { Link } from "@heroui/link";
+import clsx from "clsx";
 import { Providers } from "../components/providers";
 import { ResetPasswordModalRouter } from "./account/reset-password-modal";
 import { SettingsModalRouter } from "./account/settings-modal";
@@ -42,10 +42,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head />
       <body className={clsx("min-h-screen bg-background font-sans antialiased", fontSans.variable)}>
         <Providers cookies={cookies} themeProps={{ attribute: "class", defaultTheme: "dark" }}>
-          <div className="relative flex flex-col h-screen">
+          <div className="relative flex h-screen flex-col">
             <Navbar />
-            <main className="container mx-auto max-w-7xl pt-16 px-6 flex-grow">{children}</main>
-            <footer className="w-full flex items-center justify-center py-3">
+            <main className="container mx-auto max-w-7xl flex-grow px-6 pt-16">{children}</main>
+            <footer className="flex w-full items-center justify-center py-3">
               <Link
                 isExternal
                 className="flex items-center gap-1 text-current"

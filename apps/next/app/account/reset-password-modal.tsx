@@ -1,9 +1,8 @@
 "use client";
 
-import { useModalRouter } from "@/components/common/models";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTimer } from "@/hooks";
 import { identityService } from "@/services";
-import { CompleteResetPasswordForm } from "@/services/identity-service";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { InputOtp } from "@heroui/input-otp";
@@ -13,8 +12,9 @@ import { addToast } from "@heroui/toast";
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cloneDeep } from "lodash";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { CompleteResetPasswordForm } from "@/services/identity-service";
+import { useModalRouter } from "@/components/common/models";
 
 export default function ResetPasswordModal({
   isOpen,
@@ -220,7 +220,7 @@ export default function ResetPasswordModal({
         {(onClose) => (
           <>
             <ModalHeader className="flex flex-col gap-3 pt-6">
-              <div className="flex justify-between items-center absolute top-1 start-1">
+              <div className="absolute start-1 top-1 flex items-center justify-between">
                 {(step == 2 || step == 3) && (
                   <Button
                     isIconOnly
@@ -234,7 +234,7 @@ export default function ResetPasswordModal({
               </div>
             </ModalHeader>
 
-            <ModalBody className="px-6 py-4 min-h-[320px] overflow-x-hidden">
+            <ModalBody className="min-h-[320px] overflow-x-hidden px-6 py-4">
               <AnimatePresence mode="wait" custom={direction} initial={false}>
                 <motion.div
                   key={step}
@@ -266,7 +266,7 @@ export default function ResetPasswordModal({
                     <div className="space-y-6 py-4">
                       <div className="flex flex-col">
                         <h3 className="text-lg font-medium">Reset Password</h3>
-                        <p className="text-default-500 text-sm">
+                        <p className="text-sm text-default-500">
                           Enter your email or phone number to receive a verification code.
                         </p>
                       </div>
@@ -291,7 +291,7 @@ export default function ResetPasswordModal({
                     <div className="space-y-6 py-4">
                       <div className="flex flex-col">
                         <h3 className="text-lg font-medium">Verify Your Identity</h3>
-                        <p className="text-default-500 text-sm">
+                        <p className="text-sm text-default-500">
                           Enter the verification code sent to{" "}
                           <span className="break-all font-semibold">{form.watch("username")}</span>.
                         </p>
@@ -336,7 +336,7 @@ export default function ResetPasswordModal({
                     <div className="space-y-6 py-4">
                       <div className="flex flex-col">
                         <h3 className="text-lg font-medium">Create New Password</h3>
-                        <p className="text-default-500 text-sm">
+                        <p className="text-sm text-default-500">
                           Enter and confirm your new password.
                         </p>
                       </div>
@@ -377,7 +377,7 @@ export default function ResetPasswordModal({
               </AnimatePresence>
             </ModalBody>
 
-            <ModalFooter className="px-6 pb-6 pt-2 flex-col gap-3">
+            <ModalFooter className="flex-col gap-3 px-6 pb-6 pt-2">
               {step == 1 && (
                 <Button
                   radius="full"

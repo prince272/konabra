@@ -9,10 +9,11 @@ import {
   useContext,
   useEffect,
   useRef,
-  useState,
+  useState
 } from "react";
-import Cookies from "universal-cookie";
 import { isEqual } from "lodash"; // Add lodash for deep equality checks
+
+import Cookies from "universal-cookie";
 
 // Centralized event emitter for cookie state changes
 const cookieListeners: { [key: string]: Array<(value: any) => void> } = {};
@@ -41,7 +42,7 @@ const CookiesContext = createContext<CookiesContextValue>(undefined);
 
 export const CookiesProvider = ({
   children,
-  value,
+  value
 }: {
   children: ReactNode;
   value?: CookiesContextValue;

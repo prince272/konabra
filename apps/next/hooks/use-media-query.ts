@@ -1,6 +1,5 @@
 // source: https://github.com/react-restart/hooks/blob/master/src/useMediaQuery.tsx
 import { useState } from "react";
-
 import { useIsomorphicEffect as useEffect } from "./use-isomorphic-effect";
 
 interface RefCountedMediaQueryList extends MediaQueryList {
