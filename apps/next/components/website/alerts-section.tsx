@@ -11,6 +11,7 @@ export const AlertsSection = () => {
   return (
     <section id="alerts" className="relative overflow-hidden bg-background py-20">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,184,0,0.1),transparent_100%)]"></div>
+      
 
       <div className="container mx-auto px-6 md:px-8">
         <div className="mb-16 text-center">
@@ -30,6 +31,51 @@ export const AlertsSection = () => {
           <div className="order-2 md:order-1">
             <div className="relative h-[400px] md:h-[500px]">
               <Globe />
+              <motion.div
+                className="absolute left-1/4 top-1/4 z-10 flex items-center gap-3 rounded-xl bg-white/90 p-3 shadow-lg backdrop-blur-sm dark:bg-black/80"
+                initial={{ opacity: 0, y: -20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                viewport={{ once: true }}
+              >
+                <div className="rounded-full bg-warning/20 p-2 dark:bg-warning/10">
+                  <Icon
+                    icon="solar:danger-triangle-bold"
+                    className="text-warning"
+                    width={24}
+                    height={24}
+                  />
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold">Accident Alert</h4>
+                  <p className="text-xs text-foreground-600 dark:text-foreground-400">
+                    Major accident on N1 Highway
+                  </p>
+                </div>
+              </motion.div>
+
+              <motion.div
+                className="absolute bottom-1/4 right-1/4 z-10 flex items-center gap-3 rounded-xl bg-white/90 p-3 shadow-lg backdrop-blur-sm dark:bg-black/80"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                viewport={{ once: true }}
+              >
+                <div className="rounded-full bg-success-500/20 p-2 dark:bg-success-500/10">
+                  <Icon
+                    icon="solar:road-bold"
+                    className="text-success-500"
+                    width={24}
+                    height={24}
+                  />
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold">Traffic Update</h4>
+                  <p className="text-xs text-foreground-600 dark:text-foreground-400">
+                    Heavy congestion in Central Accra
+                  </p>
+                </div>
+              </motion.div>
             </div>
           </div>
 
