@@ -15,7 +15,7 @@ export const AlertsSection = () => {
 
       <div className="container mx-auto px-6 md:px-8">
         <div className="mb-16 text-center">
-          <Chip color="primary" variant="flat" radius="full" className="mb-4">
+          <Chip color="success" variant="flat" radius="full" className="mb-4">
             Real-time Alerts
           </Chip>
           <h2 className="font-montserrat mb-4 text-3xl font-bold md:text-4xl">

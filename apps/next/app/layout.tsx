@@ -13,6 +13,8 @@ import { SettingsModalRouter } from "./account/settings-modal";
 import { SignInModalRouter } from "./account/signin-modal";
 import { SignUpModalRouter } from "./account/signup-modal";
 import { AlertsSection } from "@/components/website/alerts-section";
+import { IncidentsMapSection } from "@/components/website/incidents-map-section";
+import { Footer } from "@/components/website/footer";
 
 export const metadata: Metadata = {
   title: {
@@ -48,6 +50,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Hero />
           <FeaturesSection />
           <AlertsSection />
+          <IncidentsMapSection />
+          <Footer />
           <SignUpModalRouter />
           <SignInModalRouter />
           <ResetPasswordModalRouter />
