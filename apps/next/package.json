@@ -17,6 +17,7 @@
     "@heroui/chip": "^2.2.15",
     "@heroui/code": "2.2.14",
     "@heroui/divider": "^2.2.13",
+    "@heroui/dropdown": "^2.3.19",
     "@heroui/input": "2.4.19",
     "@heroui/input-otp": "^2.1.18",
     "@heroui/kbd": "2.2.15",
@@ -43,8 +44,10 @@
     "next-themes": "0.4.6",
     "p-queue": "^8.1.0",
     "react": "18.3.1",
+    "react-countup": "^6.5.3",
     "react-dom": "18.3.1",
     "react-hook-form": "^7.56.4",
+    "react-intersection-observer": "^9.16.0",
     "universal-cookie": "^8.0.1"
   },
   "devDependencies": {

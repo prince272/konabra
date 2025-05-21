@@ -3,6 +3,7 @@
 import React from "react";
 import NextLink from "next/link";
 import { Button } from "@heroui/button";
+import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 import { Link } from "@heroui/link";
 import {
   Navbar as HeroNavbar,
@@ -108,16 +109,32 @@ export const Navbar = () => {
         </NavbarItem>
         <NavbarItem>
           {currentAccount ? (
-            <Button
-              radius="full"
-              as={NextLink}
-              color="primary"
-              variant="solid"
-              className="px-4"
-              href="#settings"
-            >
-              Account
-            </Button>
+            <Dropdown>
+              <DropdownTrigger>
+                <Button radius="full" color="primary" variant="solid" className="px-4">
+                  {currentAccount.firstName}
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu aria-label="User menu">
+                <DropdownItem
+                  key="settings"
+                  as={NextLink}
+                  href="#settings"
+                  startContent={<Icon icon="solar:settings-broken" width={20} height={20} />}
+                >
+                  Settings
+                </DropdownItem>
+                <DropdownItem
+                  key="signout"
+                  as={NextLink}
+                  href="#signout"
+                  startContent={<Icon icon="solar:logout-2-broken" width={20} height={20} />}
+                  color="danger"
+                >
+                  Sign Out
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
           ) : (
             <Button
               radius="full"
@@ -157,12 +174,20 @@ export const Navbar = () => {
         ))}
         <NavbarMenuItem>
           {currentAccount ? (
-            <Link color="primary" className="w-full py-3" href="#settings" size="lg">
-              <div className="flex items-center gap-3 px-4">
-                <Icon icon="solar:user-bold" className="text-primary" />
-                Account
-              </div>
-            </Link>
+            <>
+              <Link color="primary" className="w-full py-3" as={NextLink} href="#settings" size="lg">
+                <div className="flex items-center gap-3 px-4">
+                  <Icon icon="solar:settings-broken" className="text-primary" />
+                  Settings
+                </div>
+              </Link>
+              <Link color="primary" className="w-full py-3" as={NextLink} href="#signout" size="lg">
+                <div className="flex items-center gap-3 px-4">
+                  <Icon icon="solar:logout-2-broken" className="text-primary" />
+                  Sign Out
+                </div>
+              </Link>
+            </>
           ) : (
             <Link color="foreground" className="w-full py-3" href="#signin" size="lg">
               <div className="flex items-center gap-3 px-4">

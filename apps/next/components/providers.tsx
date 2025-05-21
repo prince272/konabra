@@ -6,7 +6,7 @@ import { HeroUIProvider } from "@heroui/system";
 import { ToastProvider } from "@heroui/toast";
 import type { ThemeProviderProps } from "next-themes";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
-import { CookiesProvider } from "@/hooks";
+import { CookiesProvider, useBreakpoint } from "@/hooks";
 import { ModalQueueProvider } from "@/components/common/models";
 
 export interface ProvidersProps {
@@ -23,11 +23,12 @@ declare module "@react-types/shared" {
 
 export function Providers({ children, cookies, themeProps }: ProvidersProps) {
   const router = useRouter();
+  const isSmallScreen = useBreakpoint("sm", "down");
 
   return (
     <HeroUIProvider navigate={router.push}>
       <NextThemesProvider {...themeProps}>
-        <ToastProvider placement="top-center" />
+        <ToastProvider placement={isSmallScreen ? "bottom-center" : "top-center"} />
         <CookiesProvider value={cookies}>
           <ModalQueueProvider>{children}</ModalQueueProvider>
         </CookiesProvider>

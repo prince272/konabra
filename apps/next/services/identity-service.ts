@@ -40,6 +40,11 @@ export type SignInForm = {
   password: string;
 };
 
+export type SignOutForm = {
+  refreshToken: string;
+  global: boolean;
+}
+
 export type ResetPasswordForm = {
   username: string;
 };
@@ -130,6 +135,15 @@ export class IdentityService {
       return [response.data, undefined] as const;
     } catch (error) {
       return [undefined!, parseProblem(error)] as const;
+    }
+  }
+
+  public async signOut(form: SignOutForm): Promise<Problem | undefined> {
+    try {
+      const _ = await this.api.post("/account/signout", form);
+      return undefined;
+    } catch (error) {
+      return parseProblem(error);
     }
   }
 

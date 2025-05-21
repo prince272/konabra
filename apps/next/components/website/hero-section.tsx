@@ -6,7 +6,7 @@ import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 import { CanvasMap } from "./canvas-map";
 
-export const Hero = () => {
+export const HeroSection = () => {
   const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

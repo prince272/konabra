@@ -43,7 +43,7 @@ export const Footer = () => {
   ];
 
   return (
-    <footer className="border-t border-default-200 bg-background">
+    <footer className="bg-background">
       <div className="container mx-auto px-6 pt-16 pb-8 md:px-8">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-2">
