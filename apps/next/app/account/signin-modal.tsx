@@ -17,7 +17,6 @@ import { SignInForm } from "@/services/identity-service";
 import { useAccountState } from "@/states";
 import { useBreakpoint } from "@/hooks";
 import { useModalRouter } from "@/components/common/models";
-import { Logo } from "@/components/icons";
 
 export default function SignInModal({
   isOpen,
@@ -163,7 +162,6 @@ export default function SignInModal({
               {step === 1 && (
                 <div className="space-y-5">
                   <div className="flex flex-col items-center justify-center pb-3 text-center">
-                    <Logo className="flex items-center justify-start gap-1" size={64} />
                     <h3 className="text-lg font-medium">Sign into account</h3>
                     <p className="text-sm text-default-500">
                       Enter your email or phone number to sign in to your account.

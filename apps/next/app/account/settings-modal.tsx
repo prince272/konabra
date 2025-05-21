@@ -29,7 +29,7 @@ interface ViewContextType {
 
 const ViewContext = createContext<ViewContextType>({
   title: "Settings",
-  icon: "solar:settings-bold-duotone"
+  icon: "solar:settings-broken"
 });
 
 interface ViewProps {
@@ -56,7 +56,7 @@ function AccountView({ navigateTo, currentView }: BaseViewProps) {
         <div className="rounded-xl bg-default-100 p-4 shadow-sm">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2">
-              <Icon icon="solar:user-bold-duotone" width="20" height="20" />
+              <Icon icon="solar:user-broken" width="20" height="20" />
               <h4 className="font-medium">Email Address</h4>
             </div>
           </div>
@@ -99,7 +99,7 @@ function AccountView({ navigateTo, currentView }: BaseViewProps) {
         <div className="rounded-xl bg-default-100 p-4 shadow-sm">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2">
-              <Icon icon="solar:phone-bold-duotone" width="20" height="20" />
+              <Icon icon="solar:phone-broken" width="20" height="20" />
               <h4 className="font-medium">Phone Number</h4>
             </div>
           </div>
@@ -138,7 +138,7 @@ function AccountView({ navigateTo, currentView }: BaseViewProps) {
         <div className="rounded-xl bg-default-100 p-4 shadow-sm">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2">
-              <Icon icon="solar:key-bold-duotone" width="20" height="20" />
+              <Icon icon="solar:key-broken" width="20" height="20" />
               <h4 className="font-medium">Password</h4>
             </div>
           </div>
@@ -163,7 +163,7 @@ function AccountView({ navigateTo, currentView }: BaseViewProps) {
           <div className="rounded-xl bg-warning-100 p-4 shadow-sm">
             <div className="flex items-center gap-2">
               <Icon
-                icon="solar:power-bold-duotone"
+                icon="solar:power-broken"
                 width="20"
                 height="20"
                 className="text-warning-700 dark:text-warning"
@@ -187,7 +187,7 @@ function AccountView({ navigateTo, currentView }: BaseViewProps) {
           <div className="rounded-xl bg-danger-50 p-4 shadow-sm">
             <div className="flex items-center gap-2">
               <Icon
-                icon="solar:trash-bin-trash-bold-duotone"
+                icon="solar:trash-bin-trash-broken"
                 width="24"
                 height="24"
                 className="text-danger"
@@ -202,7 +202,7 @@ function AccountView({ navigateTo, currentView }: BaseViewProps) {
               variant="solid"
               color="danger"
               fullWidth
-              startContent={<Icon icon="solar:trash-bin-bold-duotone" width="20" height="20" />}
+              startContent={<Icon icon="solar:trash-bin-broken" width="20" height="20" />}
               onPress={() => navigateTo("account:delete")}
               className="mt-3 font-medium"
             >
@@ -504,7 +504,7 @@ function NotificationsView({ currentView }: BaseViewProps) {
       <div className="space-y-6">
         <div className="rounded-xl bg-default-100 p-4 shadow-sm">
           <div className="flex items-center gap-2">
-            <Icon icon="solar:bell-bing-bold-duotone" width="20" height="20" />
+            <Icon icon="solar:bell-bing-broken" width="20" height="20" />
             <h4 className="font-medium">General Notifications</h4>
           </div>
           <div className="mt-3 space-y-3">
@@ -524,7 +524,7 @@ function NotificationsView({ currentView }: BaseViewProps) {
         </div>
         <div className="rounded-xl bg-default-100 p-4 shadow-sm">
           <div className="flex items-center gap-2">
-            <Icon icon="solar:moon-bold-duotone" width="20" height="20" />
+            <Icon icon="solar:moon-broken" width="20" height="20" />
             <h4 className="font-medium">Do Not Disturb</h4>
           </div>
           <div className="mt-3 space-y-3">
@@ -626,35 +626,35 @@ export default function SettingsModal({ isOpen, onClose, onSignOut }: SettingsMo
   const [isMenuSelected, setIsMenuSelected] = useState<boolean>(false);
   const [viewInfo, setViewInfo] = useState<{ title: string; icon: string }>({
     title: "Settings",
-    icon: "solar:settings-bold-duotone"
+    icon: "solar:settings-broken"
   });
 
   const isSmallScreen = useBreakpoint("sm", "down");
 
   const menuItems = [
-    { id: "account", label: "Account", icon: "solar:user-bold-duotone" },
-    { id: "notifications", label: "Notifications", icon: "solar:bell-bing-bold-duotone" },
-    { id: "display", label: "Display", icon: "solar:monitor-bold-duotone" },
-    { id: "sound", label: "Sound", icon: "solar:soundwave-bold-duotone" },
-    { id: "storage", label: "Storage", icon: "solar:folder-bold-duotone" },
-    { id: "privacy", label: "Privacy", icon: "solar:lock-bold-duotone" }
+    { id: "account", label: "Account", icon: "solar:user-broken" },
+    { id: "notifications", label: "Notifications", icon: "solar:bell-bing-broken" },
+    { id: "display", label: "Display", icon: "solar:monitor-broken" },
+    { id: "sound", label: "Sound", icon: "solar:soundwave-broken" },
+    { id: "storage", label: "Storage", icon: "solar:folder-broken" },
+    { id: "privacy", label: "Privacy", icon: "solar:lock-broken" }
   ];
 
   const viewInfoMap: Record<string, { title: string; icon: string }> = {
-    "": { title: "Settings", icon: "solar:settings-bold-duotone" },
-    account: { title: "Account", icon: "solar:user-bold-duotone" },
-    notifications: { title: "Notifications", icon: "solar:bell-bing-bold-duotone" },
-    display: { title: "Display", icon: "solar:monitor-bold-duotone" },
-    sound: { title: "Sound", icon: "solar:soundwave-bold-duotone" },
-    storage: { title: "Storage", icon: "solar:folder-bold-duotone" },
-    privacy: { title: "Privacy", icon: "solar:lock-bold-duotone" }
+    "": { title: "Settings", icon: "solar:settings-broken" },
+    account: { title: "Account", icon: "solar:user-broken" },
+    notifications: { title: "Notifications", icon: "solar:bell-bing-broken" },
+    display: { title: "Display", icon: "solar:monitor-broken" },
+    sound: { title: "Sound", icon: "solar:soundwave-broken" },
+    storage: { title: "Storage", icon: "solar:folder-broken" },
+    privacy: { title: "Privacy", icon: "solar:lock-broken" }
   };
 
   useEffect(() => {
     const mainViewId = currentView.split(":")[0] || "";
     const info = viewInfoMap[mainViewId] || {
       title: "Settings",
-      icon: "solar:settings-bold-duotone"
+      icon: "solar:settings-broken"
     };
     setViewInfo(info);
   }, [currentView]);

@@ -17,7 +17,6 @@ import { CreateAccountForm } from "@/services/identity-service";
 import { useAccountState } from "@/states";
 import { useBreakpoint } from "@/hooks";
 import { useModalRouter } from "@/components/common/models";
-import { Logo } from "@/components/icons";
 
 export default function SignUpModal({
   isOpen,
@@ -203,7 +202,6 @@ export default function SignUpModal({
               {step === 1 && (
                 <div className="space-y-5">
                   <div className="flex flex-col items-center justify-center pb-3 text-center">
-                    <Logo className="flex items-center justify-start gap-1" size={64} />
                     <h3 className="text-lg font-medium">Create an account</h3>
                     <p className="text-sm text-default-500">
                       Sign up quickly using your email, phone, or social account.

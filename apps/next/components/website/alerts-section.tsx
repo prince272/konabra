@@ -1,0 +1,112 @@
+"use client";
+
+import React from "react";
+import { Button } from "@heroui/button";
+import { Chip } from "@heroui/chip";
+import { Icon } from "@iconify/react";
+import { motion } from "framer-motion";
+import { Globe } from "./globe";
+
+export const AlertsSection = () => {
+  return (
+    <section id="alerts" className="relative overflow-hidden bg-background py-20">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,184,0,0.1),transparent_100%)]"></div>
+
+      <div className="container mx-auto px-6 md:px-8">
+        <div className="mb-16 text-center">
+          <Chip color="primary" variant="flat" radius="full" className="mb-4">
+            Real-time Alerts
+          </Chip>
+          <h2 className="font-montserrat mb-4 text-3xl font-bold md:text-4xl">
+            Stay Informed on the Go
+          </h2>
+          <p className="mx-auto max-w-2xl text-foreground-600">
+            Receive instant notifications about road incidents and traffic conditions along your
+            routes
+          </p>
+        </div>
+
+        <div className="grid items-center gap-12 md:grid-cols-2">
+          <div className="order-2 md:order-1">
+            <div className="relative h-[400px] md:h-[500px]">
+              <Globe />
+            </div>
+          </div>
+
+          <div className="order-1 md:order-2">
+            <div className="space-y-8">
+              <motion.div
+                className="flex gap-4"
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true, margin: "-100px" }}
+              >
+                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary/25 text-primary dark:bg-primary/15 dark:ring-1 dark:ring-primary/30">
+                  <Icon icon="lucide:bell" width={24} />
+                </div>
+                <div>
+                  <h3 className="font-montserrat mb-2 text-xl font-semibold">
+                    Personalized Alerts
+                  </h3>
+                  <p className="text-foreground-600">
+                    Set up alerts for your regular routes and receive notifications when incidents
+                    are reported along your way.
+                  </p>
+                </div>
+              </motion.div>
+
+              <motion.div
+                className="flex gap-4"
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                viewport={{ once: true, margin: "-100px" }}
+              >
+                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-success-500/25 text-success-500 dark:bg-success-500/15 dark:ring-1 dark:ring-success-500/30">
+                  <Icon icon="solar:map-point-search-bold" width={24} />
+                </div>
+                <div>
+                  <h3 className="font-montserrat mb-2 text-xl font-semibold">Interactive Map</h3>
+                  <p className="text-foreground-600">
+                    View all reported incidents on an interactive map and plan your journey
+                    accordingly.
+                  </p>
+                </div>
+              </motion.div>
+
+              <motion.div
+                className="flex gap-4"
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                viewport={{ once: true, margin: "-100px" }}
+              >
+                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary/25 text-primary dark:bg-primary/15 dark:ring-1 dark:ring-primary/30">
+                  <Icon icon="solar:clock-circle-bold" width={24} />
+                </div>
+                <div>
+                  <h3 className="font-montserrat mb-2 text-xl font-semibold">Real-time Updates</h3>
+                  <p className="text-foreground-600">
+                    Get instant updates as new incidents are reported or existing ones are resolved.
+                  </p>
+                </div>
+              </motion.div>
+
+              <div className="pt-4">
+                <Button
+                  color="primary"
+                  variant="solid"
+                  radius="full"
+                  endContent={<Icon icon="solar:arrow-right-bold" />}
+                >
+                  Learn More About Alerts
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
