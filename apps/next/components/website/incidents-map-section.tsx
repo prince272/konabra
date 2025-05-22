@@ -93,7 +93,7 @@ export const IncidentsMapSection = () => {
                   color="success"
                   variant="solid"
                   radius="full"
-                  endContent={<Icon icon="solar:arrow-right-bold" />}
+                  endContent={<Icon icon="solar:arrow-right-bold" width={24} height={24} />}
                 >
                   View Incident Map
                 </Button>
@@ -127,7 +127,7 @@ export const IncidentsMapSection = () => {
                   viewport={{ once: true }}
                 >
                   <div className="mb-2 flex items-center gap-2">
-                    <Icon icon="solar:danger-triangle-bold" className="text-warning" />
+                    <Icon icon="solar:danger-triangle-bold" className="text-warning" width={20} height={20} />
                     <h4 className="text-sm font-semibold">Incident Details</h4>
                   </div>
                   <p className="text-xs text-foreground-600 dark:text-foreground-400">

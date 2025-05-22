@@ -124,9 +124,9 @@ export const HeroSection = () => {
               <Button
                 size="lg"
                 color="primary"
-                radius="sm"
+                radius="full"
                 className="font-medium"
-                endContent={<Icon icon="solar:arrow-right-broken" />}
+                endContent={<Icon icon="solar:arrow-right-broken" width={24} height={24} />}
               >
                 Web Portal
               </Button>
@@ -135,9 +135,9 @@ export const HeroSection = () => {
                 size="lg"
                 variant="flat"
                 color="primary"
-                radius="sm"
+                radius="full"
                 className="font-medium"
-                startContent={<Icon icon="solar:smartphone-broken" />}
+                startContent={<Icon icon="solar:smartphone-broken" width={24} height={24} />}
               >
                 Mobile App
               </Button>
@@ -149,7 +149,7 @@ export const HeroSection = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.7 }}
             >
-              <Icon icon="solar:shield-check-broken" className="text-primary" />
+              <Icon icon="solar:shield-check-broken" width={24} height={24} className="text-primary" />
               <span>Trusted by over 10,000 Ghanaians</span>
             </motion.div>
           </motion.div>

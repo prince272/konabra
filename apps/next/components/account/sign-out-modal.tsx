@@ -70,7 +70,7 @@ export default function SignOutModal({
           onPress={onClose}
           className="rounded-full text-foreground-500"
         >
-          <Icon icon="solar:close-broken" width="24" height="24" />
+          <Icon icon="material-symbols:close-rounded" width="24" height="24" />
         </Button>
       }
       classNames={{

@@ -117,6 +117,14 @@ export const Navbar = () => {
               </DropdownTrigger>
               <DropdownMenu aria-label="User menu">
                 <DropdownItem
+                  key="dashboard"
+                  as={NextLink}
+                  href="#dashboard"
+                  startContent={<Icon icon="solar:spedometer-max-broken" width={20} height={20} />}
+                >
+                  Dashboard
+                </DropdownItem>
+                <DropdownItem
                   key="settings"
                   as={NextLink}
                   href="#settings"
@@ -129,7 +137,7 @@ export const Navbar = () => {
                   as={NextLink}
                   href="#signout"
                   startContent={<Icon icon="solar:logout-2-broken" width={20} height={20} />}
-                  color="danger"
+                  color="primary"
                 >
                   Sign Out
                 </DropdownItem>
@@ -175,15 +183,21 @@ export const Navbar = () => {
         <NavbarMenuItem>
           {currentAccount ? (
             <>
-              <Link color="primary" className="w-full py-3" as={NextLink} href="#settings" size="lg">
+              <Link
+                color="primary"
+                className="w-full py-3"
+                as={NextLink}
+                href="#settings"
+                size="lg"
+              >
                 <div className="flex items-center gap-3 px-4">
-                  <Icon icon="solar:settings-broken" className="text-primary" />
+                  <Icon icon="solar:settings-broken" className="text-primary" width={20} height={20} />
                   Settings
                 </div>
               </Link>
               <Link color="primary" className="w-full py-3" as={NextLink} href="#signout" size="lg">
                 <div className="flex items-center gap-3 px-4">
-                  <Icon icon="solar:logout-2-broken" className="text-primary" />
+                  <Icon icon="solar:logout-2-broken" className="text-primary" width={20} height={20} />
                   Sign Out
                 </div>
               </Link>
@@ -191,7 +205,7 @@ export const Navbar = () => {
           ) : (
             <Link color="foreground" className="w-full py-3" href="#signin" size="lg">
               <div className="flex items-center gap-3 px-4">
-                <Icon icon="solar:login-3-bold" className="text-primary" />
+                <Icon icon="solar:login-3-bold" className="text-primary" width={20} height={20} />
                 Sign In
               </div>
             </Link>
@@ -199,7 +213,7 @@ export const Navbar = () => {
         </NavbarMenuItem>
         <NavbarMenuItem>
           <div className="flex items-center gap-3 px-4 py-3">
-            <Icon icon="solar:sun-bold-duotone" className="text-primary" />
+            <Icon icon="solar:sun-bold-duotone" className="text-primary" width={20} height={20} />
             <span>Theme</span>
             <div className="ml-auto">
               <ThemeSwitcher />
@@ -215,16 +229,16 @@ export const Navbar = () => {
 function getMenuIcon(name: string) {
   switch (name) {
     case "Home":
-      return <Icon icon="solar:home-bold" className="text-primary" />;
+      return <Icon icon="solar:home-bold" className="text-primary" width={20} height={20} />;
     case "Features":
-      return <Icon icon="solar:widget-bold" className="text-primary" />;
+      return <Icon icon="solar:widget-bold" className="text-primary" width={20} height={20} />;
     case "How It Works":
-      return <Icon icon="solar:info-circle-bold" className="text-primary" />;
+      return <Icon icon="solar:info-circle-bold" className="text-primary" width={20} height={20} />;
     case "Impact":
-      return <Icon icon="solar:chart-bold" className="text-primary" />;
+      return <Icon icon="solar:chart-bold" className="text-primary" width={20} height={20} />;
     case "Testimonials":
-      return <Icon icon="solar:chat-round-dots-bold" className="text-primary" />;
+      return <Icon icon="solar:chat-round-dots-bold" className="text-primary" width={20} height={20} />;
     default:
-      return <Icon icon="solar:menu-dots-bold" className="text-primary" />;
+      return <Icon icon="solar:menu-dots-bold" className="text-primary" width={20} height={20} />;
   }
 }

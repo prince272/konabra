@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Navbar } from "@/components/website/navbar";
 import { Footer } from "@/components/website/footer";
+import { ContactUsModalRouter } from "@/components/website/contact-us-modal";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -8,6 +9,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <Navbar />
       {children}
       <Footer />
+      <ContactUsModalRouter />
     </>
   );
 }

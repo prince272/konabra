@@ -5,11 +5,11 @@ import { Metadata, Viewport } from "next";
 import { cookies as getCookiesStore } from "next/headers";
 import { cn } from "@heroui/theme";
 import { Providers } from "../components/providers";
-import { ResetPasswordModalRouter } from "./account/reset-password-modal";
-import { SettingsModalRouter } from "./account/settings-modal";
-import { SignInModalRouter } from "./account/signin-modal";
-import { SignUpModalRouter } from "./account/signup-modal";
-import { SignOutModalRouter } from "./account/sign-out-modal";
+import { ResetPasswordModalRouter } from "../components/account/reset-password-modal";
+import { SettingsModalRouter } from "../components/account/settings-modal";
+import { SignInModalRouter } from "../components/account/signin-modal";
+import { SignUpModalRouter } from "../components/account/signup-modal";
+import { SignOutModalRouter } from "../components/account/sign-out-modal";
 
 export const metadata: Metadata = {
   title: {

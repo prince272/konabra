@@ -142,7 +142,7 @@ export const StatsSection = () => {
                       <div
                         className={`${stat.color} ${stat.bgColor} mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl`}
                       >
-                        <Icon icon={stat.icon} width={28} />
+                        <Icon icon={stat.icon} width={28} height={28} />
                       </div>
                       <h3 className="font-montserrat mb-3 text-3xl font-bold sm:text-4xl">
                         {inView ? (

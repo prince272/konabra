@@ -46,7 +46,12 @@ export const ThemeSwitcher = () => {
   return (
     <Tooltip content={`Switch to ${isDark ? "light" : "dark"} mode`} placement="bottom">
       <div className="flex items-center gap-2">
-        <Icon icon="lucide:sun" className={`text-default-500 ${!isDark && "text-primary"}`} />
+        <Icon
+          icon="lucide:sun"
+          className={`text-default-500 ${!isDark && "text-primary"}`}
+          width={20}
+          height={20}
+        />
         <Switch
           isSelected={isDark}
           onValueChange={handleToggle}
@@ -54,7 +59,12 @@ export const ThemeSwitcher = () => {
           color="primary"
           className="mx-1"
         />
-        <Icon icon="lucide:moon" className={`text-default-500 ${isDark && "text-primary"}`} />
+        <Icon
+          icon="lucide:moon"
+          className={`text-default-500 ${isDark && "text-primary"}`}
+          width={20}
+          height={20}
+        />
       </div>
     </Tooltip>
   );
