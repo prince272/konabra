@@ -48,10 +48,7 @@ To revolutionize road safety and traffic management in Ghana by connecting peopl
    ```
 
 2. **Set up environment variables**:
-   - Copy the `.env.example` file from the `utils` folder to create a `.env` file:
-     ```bash
-     cp utils/.env.example .env
-     ```
+   - Rename the `.env.local` file `.env` to create a `.env` file:
    - Edit `.env` to configure your database credentials, API keys, and other settings.
 
 3. **Install backend dependencies**:
@@ -84,32 +81,5 @@ To revolutionize road safety and traffic management in Ghana by connecting peopl
 ## 📜 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-## 🤝 Contributing
-
-Konabra is an open-source project, and we welcome contributions from the community! To contribute:
-
-1. Fork the repository.
-2. Create a new branch for your feature or bugfix:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-3. Make your changes and commit them:
-   ```bash
-   git commit -m "Add your message here"
-   ```
-4. Push to your fork and create a pull request:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-For more details, please open an issue to discuss your ideas or suggestions.
-
-## 🌟 Community
-
-Join the Konabra community to stay updated and collaborate:
-
-- **GitHub Issues**: Report bugs or suggest features [here](https://github.com/prince272/konabra/issues).  
-- **Discussions**: Share ideas and feedback in the [Discussions](https://github.com/prince272/konabra/discussions) section.
 
 Let’s work together to make roads safer for everyone! 🚗
