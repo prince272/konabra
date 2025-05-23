@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Switch } from "@heroui/switch";
 import { Tooltip } from "@heroui/tooltip";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify-icon/react";
 import { useTheme } from "next-themes";
 
 export const ThemeSwitcher = () => {

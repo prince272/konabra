@@ -2,7 +2,7 @@
 
 import React, { useState, memo } from "react";
 import { Chip } from "@heroui/chip";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify-icon/react";
 import { motion } from "framer-motion";
 import CountUp from "react-countup";
 import { InView } from "react-intersection-observer";

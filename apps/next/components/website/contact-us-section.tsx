@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Button } from "@heroui/button";
-import { Icon } from "@iconify/react"; // Import Iconify
+import { Icon } from "@iconify-icon/react"; // Import Iconify
 import { motion } from "framer-motion";
 import NextLink from "next/link";
 

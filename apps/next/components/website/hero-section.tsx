@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { Button } from "@heroui/button";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify-icon/react";
 import { motion } from "framer-motion";
 import { CanvasMap } from "./canvas-map";
 

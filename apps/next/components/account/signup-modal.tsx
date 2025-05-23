@@ -8,7 +8,7 @@ import { Input } from "@heroui/input";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { cn } from "@heroui/theme";
 import { addToast } from "@heroui/toast";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify-icon/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cloneDeep } from "lodash";
 import { Controller, useForm } from "react-hook-form";
@@ -17,6 +17,7 @@ import { CreateAccountForm } from "@/services/identity-service";
 import { useAccountState } from "@/states";
 import { useBreakpoint } from "@/hooks";
 import { useModalRouter } from "@/components/common/models";
+import { InputPhone } from "../common/input-phone";
 
 export default function SignUpModal({
   isOpen,
@@ -256,7 +257,7 @@ export default function SignUpModal({
                     name="username"
                     control={form.control}
                     render={({ field }) => (
-                      <Input
+                      <InputPhone
                         {...field}
                         label="Email or Phone number"
                         isInvalid={!!formErrors.username?.message}

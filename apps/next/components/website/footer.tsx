@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "@heroui/link";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify-icon/react";
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();

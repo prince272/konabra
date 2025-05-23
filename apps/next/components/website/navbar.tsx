@@ -14,7 +14,7 @@ import {
   NavbarMenuItem,
   NavbarMenuToggle
 } from "@heroui/navbar";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify-icon/react";
 import { useAccountState } from "@/states";
 import { ThemeSwitcher } from "./theme-switcher";
 
@@ -25,10 +25,11 @@ export const Navbar = () => {
 
   const menuItems = [
     { name: "Home", href: "#" },
-    { name: "Features", href: "#features" },
-    { name: "How It Works", href: "#how-it-works" },
     { name: "Impact", href: "#stats" },
-    { name: "Testimonials", href: "#testimonials" }
+    { name: "Features", href: "#features" },
+    { name: "Alerts", href: "#alerts" },
+    { name: "Incidents", href: "#incidents-map" },
+    { name: "Contact", href: "#contact" }
   ];
 
   React.useEffect(() => {
@@ -191,13 +192,23 @@ export const Navbar = () => {
                 size="lg"
               >
                 <div className="flex items-center gap-3 px-4">
-                  <Icon icon="solar:settings-broken" className="text-primary" width={20} height={20} />
+                  <Icon
+                    icon="solar:settings-broken"
+                    className="text-primary"
+                    width={20}
+                    height={20}
+                  />
                   Settings
                 </div>
               </Link>
               <Link color="primary" className="w-full py-3" as={NextLink} href="#signout" size="lg">
                 <div className="flex items-center gap-3 px-4">
-                  <Icon icon="solar:logout-2-broken" className="text-primary" width={20} height={20} />
+                  <Icon
+                    icon="solar:logout-2-broken"
+                    className="text-primary"
+                    width={20}
+                    height={20}
+                  />
                   Sign Out
                 </div>
               </Link>
@@ -237,7 +248,9 @@ function getMenuIcon(name: string) {
     case "Impact":
       return <Icon icon="solar:chart-bold" className="text-primary" width={20} height={20} />;
     case "Testimonials":
-      return <Icon icon="solar:chat-round-dots-bold" className="text-primary" width={20} height={20} />;
+      return (
+        <Icon icon="solar:chat-round-dots-bold" className="text-primary" width={20} height={20} />
+      );
     default:
       return <Icon icon="solar:menu-dots-bold" className="text-primary" width={20} height={20} />;
   }

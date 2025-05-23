@@ -6,7 +6,7 @@ import { Input, Textarea } from "@heroui/input";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { cn } from "@heroui/theme";
 import { addToast } from "@heroui/toast";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify-icon/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Controller, useForm } from "react-hook-form";
 import { useBreakpoint } from "@/hooks";

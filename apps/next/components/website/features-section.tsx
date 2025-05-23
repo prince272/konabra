@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Chip } from "@heroui/chip";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify-icon/react";
 import { motion } from "framer-motion";
 
 export const FeaturesSection = () => {
