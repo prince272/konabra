@@ -8,7 +8,7 @@ import { Modal, ModalBody, ModalContent, ModalHeader } from "@heroui/modal";
 import { cn } from "@heroui/theme";
 import { Icon } from "@iconify-icon/react";
 import countries from "i18n-iso-countries";
-import { getCountries, getCountryCallingCode, parsePhoneNumberFromString } from "libphonenumber-js";
+import { CountryCode, getCountries, getCountryCallingCode, parsePhoneNumberFromString } from "libphonenumber-js";
 import { maybePhoneNumber } from "@/utils";
 import { useBreakpoint, useMeasure } from "@/hooks";
 
@@ -16,7 +16,7 @@ import { useBreakpoint, useMeasure } from "@/hooks";
 countries.registerLocale(require("i18n-iso-countries/langs/en.json"));
 
 type Country = {
-  code: string;
+  code: CountryCode;
   name: string;
   callingCode: string;
 };
@@ -29,17 +29,7 @@ type InputPhoneProps = React.ComponentPropsWithoutRef<typeof Input> & {
 };
 
 const InputPhone = React.forwardRef<HTMLInputElement, InputPhoneProps>(
-  (
-    {
-      isDisabled,
-      value,
-      defaultCountryCode = "GH",
-      onCountryChange,
-      onChange,
-      ...props
-    },
-    ref
-  ) => {
+  ({ isDisabled, value, defaultCountryCode = "GH", onCountryChange, onChange, ...props }, ref) => {
     // Memoize country list
     const allCountries: Country[] = useMemo(() => {
       return getCountries()
@@ -130,7 +120,7 @@ const InputPhone = React.forwardRef<HTMLInputElement, InputPhoneProps>(
     const endContent = maybePhoneNumber(value) ? (
       <Button
         type="button"
-        className="text-small h-5 px-0 py-1"
+        className="h-5 px-0 py-1 text-small"
         size="sm"
         variant="light"
         radius="full"
@@ -214,7 +204,7 @@ const InputPhone = React.forwardRef<HTMLInputElement, InputPhoneProps>(
                     isVirtualized
                     virtualization={{
                       maxListboxHeight: maxListHeight,
-                      itemHeight: 40,
+                      itemHeight: 40
                     }}
                     className="p-0"
                     itemClasses={{ base: "px-6 rounded-none" }}
