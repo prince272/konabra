@@ -11,7 +11,7 @@ export function formatInternationalNumber(
   return number;
 }
 
-export function maybePhoneNumber(input: string): boolean {
+export function maybePhoneNumber(input?: string): boolean {
   const phonePattern = /^[-+0-9() ]+$/;
-  return phonePattern.test(input);
+  return phonePattern.test(input || "");
 }
