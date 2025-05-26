@@ -78,7 +78,7 @@ export const Navbar = () => {
                 icon="solar:map-point-bold"
                 width={24}
                 height={24}
-                className="text-success-900"
+                className="text-success"
               />
             </div>
             <p className="font-montserrat text-xl font-bold text-inherit">Konabra</p>
@@ -120,7 +120,7 @@ export const Navbar = () => {
                 <DropdownItem
                   key="dashboard"
                   as={NextLink}
-                  href="#dashboard"
+                  href="/admin"
                   startContent={<Icon icon="solar:spedometer-max-broken" width={20} height={20} />}
                 >
                   Dashboard

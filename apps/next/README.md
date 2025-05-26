@@ -82,14 +82,3 @@ pnpm install
 This template is licensed under the [MIT License](https://github.com/heroui-inc/next-app-template/blob/main/LICENSE).
 
 ---
-
-## Why Use This Template for Konabra?
-This Next.js and HeroUI template is ideal for building Konabra’s web and mobile interfaces due to its:
-
-- **Scalability**: Next.js supports server-side rendering and static generation, perfect for real-time dashboards and maps.
-- **Modern UI**: HeroUI and Tailwind CSS enable rapid development of responsive, accessible interfaces for Konabra’s users.
-- **Type Safety**: TypeScript ensures robust code for handling complex data like incident reports and analytics.
-- **Animations**: Framer Motion adds engaging transitions to enhance the user experience on Konabra’s map and alert systems.
-- **Theme Support**: next-themes enables light/dark mode for better accessibility in diverse environments.
-
-Start building Konabra today and contribute to safer roads in Ghana and beyond!

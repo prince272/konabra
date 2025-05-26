@@ -53,7 +53,7 @@ export const Footer = () => {
                   icon="solar:map-point-bold"
                   width={24}
                   height={24}
-                  className="text-success-900"
+                  className="text-success"
                 />
               </div>
               <p className="font-montserrat text-xl font-bold text-inherit">Konabra</p>
@@ -68,7 +68,7 @@ export const Footer = () => {
                   key={index}
                   href={link.href}
                   isExternal
-                  className="rounded-full bg-default-100 p-2 transition-transform hover:scale-110 dark:bg-default-800"
+                  className="rounded-full bg-primary p-2 transition-transform hover:scale-110"
                 >
                   <Icon icon={link.icon} width={24} height={24} />
                 </Link>
