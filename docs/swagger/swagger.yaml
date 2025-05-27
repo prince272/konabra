@@ -187,6 +187,18 @@ paths:
       tags:
       - Account
   /account/current:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes the authenticated user's account permanently
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Delete the current user account
+      tags:
+      - Account
     get:
       consumes:
       - application/json

@@ -41,6 +41,21 @@ func (repository *IdentityRepository) UpdateUser(user *models.User) error {
 	return nil
 }
 
+func (repository *IdentityRepository) DeleteUser(user *models.User) error {
+	result := repository.defaultDB.Delete(user)
+
+	if result.Error != nil {
+
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil
+		}
+
+		return fmt.Errorf("failed to delete user: %w", result.Error)
+	}
+
+	return nil
+}
+
 func (repository *IdentityRepository) FindUserByUsername(username string) *models.User {
 	user := &models.User{}
 

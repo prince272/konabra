@@ -125,6 +125,25 @@ const docTemplate = `{
                 ],
                 "summary": "Get current user account",
                 "responses": {}
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Deletes the authenticated user's account permanently",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Delete the current user account",
+                "responses": {}
             }
         },
         "/account/password/change": {

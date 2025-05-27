@@ -27,6 +27,7 @@ func NewIdentityHandler(router *gin.Engine, jwtHelper *helpers.JwtHelper, identi
 		identityGroup.POST("/signin/refresh", handler.handle(handler.SignInWithRefreshToken))
 		identityGroup.POST("/signout", jwtHelper.RequireAuth(), handler.handle(handler.SignOut))
 		identityGroup.GET("/current", jwtHelper.RequireAuth(), handler.handle(handler.GetCurrentAccount))
+		identityGroup.DELETE("/current", jwtHelper.RequireAuth(), handler.handle(handler.DeleteCurrentAccount))
 		identityGroup.POST("/verify", handler.handle(handler.VerifyAccount))
 		identityGroup.POST("/verify/complete", handler.handle(handler.CompleteVerifyAccount))
 		identityGroup.POST("/change", jwtHelper.RequireAuth(), handler.handle(handler.ChangeAccount))
@@ -148,6 +149,24 @@ func (handler *IdentityHandler) CompleteChangeAccount(context *gin.Context) (any
 	if problem := handler.identityService.CompleteChangeAccount(userId, form); problem != nil {
 		return nil, problem
 	}
+	return gin.H{}, nil
+}
+
+// DeleteCurrentAccount handles account deletion
+// @Summary Delete the current user account
+// @Description Deletes the authenticated user's account permanently
+// @Tags Account
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Router /account/current [delete]
+func (handler *IdentityHandler) DeleteCurrentAccount(context *gin.Context) (any, *problems.Problem) {
+	claims := context.MustGet(constants.ContextClaimsKey).(map[string]any)
+	userId := claims["sub"].(string)
+	if problem := handler.identityService.DeleteAccount(userId); problem != nil {
+		return nil, problem
+	}
+
 	return gin.H{}, nil
 }
 

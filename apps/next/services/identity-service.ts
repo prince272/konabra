@@ -43,7 +43,7 @@ export type SignInForm = {
 export type SignOutForm = {
   refreshToken: string;
   global: boolean;
-}
+};
 
 export type ResetPasswordForm = {
   username: string;
@@ -173,6 +173,15 @@ export class IdentityService {
       return [response.data, undefined] as const;
     } catch (error) {
       return [undefined!, parseProblem(error)] as const;
+    }
+  }
+
+  public async deleteCurrentAccount(): Promise<Problem | undefined> {
+    try {
+      const _ = await this.api.delete("/account/current");
+      return undefined;
+    } catch (error) {
+      return parseProblem(error);
     }
   }
 }

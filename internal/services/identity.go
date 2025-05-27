@@ -467,6 +467,21 @@ func (service *IdentityService) CompleteVerifyAccount(form CompleteVerifyAccount
 	return nil
 }
 
+func (service *IdentityService) DeleteAccount(userId string) *problems.Problem {
+	user := service.identityRepository.FindUserById(userId)
+
+	if user == nil {
+		return problems.NewProblem(http.StatusNotFound, "User not found.")
+	}
+
+	if err := service.identityRepository.DeleteUser(user); err != nil {
+		service.logger.Error("User deletion error: ", zap.Error(err))
+		return problems.FromError(err)
+	}
+
+	return nil
+}
+
 func (service *IdentityService) ChangeAccount(userId string, form ChangeAccountForm) *problems.Problem {
 	if err := service.validator.ValidateStruct(form); err != nil {
 		return problems.FromError(err)
@@ -643,7 +658,7 @@ func (service *IdentityService) CompleteResetPassword(form CompleteResetPassword
 	user.PasswordHash = utils.MustHashPassword(form.NewPassword)
 	user.SecurityStamp = uuid.New().String()
 	user.UpdatedAt = time.Now()
-	user.LastPasswordChangeAt = time.Now()
+	user.LastPasswordChangedAt = time.Now()
 
 	if err := service.identityRepository.UpdateUser(user); err != nil {
 		service.logger.Error("User update error: ", zap.Error(err))
@@ -672,7 +687,7 @@ func (service *IdentityService) ChangePassword(userId string, form ChangePasswor
 	user.PasswordHash = utils.MustHashPassword(form.NewPassword)
 	user.SecurityStamp = uuid.New().String()
 	user.UpdatedAt = time.Now()
-	user.LastPasswordChangeAt = time.Now()
+	user.LastPasswordChangedAt = time.Now()
 
 	if err := service.identityRepository.UpdateUser(user); err != nil {
 		service.logger.Error("User update error: ", zap.Error(err))
