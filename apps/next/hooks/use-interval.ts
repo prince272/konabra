@@ -1,11 +1,12 @@
-import { useEffect, useRef, DependencyList } from 'react';
+import { DependencyList, useEffect, useRef, useState } from "react";
 
 export function useInterval<T extends (...args: any[]) => void>(
+  delay: number,
   callback: T,
-  delay: number | null,
   deps: DependencyList = []
-): void {
+): number {
   const savedCallback = useRef<T>();
+  const [tickCount, setTickCount] = useState(0);
 
   // Update saved callback if callback or deps change
   useEffect(() => {
@@ -17,10 +18,13 @@ export function useInterval<T extends (...args: any[]) => void>(
 
     const tick = () => {
       savedCallback.current?.();
+      setTickCount((prev) => prev + 1);
     };
 
     const id = setInterval(tick, delay);
 
     return () => clearInterval(id);
   }, [delay]);
+
+  return tickCount;
 }

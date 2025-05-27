@@ -51,11 +51,12 @@ interface BaseViewProps {
 
 function AccountView({ navigateTo, currentView }: BaseViewProps) {
   const [currentAccount] = useAccountState();
+  const lastPasswordChangedTick = useInterval(1000, () => {});
   const lastPasswordChangedAgo = useMemo(() => {
     return currentAccount?.lastPasswordChangedAt
       ? formatDistanceToNow(new Date(currentAccount.lastPasswordChangedAt), { addSuffix: true })
       : "";
-  }, [currentAccount]);
+  }, [currentAccount, lastPasswordChangedTick]);
 
   return (
     <View id="account" currentView={currentView}>
