@@ -6,7 +6,7 @@
       "type": "go",
       "request": "launch",
       "mode": "exec",
-      "program": "${workspaceFolder}/bin/api.exe",
+      "program": "${workspaceFolder}/bin/api",
       "envFile": "${workspaceFolder}/bin/.env",
       "preLaunchTask": "Build API",
       "serverReadyAction": {

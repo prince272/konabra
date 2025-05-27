@@ -24,6 +24,7 @@ export type AccountModel = {
   createdAt: string;
   updatedAt: string;
   lastActiveAt: string;
+  lastPasswordChangedAt: string;
   roles: string[];
 };
 

@@ -8,6 +8,7 @@ import { Switch } from "@heroui/switch";
 import { cn } from "@heroui/theme";
 import { addToast } from "@heroui/toast";
 import { Icon } from "@iconify-icon/react";
+import { formatDistanceToNow } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import { cloneDeep } from "lodash";
 import { Controller, useForm } from "react-hook-form";
@@ -19,7 +20,7 @@ import {
   CompleteVerifyAccountForm
 } from "@/services/identity-service";
 import { useAccountState } from "@/states";
-import { useBreakpoint, useHashState, useTimer } from "@/hooks";
+import { useBreakpoint, useHashState, useInterval, useTimer } from "@/hooks";
 import { useModalRouter } from "@/components/common/models";
 
 interface ViewContextType {
@@ -50,6 +51,12 @@ interface BaseViewProps {
 
 function AccountView({ navigateTo, currentView }: BaseViewProps) {
   const [currentAccount] = useAccountState();
+  const lastPasswordChangedAgo = useMemo(() => {
+    return currentAccount?.lastPasswordChangedAt
+      ? formatDistanceToNow(new Date(currentAccount.lastPasswordChangedAt), { addSuffix: true })
+      : "";
+  }, [currentAccount]);
+
   return (
     <View id="account" currentView={currentView}>
       <div className="grid grid-cols-1 gap-6">
@@ -72,7 +79,7 @@ function AccountView({ navigateTo, currentView }: BaseViewProps) {
               )}
             </div>
             <div className="flex items-center gap-2">
-              {!currentAccount?.emailVerified && (
+              {!!currentAccount?.email && !currentAccount?.emailVerified && (
                 <Button
                   radius="full"
                   size="sm"
@@ -117,8 +124,14 @@ function AccountView({ navigateTo, currentView }: BaseViewProps) {
               )}
             </div>
             <div className="flex items-center gap-2">
-              {currentAccount?.phoneNumber && !currentAccount?.phoneNumberVerified && (
-                <Button radius="full" size="sm" variant="flat" color="warning">
+              {!!currentAccount?.phoneNumber && !currentAccount?.phoneNumberVerified && (
+                <Button
+                  radius="full"
+                  size="sm"
+                  variant="flat"
+                  color="warning"
+                  onPress={() => navigateTo("account:verify-phone-number")}
+                >
                   Verify
                 </Button>
               )}
@@ -145,7 +158,7 @@ function AccountView({ navigateTo, currentView }: BaseViewProps) {
           </div>
           <div className="mt-3 flex items-center justify-between gap-2">
             <div className="text-sm font-medium">
-              <span className="text-default-500">Last changed: 2 weeks ago</span>
+              <span className="text-default-500">Last changed: {lastPasswordChangedAgo}</span>
             </div>
             <Button
               radius="full"
@@ -429,6 +442,7 @@ function AccountPasswordView({ navigateTo, currentView }: BaseViewProps) {
     </View>
   );
 }
+
 function AccountDeleteView({ navigateTo, currentView }: BaseViewProps) {
   const [currentAccount, setAccount] = useAccountState();
   const { handleSubmit, control, formState } = useForm<{ username: string }>({
@@ -446,7 +460,7 @@ function AccountDeleteView({ navigateTo, currentView }: BaseViewProps) {
       if (problem) {
         addToast({
           title: problem.message,
-          color: "danger",
+          color: "danger"
         });
       } else {
         addToast({

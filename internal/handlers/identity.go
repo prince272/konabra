@@ -166,7 +166,6 @@ func (handler *IdentityHandler) DeleteCurrentAccount(context *gin.Context) (any,
 	if problem := handler.identityService.DeleteAccount(userId); problem != nil {
 		return nil, problem
 	}
-
 	return gin.H{}, nil
 }
 

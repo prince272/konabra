@@ -54,20 +54,20 @@ func (form CreateAccountForm) GetPhoneNumber() string {
 }
 
 type AccountModel struct {
-	Id                   string    `json:"id"`
-	FirstName            string    `json:"firstName"`
-	LastName             string    `json:"lastName"`
-	UserName             string    `json:"userName"`
-	Email                string    `json:"email"`
-	EmailVerified        bool      `json:"emailVerified"`
-	PhoneNumber          string    `json:"phoneNumber"`
-	PhoneNumberVerified  bool      `json:"phoneNumberVerified"`
-	HasPassword          bool      `json:"hasPassword"`
-	LastPasswordChangeAt time.Time `json:"lastPasswordChangeAt"`
-	CreatedAt            time.Time `json:"createdAt"`
-	UpdatedAt            time.Time `json:"updatedAt"`
-	LastActiveAt         time.Time `json:"lastActiveAt"`
-	Roles                []string  `json:"roles"`
+	Id                    string    `json:"id"`
+	FirstName             string    `json:"firstName"`
+	LastName              string    `json:"lastName"`
+	UserName              string    `json:"userName"`
+	Email                 string    `json:"email"`
+	EmailVerified         bool      `json:"emailVerified"`
+	PhoneNumber           string    `json:"phoneNumber"`
+	PhoneNumberVerified   bool      `json:"phoneNumberVerified"`
+	HasPassword           bool      `json:"hasPassword"`
+	LastPasswordChangedAt time.Time `json:"lastPasswordChangedAt"`
+	CreatedAt             time.Time `json:"createdAt"`
+	UpdatedAt             time.Time `json:"updatedAt"`
+	LastActiveAt          time.Time `json:"lastActiveAt"`
+	Roles                 []string  `json:"roles"`
 }
 
 type AccountWithTokenModel struct {
@@ -175,20 +175,21 @@ func (service *IdentityService) CreateAccount(form CreateAccountForm) (*AccountW
 	currentTime := time.Now()
 
 	user := &models.User{
-		Id:                  uuid.New().String(),
-		FirstName:           form.FirstName,
-		LastName:            form.LastName,
-		Email:               form.GetEmail(),
-		EmailVerified:       false,
-		PhoneNumber:         form.GetPhoneNumber(),
-		PhoneNumberVerified: false,
-		UserName:            service.identityRepository.GenerateName(form.FirstName, form.LastName),
-		PasswordHash:        utils.MustHashPassword(form.Password),
-		HasPassword:         true,
-		SecurityStamp:       uuid.New().String(),
-		CreatedAt:           currentTime,
-		UpdatedAt:           currentTime,
-		LastActiveAt:        currentTime,
+		Id:                    uuid.New().String(),
+		FirstName:             form.FirstName,
+		LastName:              form.LastName,
+		Email:                 form.GetEmail(),
+		EmailVerified:         false,
+		PhoneNumber:           form.GetPhoneNumber(),
+		PhoneNumberVerified:   false,
+		UserName:              service.identityRepository.GenerateName(form.FirstName, form.LastName),
+		PasswordHash:          utils.MustHashPassword(form.Password),
+		HasPassword:           true,
+		SecurityStamp:         uuid.New().String(),
+		CreatedAt:             currentTime,
+		UpdatedAt:             currentTime,
+		LastActiveAt:          currentTime,
+		LastPasswordChangedAt: currentTime,
 	}
 
 	roles, err := service.identityRepository.EnsureRoleExists("Administrator", "Member")
