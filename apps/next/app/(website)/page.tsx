@@ -4,6 +4,7 @@ import { FeaturesSection } from "@/components/website/features-section";
 import { HeroSection } from "@/components/website/hero-section";
 import { IncidentsMapSection } from "@/components/website/incidents-map-section";
 import { StatsSection } from "@/components/website/stats-section";
+import { TestimonialsSection } from "@/components/website/testimonies-section";
 
 export default function Home() {
   return (
@@ -13,6 +14,7 @@ export default function Home() {
       <FeaturesSection />
       <AlertsSection />
       <IncidentsMapSection />
+      <TestimonialsSection />
       <ContactUsSection />
     </>
   );

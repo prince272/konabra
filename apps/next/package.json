@@ -11,8 +11,10 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@heroui/avatar": "^2.2.15",
     "@heroui/badge": "^2.2.12",
     "@heroui/button": "2.2.19",
+    "@heroui/card": "^2.2.18",
     "@heroui/checkbox": "^2.3.18",
     "@heroui/chip": "^2.2.15",
     "@heroui/code": "2.2.14",
@@ -49,6 +51,7 @@
     "react-dom": "18.3.1",
     "react-hook-form": "^7.56.4",
     "react-intersection-observer": "^9.16.0",
+    "swiper": "^11.2.8",
     "universal-cookie": "^8.0.1"
   },
   "devDependencies": {

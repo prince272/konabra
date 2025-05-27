@@ -120,7 +120,7 @@ export const Navbar = () => {
                 <DropdownItem
                   key="dashboard"
                   as={NextLink}
-                  href="/admin"
+                  href="/dashboard"
                   startContent={<Icon icon="solar:spedometer-max-broken" width={20} height={20} />}
                 >
                   Dashboard

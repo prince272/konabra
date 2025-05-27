@@ -375,6 +375,7 @@ function CreateAccountView(
                     size="sm"
                     variant="flat"
                     color="primary"
+                    className={cn(sendCodeTimer.isRunning && "hidden")}
                     disabled={codeSending || sendCodeTimer.isRunning}
                     isLoading={codeSending}
                     onPress={() => handleGetCode()}
