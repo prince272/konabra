@@ -147,7 +147,7 @@ export default function SignUpModal({
           onPress={handlePrev}
           className="rounded-full text-foreground-500"
         >
-          <Icon icon="material-symbols:close-rounded" width="24" height="24" />
+          <Icon icon="material-symbols:close-rounded" width="20" height="20" />
         </Button>
       }
       classNames={{
@@ -164,7 +164,7 @@ export default function SignUpModal({
                 onPress={handlePrev}
                 className="rounded-full text-foreground-500"
               >
-                <Icon icon="material-symbols:arrow-back-rounded" width="24" height="24" />
+                <Icon icon="material-symbols:arrow-back-rounded" width="20" height="20" />
               </Button>
             ) : (
               <div className="w-8" />
@@ -214,7 +214,7 @@ export default function SignUpModal({
                       color="primary"
                       radius="full"
                       fullWidth
-                      startContent={<Icon icon="solar:user-bold-duotone" width="24" height="24" />}
+                      startContent={<Icon icon="solar:user-broken" width="20" height="20" />}
                       onPress={handleNext}
                     >
                       Sign up with Email or Phone
@@ -230,14 +230,14 @@ export default function SignUpModal({
                       className="dark dark:light"
                       variant="solid"
                       radius="full"
-                      startContent={<Icon icon="flat-color-icons:google" width={20} />}
+                      startContent={<Icon icon="flat-color-icons:google" width="20" height="20" />}
                     >
                       Continue with Google
                     </Button>
                     <Button
                       variant="flat"
                       radius="full"
-                      startContent={<Icon icon="logos:facebook" width={20} />}
+                      startContent={<Icon icon="logos:facebook" width="20" height="20" />}
                     >
                       Continue with Facebook
                     </Button>

@@ -1,6 +1,8 @@
-import { useState } from "react";
+"use client";
+
+import { Children, createContext, isValidElement, ReactNode, useContext, useState } from "react";
 import NextLink from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Avatar } from "@heroui/avatar";
 import { Button } from "@heroui/button";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
@@ -8,119 +10,143 @@ import { cn } from "@heroui/theme";
 import { Tooltip } from "@heroui/tooltip";
 import { Icon } from "@iconify-icon/react";
 import { useAccountState } from "@/states";
-import { useHashState } from "@/hooks";
 
 interface SidebarProps {
-  onItemClick?: () => void;
   collapsed?: boolean;
 }
 
-interface MenuItem {
+interface MenuItemProps {
   title: string;
   path: string;
   icon: string;
-  children?: MenuItem[];
+  children?: ReactNode;
+  onItemClick?: (path: string) => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ onItemClick, collapsed = false }) => {
-  const pathname = usePathname();
-  const [hash] = useHashState();
-  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
-  const [currentAccount] = useAccountState();
+interface MenuContextType {
+  collapsed: boolean;
+  expandedMenus: Record<string, boolean>;
+  currentToggledMenu: string | null;
+  toggleMenu: (menuTitle: string) => void;
+  isActive: (path: string) => boolean;
+  isChildActive: (item: MenuItemProps) => boolean;
+}
 
-  const menuItems: MenuItem[] = [
-    {
-      title: "Dashboard",
-      path: "/dashboard",
-      icon: "solar:home-2-linear"
-    },
-    {
-      title: "Incidents",
-      path: "/incidents",
-      icon: "solar:danger-triangle-linear",
-      children: [
-        {
-          title: "All Incidents",
-          path: "/incidents",
-          icon: "solar:list-linear"
-        },
-        {
-          title: "Accidents",
-          path: "/incidents/accidents",
-          icon: "solar:car-crash-linear"
-        },
-        {
-          title: "Traffic Jams",
-          path: "/incidents/traffic",
-          icon: "solar:traffic-linear"
-        },
-        {
-          title: "Road Issues",
-          path: "/incidents/road-issues",
-          icon: "solar:hammer-linear"
-        }
-      ]
-    },
-    {
-      title: "Map View",
-      path: "/map-view",
-      icon: "solar:map-point-wave-linear"
-    },
-    {
-      title: "Analytics",
-      path: "/analytics",
-      icon: "solar:chart-linear",
-      children: [
-        {
-          title: "Overview",
-          path: "/analytics",
-          icon: "solar:pie-chart-2-linear"
-        },
-        {
-          title: "Hotspots",
-          path: "/hotspots",
-          icon: "solar:map-arrow-wave-linear"
-        },
-        {
-          title: "Reports",
-          path: "/reports",
-          icon: "solar:document-linear"
-        }
-      ]
-    },
-    {
-      title: "Management",
-      path: "/users",
-      icon: "solar:users-group-two-rounded-linear",
-      children: [
-        {
-          title: "Users",
-          path: "/users",
-          icon: "solar:user-linear"
-        },
-        {
-          title: "Authorities",
-          path: "/authorities",
-          icon: "solar:shield-user-linear"
-        },
-        {
-          title: "Emergency Services",
-          path: "/emergency-services",
-          icon: "solar:ambulance-linear"
-        }
-      ]
-    },
-    {
-      title: "Notifications",
-      path: "/notifications",
-      icon: "solar:bell-linear"
-    },
-    {
-      title: "Help & Support",
-      path: "/help",
-      icon: "solar:info-circle-linear"
+const MenuContext = createContext<MenuContextType | undefined>(undefined);
+
+const useMenuContext = () => {
+  const context = useContext(MenuContext);
+  if (!context) {
+    throw new Error("Menu components must be used within a Sidebar");
+  }
+  return context;
+};
+
+const MenuItem: React.FC<MenuItemProps> = ({ title, path, icon, children, onItemClick }) => {
+  const { collapsed, expandedMenus, currentToggledMenu, toggleMenu, isActive, isChildActive } =
+    useMenuContext();
+
+  const hasChildren = Children.count(children) > 0;
+
+  const handleItemClick = () => {
+    if (hasChildren && !collapsed) {
+      toggleMenu(title.toLowerCase());
+    } else if (onItemClick) {
+      onItemClick(path);
     }
-  ];
+  };
+
+  if (collapsed) {
+    return (
+      <Tooltip content={title} placement="right">
+        <Button
+          as={hasChildren ? "button" : NextLink}
+          href={!hasChildren ? path : undefined}
+          variant={
+            hasChildren
+              ? isChildActive({ title, path, icon, children })
+                ? "flat"
+                : "light"
+              : isActive(path)
+                ? "flat"
+                : "light"
+          }
+          isIconOnly
+          color={
+            hasChildren
+              ? isChildActive({ title, path, icon, children })
+                ? "primary"
+                : "default"
+              : isActive(path)
+                ? "primary"
+                : "default"
+          }
+          className="mx-auto mb-2"
+          onPress={handleItemClick}
+        >
+          <Icon icon={icon} className="text-xl" />
+        </Button>
+      </Tooltip>
+    );
+  }
+
+  if (hasChildren) {
+    const isExpanded =
+      expandedMenus[title.toLowerCase()] ?? isChildActive({ title, path, icon, children });
+    const isCurrentToggled = currentToggledMenu === title.toLowerCase();
+    return (
+      <div>
+        <Button
+          variant="light"
+          radius="full"
+          color={isChildActive({ title, path, icon, children }) ? "primary" : "default"}
+          className="mb-1 w-full justify-start"
+          startContent={<Icon icon={icon} className="text-xl" />}
+          endContent={
+            <Icon
+              icon="solar:alt-arrow-right-linear"
+              className={cn("ml-auto text-lg transition-transform", { "rotate-90": isExpanded })}
+            />
+          }
+          onPress={handleItemClick}
+        >
+          {title}
+        </Button>
+        <div
+          className={cn("overflow-hidden", {
+            "transition-max-height duration-500 ease-in-out": isCurrentToggled,
+            "max-h-96": isExpanded,
+            "max-h-0": !isExpanded
+          })}
+        >
+          <div className="pl-6">{children}</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Button
+      as={NextLink}
+      href={path}
+      radius="full"
+      variant={isActive(path) ? "flat" : "light"}
+      color={isActive(path) ? "primary" : "default"}
+      className="mb-1 w-full justify-start"
+      startContent={<Icon icon={icon} className="text-xl" />}
+      onPress={handleItemClick}
+    >
+      {title}
+    </Button>
+  );
+};
+
+export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [currentAccount] = useAccountState();
+  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
+  const [currentToggledMenu, setCurrentToggledMenu] = useState<string | null>(null);
 
   const toggleMenu = (menuTitle: string) => {
     if (collapsed) return;
@@ -128,120 +154,39 @@ export const Sidebar: React.FC<SidebarProps> = ({ onItemClick, collapsed = false
       ...prev,
       [menuTitle.toLowerCase()]: !prev[menuTitle.toLowerCase()]
     }));
+    setCurrentToggledMenu(menuTitle.toLowerCase());
   };
 
   const isActive = (path: string) => pathname === path;
-  const isChildActive = (item: MenuItem) =>
-    item.children?.some((child) => pathname.startsWith(child.path)) || false;
 
-  const handleItemClick = (item: MenuItem) => {
-    if (item.children && !collapsed) {
-      toggleMenu(item.title.toLowerCase());
-    } else if (onItemClick) {
-      onItemClick();
-    }
+  const isChildActive = (item: MenuItemProps) => {
+    if (!item.children) return false;
+
+    let hasActiveChild = false;
+    Children.forEach(item.children, (child) => {
+      if (isValidElement(child) && isActive(child.props.path)) {
+        hasActiveChild = true;
+      }
+    });
+    return hasActiveChild;
   };
 
-  const renderMenuItem = (item: MenuItem) => {
-    if (collapsed) {
-      return (
-        <Tooltip content={item.title} placement="right">
-          <Button
-            as={item.children ? "button" : NextLink}
-            href={!item.children ? item.path : undefined}
-            variant={
-              item.children
-                ? isChildActive(item)
-                  ? "flat"
-                  : "light"
-                : isActive(item.path)
-                  ? "flat"
-                  : "light"
-            }
-            isIconOnly
-            color={
-              item.children
-                ? isChildActive(item)
-                  ? "primary"
-                  : "default"
-                : isActive(item.path)
-                  ? "primary"
-                  : "default"
-            }
-            className="mx-auto mb-2"
-            onPress={() => handleItemClick(item)}
-          >
-            <Icon icon={item.icon} className="text-xl" />
-          </Button>
-        </Tooltip>
-      );
-    }
+  const contextValue = {
+    collapsed,
+    expandedMenus,
+    currentToggledMenu,
+    toggleMenu,
+    isActive,
+    isChildActive
+  };
 
-    if (item.children) {
-      const isExpanded = expandedMenus[item.title.toLowerCase()] ?? isChildActive(item);
-      return (
-        <div>
-          <Button
-            variant="light"
-            color={isChildActive(item) ? "primary" : "default"}
-            className="mb-1 w-full justify-start"
-            startContent={<Icon icon={item.icon} className="text-xl" />}
-            endContent={
-              <Icon
-                icon="solar:alt-arrow-right-linear"
-                className={cn("ml-auto text-lg transition-transform", { "rotate-90": isExpanded })}
-              />
-            }
-            onPress={() => handleItemClick(item)}
-          >
-            {item.title}
-          </Button>
-          <div
-            className={cn("overflow-hidden transition-all", {
-              "max-h-96": isExpanded,
-              "max-h-0": !isExpanded
-            })}
-          >
-            <div className="pl-6">
-              {item.children.map((child) => (
-                <Button
-                  key={child.title}
-                  as={NextLink}
-                  href={child.path}
-                  variant="light"
-                  color={isActive(child.path) ? "primary" : "default"}
-                  className="mb-1 w-full justify-start"
-                  startContent={<Icon icon={child.icon} className="text-lg" />}
-                  size="sm"
-                  onPress={() => onItemClick?.()}
-                >
-                  {child.title}
-                </Button>
-              ))}
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <Button
-        as={NextLink}
-        href={item.path}
-        variant={isActive(item.path) ? "flat" : "light"}
-        color={isActive(item.path) ? "primary" : "default"}
-        className="mb-1 w-full justify-start"
-        startContent={<Icon icon={item.icon} className="text-xl" />}
-        onPress={() => handleItemClick(item)}
-      >
-        {item.title}
-      </Button>
-    );
+  const handleItemClick = (path: string) => {
+    router.push(path);
   };
 
   return (
     <div className="flex h-full flex-col bg-content1">
-      <div className="flex h-16 items-center bg-content2 px-4">
+      <div className="flex h-16 items-center px-4">
         <div
           className={cn("flex items-center", {
             "w-full justify-center": collapsed,
@@ -255,11 +200,84 @@ export const Sidebar: React.FC<SidebarProps> = ({ onItemClick, collapsed = false
 
       <div className="flex-1 overflow-y-auto py-4">
         <nav className={cn("space-y-1", { "px-1": collapsed, "px-2": !collapsed })}>
-          {menuItems.map((item) => (
-            <div key={item.title} className="mb-1">
-              {renderMenuItem(item)}
-            </div>
-          ))}
+          <MenuContext.Provider value={contextValue}>
+            <MenuItem
+              title="Dashboard"
+              path="/dashboard"
+              icon="solar:home-2-broken"
+              onItemClick={handleItemClick}
+            />
+            <MenuItem
+              title="Incidents"
+              path="/incidents"
+              icon="solar:danger-circle-broken"
+              onItemClick={handleItemClick}
+            >
+              <MenuItem
+                title="All Incidents"
+                path="/incidents"
+                icon="solar:list-broken"
+                onItemClick={handleItemClick}
+              />
+            </MenuItem>
+            <MenuItem
+              title="Categories"
+              path="/categories"
+              icon="solar:tag-broken"
+              onItemClick={handleItemClick}
+            />
+            <MenuItem
+              title="Map View"
+              path="/map-view"
+              icon="solar:map-point-wave-broken"
+              onItemClick={handleItemClick}
+            />
+            <MenuItem title="Analytics" path="/analytics" icon="solar:chart-broken">
+              <MenuItem
+                title="Overview"
+                path="/analytics"
+                icon="solar:pie-chart-2-broken"
+                onItemClick={handleItemClick}
+              />
+              <MenuItem
+                title="Hotspots"
+                path="/hotspots"
+                icon="solar:fire-broken"
+                onItemClick={handleItemClick}
+              />
+              <MenuItem
+                title="Reports"
+                path="/reports"
+                icon="solar:document-broken"
+                onItemClick={handleItemClick}
+              />
+            </MenuItem>
+            <MenuItem
+              title="Management"
+              path="/users"
+              icon="solar:users-group-two-rounded-broken"
+              onItemClick={handleItemClick}
+            >
+              <MenuItem
+                title="Users"
+                path="/users"
+                icon="solar:user-broken"
+                onItemClick={handleItemClick}
+              />
+              <MenuItem
+                title="Roles"
+                path="/Roles"
+                icon="solar:shield-user-broken"
+                onItemClick={handleItemClick}
+              />
+            </MenuItem>
+            <MenuItem
+              title="Help & Support"
+              path="/help"
+              icon="solar:info-circle-broken"
+              onItemClick={handleItemClick}
+            />
+          </MenuContext.Provider>
         </nav>
       </div>
 
@@ -304,7 +322,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onItemClick, collapsed = false
               >
                 <div className="flex flex-col items-start">
                   <p className="text-sm font-medium">{currentAccount?.fullName}</p>
-                  <p className="text-xs text-foreground-500">Administrator</p>
+                  <p className="text-xs text-foreground-500">{currentAccount?.primaryRole}</p>
                 </div>
               </Button>
             </DropdownTrigger>

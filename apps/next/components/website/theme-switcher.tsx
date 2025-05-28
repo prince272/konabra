@@ -47,10 +47,10 @@ export const ThemeSwitcher = () => {
     <Tooltip content={`Switch to ${isDark ? "light" : "dark"} mode`} placement="bottom">
       <div className="flex items-center gap-2">
         <Icon
-          icon="lucide:sun"
+          icon="solar:sun-2-broken"
           className={`text-default-500 ${!isDark && "text-primary"}`}
-          width={20}
-          height={20}
+          width="20"
+          height="20"
         />
         <Switch
           isSelected={isDark}
@@ -60,10 +60,10 @@ export const ThemeSwitcher = () => {
           className="mx-1"
         />
         <Icon
-          icon="lucide:moon"
+          icon="solar:moon-broken"
           className={`text-default-500 ${isDark && "text-primary"}`}
-          width={20}
-          height={20}
+          width="20"
+          height="20"
         />
       </div>
     </Tooltip>

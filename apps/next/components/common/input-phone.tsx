@@ -129,8 +129,8 @@ const InputPhone = React.forwardRef<HTMLInputElement, InputPhoneProps>(
         startContent={
           <Icon
             icon={`circle-flags:${selectedCountry.code.toLowerCase()}`}
-            width={18}
-            height={18}
+            width="20"
+            height="20"
           />
         }
       >
@@ -183,7 +183,7 @@ const InputPhone = React.forwardRef<HTMLInputElement, InputPhoneProps>(
                 className="rounded-full text-foreground-500"
                 isDisabled={isDisabled}
               >
-                <Icon icon="material-symbols:close-rounded" width="24" height="24" />
+                <Icon icon="material-symbols:close-rounded" width="20" height="20" />
               </Button>
             }
             classNames={{ wrapper: cn(isSmallScreen && "h-full") }}

@@ -51,8 +51,8 @@ export const Footer = () => {
               <div className="rounded-full bg-gradient-to-r from-warning to-warning-600 p-2">
                 <Icon
                   icon="solar:map-point-bold"
-                  width={24}
-                  height={24}
+                  width="20"
+                  height="20"
                   className="text-success"
                 />
               </div>
@@ -70,7 +70,7 @@ export const Footer = () => {
                   isExternal
                   className="rounded-full bg-primary p-2 transition-transform hover:scale-110"
                 >
-                  <Icon icon={link.icon} width={24} height={24} />
+                  <Icon icon={link.icon} width="20" height="20" />
                 </Link>
               ))}
             </div>
@@ -110,7 +110,7 @@ export const Footer = () => {
               color="foreground"
               className="flex items-center gap-1 text-sm text-foreground-500 transition-colors hover:text-warning"
             >
-              <Icon icon="solar:shield-check-bold" width={14} height={14} />
+              <Icon icon="solar:shield-check-broken" width="18" height="18" />
               Privacy Policy
             </Link>
             <Link
@@ -118,16 +118,8 @@ export const Footer = () => {
               color="foreground"
               className="flex items-center gap-1 text-sm text-foreground-500 transition-colors hover:text-warning"
             >
-              <Icon icon="solar:document-bold" width={14} height={14} />
+              <Icon icon="solar:document-broken" width="18" height="18" />
               Terms of Service
-            </Link>
-            <Link
-              href="#"
-              color="foreground"
-              className="flex items-center gap-1 text-sm text-foreground-500 transition-colors hover:text-warning"
-            >
-              <Icon icon="solar:cookie-bold" width={14} height={14} />
-              Cookie Policy
             </Link>
           </div>
         </div>

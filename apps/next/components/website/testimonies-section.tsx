@@ -177,7 +177,7 @@ export const TestimonialsSection = () => {
               aria-label="Previous testimonial"
               onPress={() => swiperRef.current?.swiper.slidePrev()}
             >
-              <Icon icon="solar:arrow-left-bold" />
+              <Icon icon="solar:arrow-left-broken" />
             </Button>
             <Button
               isIconOnly
@@ -186,7 +186,7 @@ export const TestimonialsSection = () => {
               aria-label="Next testimonial"
               onPress={() => swiperRef.current?.swiper.slideNext()}
             >
-              <Icon icon="solar:arrow-right-bold" />
+              <Icon icon="solar:arrow-right-broken" />
             </Button>
           </div>
         </div>

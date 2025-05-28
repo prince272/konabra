@@ -87,7 +87,7 @@ export const HeroSection = () => {
               <span className="font-medium text-primary">Ko na bra - Go and come safely</span>
             </motion.div>
 
-            <h1 className="font-montserrat mb-6 text-4xl font-bold leading-tight md:text-5xl lg:text-6xl">
+            <h1 className="mb-6 font-montserrat text-4xl font-bold leading-tight md:text-5xl lg:text-6xl">
               Move Toward{" "}
               <motion.span
                 className="relative inline-block text-primary"
@@ -126,7 +126,7 @@ export const HeroSection = () => {
                 color="primary"
                 radius="full"
                 className="font-medium"
-                endContent={<Icon icon="solar:arrow-right-broken" width={24} height={24} />}
+                endContent={<Icon icon="solar:arrow-right-broken" width="20" height="20" />}
               >
                 Web Portal
               </Button>
@@ -137,7 +137,7 @@ export const HeroSection = () => {
                 color="primary"
                 radius="full"
                 className="font-medium"
-                startContent={<Icon icon="solar:smartphone-broken" width={24} height={24} />}
+                startContent={<Icon icon="solar:smartphone-broken" width="20" height="20" />}
               >
                 Mobile App
               </Button>
@@ -149,7 +149,12 @@ export const HeroSection = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.7 }}
             >
-              <Icon icon="solar:shield-check-broken" width={24} height={24} className="text-primary" />
+              <Icon
+                icon="solar:shield-check-broken"
+                width="20"
+                height="20"
+                className="text-primary"
+              />
               <span>Trusted by over 10,000 Ghanaians</span>
             </motion.div>
           </motion.div>
@@ -176,8 +181,8 @@ export const HeroSection = () => {
                       <Icon
                         icon="solar:alarm-broken"
                         className="text-primary"
-                        width={16}
-                        height={16}
+                        width="20"
+                        height="20"
                       />
                     </div>
                     <span className="text-xs font-medium dark:text-foreground-400">
@@ -194,10 +199,9 @@ export const HeroSection = () => {
                   >
                     <div className="rounded-md bg-success-500/20 p-1.5">
                       <Icon
-                        icon="solar:map-pointer-broken"
+                        icon="solar:map-point-rotate-broken"
                         className="text-success-500"
-                        width={16}
-                        height={16}
+                     width="20" height="20"
                       />
                     </div>
                     <span className="text-xs font-medium dark:text-foreground-400">
@@ -216,8 +220,8 @@ export const HeroSection = () => {
                       <Icon
                         icon="solar:compass-broken"
                         className="text-primary"
-                        width={20}
-                        height={20}
+                        width="20"
+                        height="20"
                       />
                     </div>
                     <div>

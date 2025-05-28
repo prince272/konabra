@@ -77,16 +77,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
       {isSmallScreen && (
         <Drawer isOpen={isSidebarOpen} onOpenChange={setIsSidebarOpen} placement="left">
           <DrawerContent>
-            <DrawerHeader className="px-0 py-0">
-              <div className="flex h-16 items-center bg-content2 px-4">
-                <div className="flex items-center gap-2">
-                  <Icon icon="solar:traffic-cone-broken" className="text-2xl text-primary" />
-                  <span className="text-xl font-bold">Konabra</span>
-                </div>
-              </div>
-            </DrawerHeader>
             <DrawerBody className="p-0">
-              <Sidebar onItemClick={() => setIsSidebarOpen(false)} />
+              <Sidebar />
             </DrawerBody>
           </DrawerContent>
         </Drawer>
@@ -105,7 +97,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                   onPress={() => setIsSidebarOpen(true)}
                   aria-label="Open menu"
                 >
-                  <Icon icon="solar:hamburger-menu-broken" className="text-xl" />
+                  <Icon icon="solar:hamburger-menu-broken" width="20" height="20" />
                 </Button>
               </NavbarItem>
             ) : (
@@ -122,7 +114,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                         ? "solar:sidebar-arrow-right-broken"
                         : "solar:sidebar-arrow-left-broken"
                     }
-                    className="text-xl"
+                    width="20"
+                    height="20"
                   />
                 </Button>
               </NavbarItem>
@@ -134,7 +127,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
               <div className="flex items-center gap-2">
                 <Tooltip content="Search">
                   <Button isIconOnly variant="light" aria-label="Search">
-                    <Icon icon="solar:magnifer-broken" className="text-xl" />
+                    <Icon icon="solar:magnifer-broken" width="20" height="20" />
                   </Button>
                 </Tooltip>
 
@@ -146,18 +139,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                     onPress={() => setIsNotificationsOpen(true)}
                   >
                     <div className="relative">
-                      <Icon icon="solar:bell-broken" className="text-xl" />
+                      <Icon icon="solar:bell-broken" width="20" height="20" />
                       <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-danger text-[10px] text-white">
                         3
                       </span>
-                    </div>
-                  </Button>
-                </Tooltip>
-
-                <Tooltip content="Profile">
-                  <Button isIconOnly variant="light" className="rounded-full" aria-label="Profile">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white">
-                      <span className="text-sm font-medium">JD</span>
                     </div>
                   </Button>
                 </Tooltip>
@@ -182,7 +167,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                   variant="light"
                   onPress={() => setIsNotificationsOpen(false)}
                 >
-                  <Icon icon="solar:close-circle-broken" className="text-xl" />
+                  <Icon icon="solar:close-circle-broken" width="20" height="20" />
                 </Button>
               </div>
             </DrawerHeader>
@@ -191,7 +176,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                 <div className="rounded-medium bg-content2 p-3">
                   <div className="flex items-start gap-3">
                     <div className="rounded-full bg-primary-100 p-2 dark:bg-primary-900">
-                      <Icon icon="solar:danger-triangle-broken" className="text-lg text-primary" />
+                      <Icon icon="solar:danger-triangle-broken" className="text-primary"  width="20" height="20" />
                     </div>
                     <div>
                       <p className="font-medium">New accident reported</p>
@@ -206,7 +191,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                 <div className="rounded-medium bg-content2 p-3">
                   <div className="flex items-start gap-3">
                     <div className="rounded-full bg-warning-100 p-2 dark:bg-warning-900">
-                      <Icon icon="solar:traffic-cone-broken" className="text-lg text-warning" />
+                      <Icon icon="solar:traffic-cone-broken" className="text-warning" width="20" height="20" />
                     </div>
                     <div>
                       <p className="font-medium">Traffic jam alert</p>
@@ -221,7 +206,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                 <div className="rounded-medium bg-content2 p-3">
                   <div className="flex items-start gap-3">
                     <div className="rounded-full bg-success-100 p-2 dark:bg-success-900">
-                      <Icon icon="solar:user-check-broken" className="text-lg text-success" />
+                      <Icon icon="solar:user-check-broken" className="text-success" width="20" height="20" />
                     </div>
                     <div>
                       <p className="font-medium">New user registered</p>

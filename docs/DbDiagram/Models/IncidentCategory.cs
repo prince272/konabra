@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace DbDiagram.Models {
-    public class IncidentType {
+    public class IncidentCategory {
         public string Id { get; set; } = null!;
 
         public string Name { get; set; } = null!;

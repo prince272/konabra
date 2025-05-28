@@ -59,7 +59,7 @@ func (repository *IdentityRepository) DeleteUser(user *models.User) error {
 func (repository *IdentityRepository) FindUserByUsername(username string) *models.User {
 	user := &models.User{}
 
-	result := repository.defaultDB.Model(&models.User{}).Preload("Roles").
+	result := repository.defaultDB.Model(&models.User{}).Preload("UserRoles").
 		Where("LOWER(email) = LOWER(?) OR LOWER(phone_number) = LOWER(?)", username, username).
 		First(user)
 
@@ -76,7 +76,7 @@ func (repository *IdentityRepository) FindUserByUsername(username string) *model
 
 func (repository *IdentityRepository) FindUserById(id string) *models.User {
 	user := &models.User{}
-	result := repository.defaultDB.Model(&models.User{}).Preload("Roles").
+	result := repository.defaultDB.Model(&models.User{}).Preload("UserRoles").
 		Where("id = ?", id).
 		First(user)
 
@@ -154,14 +154,14 @@ func (repository *IdentityRepository) GenerateName(names ...string) string {
 	return userName
 }
 
-func (repository *IdentityRepository) EnsureRoleExists(roles ...string) ([]*models.Role, error) {
+func (repository *IdentityRepository) EnsureRoleExists(roleNames ...string) ([]*models.Role, error) {
 	var resultRoles []*models.Role
 
-	for _, role := range roles {
+	for _, roleName := range roleNames {
 		var existingRole *models.Role
 		// Check if the role already exists
 		if err := repository.defaultDB.
-			Where("name = ?", role).
+			Where("name = ?", roleName).
 			First(&existingRole).Error; err == nil {
 			// Role already exists, add to result
 			resultRoles = append(resultRoles, existingRole)
@@ -174,7 +174,7 @@ func (repository *IdentityRepository) EnsureRoleExists(roles ...string) ([]*mode
 		// Role does not exist, so create it
 		roleModel := &models.Role{
 			Id:   uuid.New().String(),
-			Name: role,
+			Name: roleName,
 		}
 		result := repository.defaultDB.Create(roleModel)
 		if result.Error != nil {
@@ -186,11 +186,35 @@ func (repository *IdentityRepository) EnsureRoleExists(roles ...string) ([]*mode
 	return resultRoles, nil
 }
 
-func (repository *IdentityRepository) AddUserToRoles(user *models.User, roles ...*models.Role) error {
-	for _, role := range roles {
-		if err := repository.defaultDB.Model(user).Association("Roles").Append(role); err != nil {
-			return fmt.Errorf("failed to add user to role: %w", err)
-		}
+func (repository *IdentityRepository) AddUserToRoles(user *models.User, roleNames ...string) error {
+	roles, err := repository.EnsureRoleExists(roleNames...)
+	if err != nil {
+		return fmt.Errorf("failed to ensure roles exist: %w", err)
 	}
+
+	if err := repository.defaultDB.
+		Model(user).
+		Association("UserRoles").
+		Find(&user.UserRoles); err != nil {
+		return fmt.Errorf("failed to load existing roles: %w", err)
+	}
+
+	roleMap := make(map[string]*models.Role)
+	for _, role := range user.UserRoles {
+		roleMap[role.Id] = role
+	}
+	for _, role := range roles {
+		roleMap[role.Id] = role
+	}
+
+	distinctRoles := make([]*models.Role, 0, len(roleMap))
+	for _, role := range roleMap {
+		distinctRoles = append(distinctRoles, role)
+	}
+
+	if err := repository.defaultDB.Model(user).Association("UserRoles").Replace(distinctRoles); err != nil {
+		return fmt.Errorf("failed to associate roles with user: %w", err)
+	}
+
 	return nil
 }

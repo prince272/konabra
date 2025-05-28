@@ -43,7 +43,7 @@ export const IncidentsMapSection = () => {
                 viewport={{ once: true, margin: "-100px" }}
               >
                 <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-warning/10 text-warning">
-                  <Icon icon="solar:camera-bold" width={24} />
+                  <Icon icon="solar:camera-broken" width="20" height="20" />
                 </div>
                 <div>
                   <h3 className="mb-2 font-montserrat text-xl font-semibold">Photo Evidence</h3>
@@ -62,7 +62,7 @@ export const IncidentsMapSection = () => {
                 viewport={{ once: true, margin: "-100px" }}
               >
                 <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-success-500/10 text-success-500">
-                  <Icon icon="solar:map-arrow-square-bold" width={24} />
+                  <Icon icon="solar:map-arrow-square-broken" width="20" height="20" />
                 </div>
                 <div>
                   <h3 className="mb-2 font-montserrat text-xl font-semibold">Precise Location</h3>
@@ -81,7 +81,7 @@ export const IncidentsMapSection = () => {
                 viewport={{ once: true, margin: "-100px" }}
               >
                 <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-warning/10 text-warning">
-                  <Icon icon="solar:sort-by-time-bold" width={24} />
+                  <Icon icon="solar:sort-by-time-broken" width="20" height="20" />
                 </div>
                 <div>
                   <h3 className="mb-2 font-montserrat text-xl font-semibold">Incident History</h3>
@@ -97,7 +97,7 @@ export const IncidentsMapSection = () => {
                   color="success"
                   variant="solid"
                   radius="full"
-                  endContent={<Icon icon="solar:arrow-right-bold" width={24} height={24} />}
+                  endContent={<Icon icon="solar:arrow-right-broken" width="20" height="20" />}
                 >
                   View Incident Map
                 </Button>
@@ -132,10 +132,10 @@ export const IncidentsMapSection = () => {
                 >
                   <div className="mb-2 flex items-center gap-2">
                     <Icon
-                      icon="solar:danger-triangle-bold"
+                      icon="solar:danger-triangle-broken"
                       className="text-warning"
-                      width={20}
-                      height={20}
+                      width="20"
+                      height="20"
                     />
                     <h4 className="text-sm font-semibold">Incident Details</h4>
                   </div>
@@ -143,7 +143,7 @@ export const IncidentsMapSection = () => {
                     Major pothole on Ring Road
                   </p>
                   <div className="mt-1 flex items-center gap-1 text-xs text-foreground-500 dark:text-foreground-500">
-                    <Icon icon="solar:clock-circle-bold" width={12} />
+                    <Icon icon="solar:clock-circle-broken" width="12" height="12" />
                     <span>Reported 25 mins ago</span>
                   </div>
                 </motion.div>
@@ -157,26 +157,26 @@ export const IncidentsMapSection = () => {
                 >
                   <div className="rounded-full bg-white/90 p-2 shadow-lg backdrop-blur-sm dark:bg-black/80">
                     <Icon
-                      icon="solar:map-point-add-bold"
+                      icon="solar:map-point-add-broken"
                       className="text-success-500"
-                      width={20}
-                      height={20}
+                      width="20"
+                      height="20"
                     />
                   </div>
                   <div className="rounded-full bg-white/90 p-2 shadow-lg backdrop-blur-sm dark:bg-black/80">
                     <Icon
-                      icon="solar:refresh-bold"
+                      icon="solar:refresh-broken"
                       className="text-warning"
-                      width={20}
-                      height={20}
+                      width="20"
+                      height="20"
                     />
                   </div>
                   <div className="rounded-full bg-white/90 p-2 shadow-lg backdrop-blur-sm dark:bg-black/80">
                     <Icon
-                      icon="solar:filter-bold"
+                      icon="solar:filter-broken"
                       className="text-foreground-600"
-                      width={20}
-                      height={20}
+                      width="20"
+                      height="20"
                     />
                   </div>
                 </motion.div>

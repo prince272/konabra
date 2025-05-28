@@ -69,6 +69,7 @@ type AccountModel struct {
 	UpdatedAt             time.Time `json:"updatedAt"`
 	LastActiveAt          time.Time `json:"lastActiveAt"`
 	Roles                 []string  `json:"roles"`
+	PrimaryRole           string    `json:"primaryRole"`
 }
 
 type AccountWithTokenModel struct {
@@ -193,19 +194,12 @@ func (service *IdentityService) CreateAccount(form CreateAccountForm) (*AccountW
 		LastPasswordChangedAt: currentTime,
 	}
 
-	roles, err := service.identityRepository.EnsureRoleExists("Administrator", "Member")
-
-	if err != nil {
-		service.logger.Error("Error ensuring roles exist: ", zap.Error(err))
-		return nil, problems.FromError(err)
-	}
-
 	if err := service.identityRepository.CreateUser(user); err != nil {
 		service.logger.Error("Error creating user: ", zap.Error(err))
 		return nil, problems.FromError(err)
 	}
 
-	if err := service.identityRepository.AddUserToRoles(user, roles...); err != nil {
+	if err := service.identityRepository.AddUserToRoles(user, []string{models.RoleReporter}...); err != nil {
 		service.logger.Error("Error adding user to roles: ", zap.Error(err))
 		return nil, problems.FromError(err)
 	}
@@ -214,7 +208,7 @@ func (service *IdentityService) CreateAccount(form CreateAccountForm) (*AccountW
 	token, err := service.jwtHelper.CreateToken(user.Id, map[string]any{
 		"email":       user.Email,
 		"phoneNumber": user.PhoneNumber,
-		"roles":       user.RoleNames(),
+		"roles":       user.Roles(),
 	})
 
 	if err != nil {
@@ -234,7 +228,6 @@ func (service *IdentityService) CreateAccount(form CreateAccountForm) (*AccountW
 		return nil, problems.FromError(err)
 	}
 
-	model.Roles = user.RoleNames()
 	return model, nil
 }
 
@@ -266,7 +259,7 @@ func (service *IdentityService) SignIn(form SignInForm) (*AccountWithTokenModel,
 	token, err := service.jwtHelper.CreateToken(user.Id, map[string]any{
 		"email":       user.Email,
 		"phoneNumber": user.PhoneNumber,
-		"roles":       user.RoleNames(),
+		"roles":       user.Roles(),
 	})
 
 	if err != nil {
@@ -286,7 +279,6 @@ func (service *IdentityService) SignIn(form SignInForm) (*AccountWithTokenModel,
 		return nil, problems.FromError(err)
 	}
 
-	model.Roles = user.RoleNames()
 	return model, nil
 }
 
@@ -319,7 +311,7 @@ func (service *IdentityService) SignInWithRefreshToken(form SignInWithRefreshTok
 	token, err := service.jwtHelper.CreateToken(user.Id, map[string]any{
 		"email":       user.Email,
 		"phoneNumber": user.PhoneNumber,
-		"roles":       user.RoleNames(),
+		"roles":       user.Roles(),
 	})
 
 	if err != nil {
@@ -339,7 +331,6 @@ func (service *IdentityService) SignInWithRefreshToken(form SignInWithRefreshTok
 		return nil, problems.FromError(err)
 	}
 
-	model.Roles = user.RoleNames()
 	return model, nil
 }
 
@@ -378,7 +369,6 @@ func (service *IdentityService) GetAccountByUserId(userId string) (*AccountModel
 		return nil, problems.FromError(err)
 	}
 
-	model.Roles = user.RoleNames()
 	return model, nil
 }
 

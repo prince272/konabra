@@ -56,7 +56,7 @@ export const ContactUsSection = () => {
               as={NextLink}
               href="#contact-us"
             >
-              <Icon icon="solar:mailbox-broken" width="24" height="24" />
+              <Icon icon="solar:mailbox-broken" width="20" height="20" />
               Contact Us
             </Button>
           </motion.div>

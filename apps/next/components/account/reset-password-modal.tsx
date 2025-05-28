@@ -214,7 +214,7 @@ export default function ResetPasswordModal({
           onPress={onClose}
           className="rounded-full text-foreground-500"
         >
-          <Icon icon="material-symbols:close-rounded" width="24" height="24" />
+          <Icon icon="material-symbols:close-rounded" width="20" height="20" />
         </Button>
       }
       classNames={{
@@ -231,7 +231,7 @@ export default function ResetPasswordModal({
                 onPress={handlePrev}
                 className="rounded-full text-foreground-500"
               >
-                <Icon icon="material-symbols:arrow-back-rounded" width="24" height="24" />
+                <Icon icon="material-symbols:arrow-back-rounded" width="20" height="20" />
               </Button>
             )}
           </div>

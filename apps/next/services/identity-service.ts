@@ -27,6 +27,7 @@ export type AccountModel = {
   lastActiveAt: string;
   lastPasswordChangedAt: string;
   roles: string[];
+  primaryRole: string;
   settings: {
     [key: string]: any;
   };

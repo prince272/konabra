@@ -116,7 +116,7 @@ export const Navbar = () => {
                   key="dashboard"
                   as={NextLink}
                   href="/dashboard"
-                  startContent={<Icon icon="solar:spedometer-max-broken" width={20} height={20} />}
+                  startContent={<Icon icon="solar:spedometer-max-broken" width="20" height="20" />}
                 >
                   Dashboard
                 </DropdownItem>
@@ -124,7 +124,7 @@ export const Navbar = () => {
                   key="settings"
                   as={NextLink}
                   href="#settings"
-                  startContent={<Icon icon="solar:settings-broken" width={20} height={20} />}
+                  startContent={<Icon icon="solar:settings-broken" width="20" height="20" />}
                 >
                   Settings
                 </DropdownItem>
@@ -132,7 +132,7 @@ export const Navbar = () => {
                   key="signout"
                   as={NextLink}
                   href="#signout"
-                  startContent={<Icon icon="solar:logout-2-broken" width={20} height={20} />}
+                  startContent={<Icon icon="solar:logout-2-broken" width="20" height="20" />}
                   color="primary"
                 >
                   Sign Out

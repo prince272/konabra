@@ -113,7 +113,7 @@ export default function SignInModal({
           onPress={onClose}
           className="rounded-full text-foreground-500"
         >
-          <Icon icon="material-symbols:close-rounded" width="24" height="24" />
+          <Icon icon="material-symbols:close-rounded" width="20" height="20" />
         </Button>
       }
       classNames={{
@@ -131,7 +131,7 @@ export default function SignInModal({
                 onPress={handlePrev}
                 className="rounded-full text-foreground-500"
               >
-                <Icon icon="material-symbols:arrow-back-rounded" width="24" height="24" />
+                <Icon icon="material-symbols:arrow-back-rounded" width="20" height="20" />
               </Button>
             )}
           </div>
@@ -178,7 +178,7 @@ export default function SignInModal({
                     color="primary"
                     radius="full"
                     fullWidth
-                    startContent={<Icon icon="solar:user-bold-duotone" width="24" height="24" />}
+                    startContent={<Icon icon="solar:user-broken" width="20" height="20" />}
                     onPress={handleNext}
                   >
                     Sign in with Email or Phone
@@ -193,14 +193,14 @@ export default function SignInModal({
                       className="dark dark:light"
                       variant="solid"
                       radius="full"
-                      startContent={<Icon icon="flat-color-icons:google" width={20} />}
+                      startContent={<Icon icon="flat-color-icons:google" width="20" height="20" />}
                     >
                       Continue with Google
                     </Button>
                     <Button
                       variant="flat"
                       radius="full"
-                      startContent={<Icon icon="logos:facebook" width={20} />}
+                      startContent={<Icon icon="logos:facebook" width="20" height="20" />}
                     >
                       Continue with Facebook
                     </Button>

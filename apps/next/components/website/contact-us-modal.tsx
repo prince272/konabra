@@ -101,7 +101,7 @@ export default function ContactUsModal({
           onPress={onClose}
           className="rounded-full text-foreground-500"
         >
-          <Icon icon="material-symbols:close-rounded" width="24" height="24" />
+          <Icon icon="material-symbols:close-rounded" width="20" height="20" />
         </Button>
       }
       classNames={{

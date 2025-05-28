@@ -24,9 +24,9 @@ namespace DbDiagram.Models {
 
         public DateTime? ResolvedAt { get; set; }
 
-        public IncidentType Type { get; set; } = null!;
+        public IncidentCategory Category { get; set; } = null!;
 
-        public string TypeId { get; set; } = null!;
+        public string CategoryId { get; set; } = null!;
 
         public double Latitude { get; set; }
 

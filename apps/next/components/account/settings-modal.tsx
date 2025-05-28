@@ -179,8 +179,8 @@ function AccountView({ navigateTo, currentView }: BaseViewProps) {
             <div className="flex items-center gap-2">
               <Icon
                 icon="solar:trash-bin-trash-broken"
-                width="24"
-                height="24"
+                width="20"
+                height="20"
                 className="text-danger"
               />
               <h4 className="font-medium text-danger">Delete Account</h4>
@@ -513,8 +513,8 @@ function AccountDeleteView({ navigateTo, currentView }: BaseViewProps) {
           <Icon
             icon="solar:danger-triangle-broken"
             className="mt-0.5 text-danger-600"
-            width={20}
-            height={20}
+            width="20"
+            height="20"
           />
           <div>
             <h4 className="font-medium text-danger-800">Before you proceed</h4>
@@ -536,7 +536,7 @@ function AccountDeleteView({ navigateTo, currentView }: BaseViewProps) {
           onPress={() => onSubmit()}
           isLoading={isDeleting}
           isDisabled={!formState.isValid || isDeleting}
-          startContent={<Icon icon="solar:trash-bin-trash-broken" width={18} height={18} />}
+          startContent={<Icon icon="solar:trash-bin-trash-broken" width="20" height="20" />}
         >
           Delete Account Permanently
         </Button>
@@ -751,7 +751,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             onPress={onClose}
             className="rounded-full text-foreground-500"
           >
-            <Icon icon="material-symbols:close-rounded" width="24" height="24" />
+            <Icon icon="material-symbols:close-rounded" width="20" height="20" />
           </Button>
         }
         classNames={{
@@ -763,19 +763,19 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             <div className="flex min-h-10 items-center gap-2">
               {isSmallScreen && isMenuSelected && currentView.split(":").length === 1 ? (
                 <Button isIconOnly variant="light" onPress={backToMenu}>
-                  <Icon icon="material-symbols:arrow-back" width="24" height="24" />
+                  <Icon icon="material-symbols:arrow-back" width="20" height="20" />
                 </Button>
               ) : currentView.includes(":") ? (
                 <Button isIconOnly variant="light" onPress={backToParent}>
-                  <Icon icon="material-symbols:arrow-back" width="24" height="24" />
+                  <Icon icon="material-symbols:arrow-back" width="20" height="20" />
                 </Button>
               ) : isSmallScreen && !showSidebar ? (
                 <Button isIconOnly variant="light" onPress={() => setShowSidebar(true)}>
-                  <Icon icon="material-symbols:menu" width="24" height="24" />
+                  <Icon icon="material-symbols:menu" width="20" height="20" />
                 </Button>
               ) : (
                 <Button isIconOnly variant="light">
-                  <Icon icon={viewInfo.icon} width="24" height="24" />
+                  <Icon icon={viewInfo.icon} width="20" height="20" />
                 </Button>
               )}
               <h2 className="text-xl font-bold">{viewInfo.title}</h2>

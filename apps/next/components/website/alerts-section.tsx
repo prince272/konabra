@@ -43,10 +43,10 @@ export const AlertsSection = () => {
               >
                 <div className="rounded-full bg-warning/20 p-2 dark:bg-warning/10">
                   <Icon
-                    icon="solar:danger-triangle-bold"
+                    icon="solar:danger-triangle-broken"
                     className="text-warning"
-                    width={24}
-                    height={24}
+                    width="20"
+                    height="20"
                   />
                 </div>
                 <div>
@@ -66,10 +66,10 @@ export const AlertsSection = () => {
               >
                 <div className="rounded-full bg-success-500/20 p-2 dark:bg-success-500/10">
                   <Icon
-                    icon="solar:road-bold"
+                    icon="solar:point-on-map-broken"
                     className="text-success-500"
-                    width={24}
-                    height={24}
+                    width="20"
+                    height="20"
                   />
                 </div>
                 <div>
@@ -92,7 +92,7 @@ export const AlertsSection = () => {
                 viewport={{ once: true, margin: "-100px" }}
               >
                 <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary/25 text-primary dark:bg-primary/15 dark:ring-1 dark:ring-primary/30">
-                  <Icon icon="lucide:bell" width={24} />
+                  <Icon icon="solar:bell-broken" width="20" height="20" />
                 </div>
                 <div>
                   <h3 className="mb-2 font-montserrat text-xl font-semibold">
@@ -113,7 +113,7 @@ export const AlertsSection = () => {
                 viewport={{ once: true, margin: "-100px" }}
               >
                 <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-success-500/25 text-success-500 dark:bg-success-500/15 dark:ring-1 dark:ring-success-500/30">
-                  <Icon icon="solar:map-point-search-bold" width={24} />
+                  <Icon icon="solar:map-point-search-broken" width="20" height="20" />
                 </div>
                 <div>
                   <h3 className="mb-2 font-montserrat text-xl font-semibold">Interactive Map</h3>
@@ -132,7 +132,7 @@ export const AlertsSection = () => {
                 viewport={{ once: true, margin: "-100px" }}
               >
                 <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary/25 text-primary dark:bg-primary/15 dark:ring-1 dark:ring-primary/30">
-                  <Icon icon="solar:clock-circle-bold" width={24} />
+                  <Icon icon="solar:clock-circle-broken" width="20" height="20" />
                 </div>
                 <div>
                   <h3 className="mb-2 font-montserrat text-xl font-semibold">Real-time Updates</h3>

@@ -70,7 +70,7 @@ export default function SignOutModal({
           onPress={onClose}
           className="rounded-full text-foreground-500"
         >
-          <Icon icon="material-symbols:close-rounded" width="24" height="24" />
+          <Icon icon="material-symbols:close-rounded" width="20" height="20" />
         </Button>
       }
       classNames={{
@@ -115,7 +115,7 @@ export default function SignOutModal({
             isLoading={isSubmitting}
             form="sign-out-form"
             type="submit"
-            startContent={<Icon icon="solar:logout-2-broken" width="24" height="24" />}
+            startContent={<Icon icon="solar:logout-2-broken" width="20" height="20" />}
             className="w-full"
           >
             Sign Out
