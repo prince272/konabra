@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, memo } from "react";
+import React, { memo, useState } from "react";
 import { Chip } from "@heroui/chip";
 import { Icon } from "@iconify-icon/react";
 import { motion } from "framer-motion";
@@ -8,22 +8,32 @@ import CountUp from "react-countup";
 import { InView } from "react-intersection-observer";
 
 // Memoized CountUp component to prevent re-renders on hover state changes
-const MemoizedCountUp = memo(({ value, duration, displayValue }: { value: number; duration: number; displayValue: string }) => (
-  <CountUp
-    start={0}
-    end={value}
-    duration={duration}
-    formattingFn={(val) => {
-      if (displayValue.includes("K+")) {
-        return `${Math.floor(val / 1000)}K+`;
-      } else if (displayValue.includes("%")) {
-        return `${Math.floor(val)}%`;
-      }
-      return `${Math.floor(val)}+`;
-    }}
-    useEasing={true}
-  />
-));
+const MemoizedCountUp = memo(
+  ({
+    value,
+    duration,
+    displayValue
+  }: {
+    value: number;
+    duration: number;
+    displayValue: string;
+  }) => (
+    <CountUp
+      start={0}
+      end={value}
+      duration={duration}
+      formattingFn={(val) => {
+        if (displayValue.includes("K+")) {
+          return `${Math.floor(val / 1000)}K+`;
+        } else if (displayValue.includes("%")) {
+          return `${Math.floor(val)}%`;
+        }
+        return `${Math.floor(val)}+`;
+      }}
+      useEasing={true}
+    />
+  )
+);
 
 export const StatsSection = () => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -38,7 +48,7 @@ export const StatsSection = () => {
       color: "text-primary",
       bgColor: "bg-primary/15 dark:bg-primary/20",
       chipColor: "primary",
-      duration: 2.5,
+      duration: 2.5
     },
     {
       value: 5000,
@@ -49,7 +59,7 @@ export const StatsSection = () => {
       color: "text-success-500",
       bgColor: "bg-success-500/15 dark:bg-success-500/20",
       chipColor: "success",
-      duration: 2,
+      duration: 2
     },
     {
       value: 200,
@@ -60,7 +70,7 @@ export const StatsSection = () => {
       color: "text-primary",
       bgColor: "bg-primary/15 dark:bg-primary/20",
       chipColor: "primary",
-      duration: 1.5,
+      duration: 1.5
     },
     {
       value: 30,
@@ -71,8 +81,8 @@ export const StatsSection = () => {
       color: "text-success-500",
       bgColor: "bg-success-500/15 dark:bg-success-500/20",
       chipColor: "success",
-      duration: 2,
-    },
+      duration: 2
+    }
   ];
 
   const container = {
@@ -80,14 +90,14 @@ export const StatsSection = () => {
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
-      },
-    },
+        staggerChildren: 0.1
+      }
+    }
   };
 
   const item = {
     hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+    show: { opacity: 1, y: 0, transition: { duration: 0.5 } }
   };
 
   return (
@@ -99,13 +109,17 @@ export const StatsSection = () => {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(0,184,255,0.15),transparent_70%)] dark:bg-[radial-gradient(ellipse_at_top_left,rgba(0,184,255,0.1),transparent_90%)]"></div>
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(255,0,0,0.15),transparent_70%)] dark:bg-[radial-gradient(ellipse_at_bottom_right,rgba(255,0,0,0.1),transparent_90%)]"></div>
 
-      <div className="container mx-auto px-4 sm:px-6 md:px-8">
+      <div className="container relative z-10 mx-auto px-4 sm:px-6 md:px-8">
         <div className="mb-20 text-center">
           <Chip color="primary" variant="flat" radius="full" className="mb-4 text-base">
             Our Impact
           </Chip>
-          <h2 className="font-montserrat mb-4 text-3xl font-bold sm:text-4xl md:text-5xl">
-            Konabra’s Impact in Numbers
+          <h2 className="mb-4 font-montserrat text-3xl font-bold sm:text-4xl md:text-5xl">
+            <span className="relative inline-block text-primary">
+              Konabra&rsquo;s
+              <span className="absolute -bottom-2 left-0 h-1 w-full bg-primary/40"></span>
+            </span>{" "}
+            Impact in Numbers
           </h2>
           <p className="mx-auto max-w-3xl text-base text-foreground-600 dark:text-foreground-400 sm:text-lg">
             Discover how Konabra is transforming road safety and community engagement across Ghana.
@@ -135,7 +149,7 @@ export const StatsSection = () => {
                       boxShadow:
                         hoveredIndex === index
                           ? "0 12px 30px -5px rgba(0,0,0,0.2), 0 8px 12px -6px rgba(0,0,0,0.15)"
-                          : "0 6px 12px -2px rgba(0,0,0,0.1)",
+                          : "0 6px 12px -2px rgba(0,0,0,0.1)"
                     }}
                   >
                     <div className="p-8 text-center">
@@ -144,7 +158,7 @@ export const StatsSection = () => {
                       >
                         <Icon icon={stat.icon} width={28} height={28} />
                       </div>
-                      <h3 className="font-montserrat mb-3 text-3xl font-bold sm:text-4xl">
+                      <h3 className="mb-3 font-montserrat text-3xl font-bold sm:text-4xl">
                         {inView ? (
                           <MemoizedCountUp
                             value={stat.value}
@@ -155,7 +169,7 @@ export const StatsSection = () => {
                           stat.displayValue
                         )}
                       </h3>
-                      <h4 className="font-montserrat mb-3 text-lg font-semibold sm:text-xl">
+                      <h4 className="mb-3 font-montserrat text-lg font-semibold sm:text-xl">
                         {stat.label}
                       </h4>
                       <p className="text-base text-foreground-600 dark:text-foreground-400">

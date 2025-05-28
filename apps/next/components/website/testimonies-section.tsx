@@ -81,12 +81,19 @@ export const TestimonialsSection = () => {
       <div className="absolute -top-40 left-0 h-96 w-96 rounded-full bg-warning/5 blur-3xl dark:bg-warning/10"></div>
       <div className="absolute -bottom-40 right-0 h-96 w-96 rounded-full bg-success-500/5 blur-3xl dark:bg-success-500/10"></div>
 
-      <div className="container relative mx-auto px-6 md:px-8">
+      <div className="container relative z-10 mx-auto px-6 md:px-8">
         <div className="mb-16 text-center">
           <Chip color="warning" variant="flat" radius="full" className="mb-4">
             Testimonials
           </Chip>
-          <h2 className="mb-4 text-3xl font-bold md:text-4xl">What People Are Saying</h2>
+          <h2 className="mb-4 font-montserrat text-3xl font-bold md:text-4xl">
+            What{" "}
+            <span className="relative inline-block text-primary">
+              People
+              <span className="absolute -bottom-2 left-0 h-1 w-full bg-primary/40"></span>
+            </span>{" "}
+            Are Saying
+          </h2>
           <p className="mx-auto max-w-2xl text-foreground-700 dark:text-foreground-500">
             Hear from the community about how Konabra is making a difference across Ghana
           </p>

@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
+import NextLink from "next/link";
 import { Button } from "@heroui/button";
 import { Icon } from "@iconify-icon/react"; // Import Iconify
 import { motion } from "framer-motion";
-import NextLink from "next/link";
 
 export const ContactUsSection = () => {
   const container = {
@@ -30,15 +30,19 @@ export const ContactUsSection = () => {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(0,184,255,0.15),transparent_70%)] dark:bg-[radial-gradient(ellipse_at_top_left,rgba(0,184,255,0.1),transparent_90%)]"></div>
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(255,0,0,0.15),transparent_70%)] dark:bg-[radial-gradient(ellipse_at_bottom_right,rgba(255,0,0,0.1),transparent_90%)]"></div>
 
-      <div className="container mx-auto px-4 sm:px-6 md:px-8">
+      <div className="container relative z-10 mx-auto px-4 sm:px-6 md:px-8">
         <motion.div
           className="mx-auto max-w-4xl text-center"
           variants={container}
           initial="hidden"
           animate="show"
         >
-          <motion.h2 variants={item} className="mb-4 text-4xl font-bold">
-            We'd Love to Hear From You
+          <motion.h2 variants={item} className="mb-4 font-montserrat text-4xl font-bold">
+            We'd Love to{" "}
+            <span className="relative inline-block text-primary">
+              Hear From You
+              <span className="absolute -bottom-2 left-0 h-1 w-full bg-primary/40"></span>
+            </span>
           </motion.h2>
           <motion.p variants={item} className="text-muted-foreground mb-8 text-lg">
             Reach out via email or give us a call. We're here to help!

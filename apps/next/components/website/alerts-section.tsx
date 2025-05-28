@@ -11,15 +11,18 @@ export const AlertsSection = () => {
   return (
     <section id="alerts" className="relative overflow-hidden bg-background py-20">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,184,0,0.1),transparent_100%)]"></div>
-      
 
-      <div className="container mx-auto px-6 md:px-8">
+      <div className="container relative z-10 mx-auto px-6 md:px-8">
         <div className="mb-16 text-center">
           <Chip color="success" variant="flat" radius="full" className="mb-4">
             Real-time Alerts
           </Chip>
-          <h2 className="font-montserrat mb-4 text-3xl font-bold md:text-4xl">
-            Stay Informed on the Go
+          <h2 className="mb-4 font-montserrat text-3xl font-bold md:text-4xl">
+            <span className="relative inline-block text-primary">
+              Real-Time Updates
+              <span className="absolute -bottom-2 left-0 h-1 w-full bg-primary/40"></span>
+            </span>{" "}
+            in Your Pocket
           </h2>
           <p className="mx-auto max-w-2xl text-foreground-600">
             Receive instant notifications about road incidents and traffic conditions along your
@@ -92,7 +95,7 @@ export const AlertsSection = () => {
                   <Icon icon="lucide:bell" width={24} />
                 </div>
                 <div>
-                  <h3 className="font-montserrat mb-2 text-xl font-semibold">
+                  <h3 className="mb-2 font-montserrat text-xl font-semibold">
                     Personalized Alerts
                   </h3>
                   <p className="text-foreground-600">
@@ -113,7 +116,7 @@ export const AlertsSection = () => {
                   <Icon icon="solar:map-point-search-bold" width={24} />
                 </div>
                 <div>
-                  <h3 className="font-montserrat mb-2 text-xl font-semibold">Interactive Map</h3>
+                  <h3 className="mb-2 font-montserrat text-xl font-semibold">Interactive Map</h3>
                   <p className="text-foreground-600">
                     View all reported incidents on an interactive map and plan your journey
                     accordingly.
@@ -132,7 +135,7 @@ export const AlertsSection = () => {
                   <Icon icon="solar:clock-circle-bold" width={24} />
                 </div>
                 <div>
-                  <h3 className="font-montserrat mb-2 text-xl font-semibold">Real-time Updates</h3>
+                  <h3 className="mb-2 font-montserrat text-xl font-semibold">Real-time Updates</h3>
                   <p className="text-foreground-600">
                     Get instant updates as new incidents are reported or existing ones are resolved.
                   </p>

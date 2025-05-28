@@ -89,13 +89,18 @@ export const FeaturesSection = () => {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(0,184,255,0.15),transparent_70%)] dark:bg-[radial-gradient(ellipse_at_top_left,rgba(0,184,255,0.1),transparent_90%)]"></div>
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(255,0,0,0.15),transparent_70%)] dark:bg-[radial-gradient(ellipse_at_bottom_right,rgba(255,0,0,0.1),transparent_90%)]"></div>
 
-      <div className="container mx-auto px-6 md:px-8">
+      <div className="container relative z-10 mx-auto px-6 md:px-8">
         <div className="mb-16 text-center">
           <Chip color="primary" variant="flat" radius="full" className="mb-4">
             Features
           </Chip>
-          <h2 className="font-montserrat mb-4 text-3xl font-bold md:text-4xl">
-            What Does Konabra Do?
+          <h2 className="mb-4 font-montserrat text-3xl font-bold md:text-4xl">
+            What Does{" "}
+            <span className="relative inline-block text-primary">
+              Konabra
+              <span className="absolute -bottom-2 left-0 h-1 w-full bg-primary/40"></span>
+            </span>{" "}
+            Do?
           </h2>
           <p className="mx-auto max-w-2xl text-foreground-700 dark:text-foreground-500">
             Konabra empowers drivers, passengers, and pedestrians with tools to make roads safer and
@@ -133,7 +138,7 @@ export const FeaturesSection = () => {
                   >
                     <Icon icon={feature.icon} width={24} />
                   </div>
-                  <h3 className="font-montserrat mb-2 text-xl font-semibold">{feature.title}</h3>
+                  <h3 className="mb-2 font-montserrat text-xl font-semibold">{feature.title}</h3>
                   <p className="text-foreground-700 dark:text-foreground-500">
                     {feature.description}
                   </p>

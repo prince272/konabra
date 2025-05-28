@@ -74,12 +74,7 @@ export const Navbar = () => {
         <NavbarBrand>
           <div className="flex items-center gap-2">
             <div className="rounded-full bg-gradient-to-r from-primary to-primary-600 p-1">
-              <Icon
-                icon="solar:map-point-bold"
-                width={24}
-                height={24}
-                className="text-success"
-              />
+              <Icon icon="solar:map-point-bold" width={24} height={24} className="text-success" />
             </div>
             <p className="font-montserrat text-xl font-bold text-inherit">Konabra</p>
           </div>
@@ -157,10 +152,10 @@ export const Navbar = () => {
             </Button>
           )}
         </NavbarItem>
-        <NavbarItem className="ml-2 flex lg:hidden">
+        <NavbarItem className="ml-2 flex md:hidden">
           <NavbarMenuToggle
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-            className="text-xl"
+            className="p-3"
           />
         </NavbarItem>
       </NavbarContent>

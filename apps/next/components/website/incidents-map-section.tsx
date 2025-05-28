@@ -15,13 +15,17 @@ export const IncidentsMapSection = () => {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(23,201,100,0.07),transparent_50%)]"></div>
       <div className="absolute -top-40 left-0 h-96 w-96 rounded-full bg-warning/5 blur-3xl"></div>
       <div className="absolute -bottom-40 right-0 h-96 w-96 rounded-full bg-success-500/5 blur-3xl"></div>
-      <div className="container mx-auto px-6 md:px-8">
+      <div className="container relative z-10 mx-auto px-6 md:px-8">
         <div className="mb-16 text-center">
           <Chip color="primary" variant="flat" radius="full" className="mb-4">
             Incident Reporting
           </Chip>
-          <h2 className="font-montserrat mb-4 text-3xl font-bold md:text-4xl">
-            Report & Track Incidents
+          <h2 className="mb-4 font-montserrat text-3xl font-bold md:text-4xl">
+            Quickly Report &{" "}
+            <span className="relative inline-block text-primary">
+              Monitor Incidents
+              <span className="absolute -bottom-2 left-0 h-1 w-full bg-primary/40"></span>
+            </span>
           </h2>
           <p className="mx-auto max-w-2xl text-foreground-600">
             Easily report road incidents and see them displayed on an interactive map
@@ -42,7 +46,7 @@ export const IncidentsMapSection = () => {
                   <Icon icon="solar:camera-bold" width={24} />
                 </div>
                 <div>
-                  <h3 className="font-montserrat mb-2 text-xl font-semibold">Photo Evidence</h3>
+                  <h3 className="mb-2 font-montserrat text-xl font-semibold">Photo Evidence</h3>
                   <p className="text-foreground-600">
                     Add photos to your incident reports to provide visual evidence and help others
                     understand the situation.
@@ -61,7 +65,7 @@ export const IncidentsMapSection = () => {
                   <Icon icon="solar:map-arrow-square-bold" width={24} />
                 </div>
                 <div>
-                  <h3 className="font-montserrat mb-2 text-xl font-semibold">Precise Location</h3>
+                  <h3 className="mb-2 font-montserrat text-xl font-semibold">Precise Location</h3>
                   <p className="text-foreground-600">
                     GPS integration ensures accurate location data for each incident, making it easy
                     for others to avoid trouble spots.
@@ -80,7 +84,7 @@ export const IncidentsMapSection = () => {
                   <Icon icon="solar:sort-by-time-bold" width={24} />
                 </div>
                 <div>
-                  <h3 className="font-montserrat mb-2 text-xl font-semibold">Incident History</h3>
+                  <h3 className="mb-2 font-montserrat text-xl font-semibold">Incident History</h3>
                   <p className="text-foreground-600">
                     Track the history of reported incidents to identify recurring problems and
                     monitor resolution progress.
@@ -127,7 +131,12 @@ export const IncidentsMapSection = () => {
                   viewport={{ once: true }}
                 >
                   <div className="mb-2 flex items-center gap-2">
-                    <Icon icon="solar:danger-triangle-bold" className="text-warning" width={20} height={20} />
+                    <Icon
+                      icon="solar:danger-triangle-bold"
+                      className="text-warning"
+                      width={20}
+                      height={20}
+                    />
                     <h4 className="text-sm font-semibold">Incident Details</h4>
                   </div>
                   <p className="text-xs text-foreground-600 dark:text-foreground-400">
