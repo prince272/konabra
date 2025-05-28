@@ -15,6 +15,7 @@ export type AccountModel = {
   id: string;
   firstName: string;
   lastName: string;
+  fullName: string;
   userName: string;
   email: string;
   emailVerified: boolean;
@@ -26,6 +27,9 @@ export type AccountModel = {
   lastActiveAt: string;
   lastPasswordChangedAt: string;
   roles: string[];
+  settings: {
+    [key: string]: any;
+  };
 };
 
 export type AccountWithTokenModel = {

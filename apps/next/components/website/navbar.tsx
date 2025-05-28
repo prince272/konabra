@@ -67,7 +67,7 @@ export const Navbar = () => {
       onMenuOpenChange={setIsMenuOpen}
       isMenuOpen={isMenuOpen}
       isBordered={false}
-      className="bg-background/80 shadow-sm backdrop-blur-md dark:bg-background/80 dark:shadow-none"
+      className="bg-background/50 shadow-sm backdrop-blur-lg dark:bg-background/80 dark:shadow-none z-50"
       maxWidth="xl"
     >
       <NavbarContent className="gap-0">

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -24,6 +25,10 @@ type User struct {
 	LastPasswordChangedAt time.Time
 	Roles                 []*Role        `gorm:"many2many:user_roles;"`
 	DeletedAt             gorm.DeletedAt `gorm:"column:deleted_at;index"`
+}
+
+func (user *User) FullName() string {
+	return strings.Trim(user.FirstName+" "+user.LastName, " ")
 }
 
 func (user *User) RoleNames() []string {

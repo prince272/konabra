@@ -1,7 +1,41 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useInsertionEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
+// Centralized event emitter for hash changes
+const hashChangeEmitter = {
+  listeners: new Set<() => void>(),
+  subscribe: (callback: () => void) => {
+    hashChangeEmitter.listeners.add(callback);
+    return () => hashChangeEmitter.listeners.delete(callback);
+  },
+  notify: () => {
+    if (typeof window === "undefined") return;
+    hashChangeEmitter.listeners.forEach(callback => callback());
+  }
+};
+
+// Monkey-patch history methods once
+if (typeof window !== "undefined" && !window.history._patched) {
+  const { pushState, replaceState } = window.history;
+  
+  const patched = function(method: typeof pushState) {
+    return function(this: any, ...args: any[]) {
+      const result = method.apply(this, args);
+      if (args[2] !== window.location.href) {
+        setTimeout(hashChangeEmitter.notify, 0);
+      }
+      return result;
+    };
+  };
+  
+  window.history.pushState = patched(pushState);
+  window.history.replaceState = patched(replaceState);
+  window.history._patched = true;
+  
+  window.addEventListener('hashchange', () => setTimeout(hashChangeEmitter.notify, 0));
+}
 
 export const useHashState = () => {
   const router = useRouter();
@@ -13,32 +47,26 @@ export const useHashState = () => {
 
   const [hash, setHashState] = useState<string>(getCurrentHash());
 
-  useEffect(() => {
+  // Use useInsertionEffect for subscription setup
+  useInsertionEffect(() => {
     if (typeof window === "undefined") return;
+    
+    // This effect only sets up the subscription
+    const unsubscribe = hashChangeEmitter.subscribe(() => {
+      // The actual state update will happen in a useEffect
+      requestAnimationFrame(() => {
+        setHashState(getCurrentHash());
+      });
+    });
+    
+    return unsubscribe;
+  }, []);
 
-    const handleHashChange = () => {
+  // Use regular useEffect for the initial hash sync
+  useEffect(() => {
+    if (typeof window !== "undefined") {
       setHashState(getCurrentHash());
-    };
-
-    const { pushState, replaceState } = window.history;
-
-    // Monkey-patch pushState and replaceState to track hash updates
-    window.history.pushState = function (...args) {
-      pushState.apply(window.history, args);
-      setTimeout(handleHashChange, 0);
-    };
-    window.history.replaceState = function (...args) {
-      replaceState.apply(window.history, args);
-      setTimeout(handleHashChange, 0);
-    };
-
-    window.addEventListener("hashchange", handleHashChange);
-
-    return () => {
-      window.removeEventListener("hashchange", handleHashChange);
-      window.history.pushState = pushState;
-      window.history.replaceState = replaceState;
-    };
+    }
   }, []);
 
   const setHash = useCallback(
@@ -48,15 +76,13 @@ export const useHashState = () => {
 
       if (cleanHash !== window.location.hash) {
         if (shallow) {
-          // Update the URL without triggering state change or navigation
           window.history.replaceState(
             window.history.state,
             "",
             `${pathname}${searchParams ? `?${searchParams}` : ""}${cleanHash}`
           );
+          setTimeout(hashChangeEmitter.notify, 0);
         } else {
-          // Normal update that triggers state change
-          setHashState(cleanHash.slice(1));
           router.replace(`${pathname}${searchParams ? `?${searchParams}` : ""}${cleanHash}`, {
             scroll: false
           });
@@ -71,15 +97,13 @@ export const useHashState = () => {
       if (typeof window === "undefined") return;
 
       if (shallow) {
-        // Remove hash without triggering state change or navigation
         window.history.replaceState(
           window.history.state,
           "",
           `${pathname}${searchParams ? `?${searchParams}` : ""}`
         );
+        setTimeout(hashChangeEmitter.notify, 0);
       } else {
-        // Normal hash removal that triggers state change
-        setHashState("");
         router.replace(`${pathname}${searchParams ? `?${searchParams}` : ""}`, {
           scroll: false
         });

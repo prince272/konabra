@@ -1,11 +1,5 @@
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1">{children}</div>
-    </div>
-  )
+import { DashboardLayout } from "@/components/dashboard/layout";
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return <DashboardLayout>{children}</DashboardLayout>;
 }

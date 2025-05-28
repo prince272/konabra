@@ -57,6 +57,7 @@ type AccountModel struct {
 	Id                    string    `json:"id"`
 	FirstName             string    `json:"firstName"`
 	LastName              string    `json:"lastName"`
+	FullName              string    `json:"fullName"`
 	UserName              string    `json:"userName"`
 	Email                 string    `json:"email"`
 	EmailVerified         bool      `json:"emailVerified"`
