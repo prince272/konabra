@@ -304,7 +304,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onItemClick, collapsed = false
               >
                 <div className="flex flex-col items-start">
                   <p className="text-sm font-medium">{currentAccount?.fullName}</p>
-                  <p className="text-xs text-foreground-500">Administrator {hash}</p>
+                  <p className="text-xs text-foreground-500">Administrator</p>
                 </div>
               </Button>
             </DropdownTrigger>

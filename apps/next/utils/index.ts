@@ -1,4 +1,5 @@
 import { CountryCode, parsePhoneNumberFromString } from "libphonenumber-js";
+import queryString, { StringifyOptions, UrlObject } from "query-string";
 
 export function formatInternationalNumber(
   number: string,
@@ -14,4 +15,23 @@ export function formatInternationalNumber(
 export function maybePhoneNumber(input?: string): boolean {
   const phonePattern = /^[-+0-9() ]+$/;
   return phonePattern.test(input || "");
+}
+
+export function stringifyPath(object: UrlObject, options?: StringifyOptions): string {
+  const BASE = "https://example.com";
+  const originalUrl = object.url ?? "";
+  const isRelative = originalUrl.startsWith("/");
+
+  if (isRelative) {
+    const withBase: UrlObject = {
+      ...object,
+      url: `${BASE}${originalUrl}`
+    };
+
+    // 2) stringify
+    const full = queryString.stringifyUrl(withBase, options);
+    return full.replace(BASE, "");
+  }
+
+  return queryString.stringifyUrl(object, options);
 }

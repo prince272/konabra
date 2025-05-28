@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@heroui/button";
 import { Drawer, DrawerBody, DrawerContent, DrawerHeader } from "@heroui/drawer";
 import { Navbar, NavbarContent, NavbarItem } from "@heroui/navbar";
 import { Tooltip } from "@heroui/tooltip";
 import { Icon } from "@iconify-icon/react";
+import { stringifyPath } from "@/utils";
 import { useAccountState } from "@/states";
 import { useBreakpoint, useHashState } from "@/hooks";
 import { Sidebar } from "./sidebar";
@@ -26,12 +27,36 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [hash] = useHashState();
+  const hasRedirected = useRef(false);
+
+  const returnUrl = useMemo(() => {
+    const url = stringifyPath(
+      {
+        url: pathname,
+        query: Object.fromEntries(searchParams.entries()),
+        fragmentIdentifier: !["signin", "signout"].includes(hash) ? hash : undefined
+      },
+      { skipNull: true }
+    );
+    return url;
+  }, [hasRedirected]);
 
   useEffect(() => {
-    if (!currentAccount) {
-      router.replace("/#signin");
+    if (!currentAccount && !hasRedirected.current) {
+      hasRedirected.current = true;
+
+      const signinUrl = stringifyPath(
+        {
+          url: "/",
+          query: { returnUrl },
+          fragmentIdentifier: "signin"
+        },
+        { skipNull: true }
+      );
+
+      router.replace(signinUrl);
     }
-  }, [currentAccount, pathname, searchParams, hash]);
+  }, [currentAccount, returnUrl]);
 
   if (!currentAccount) {
     return null;

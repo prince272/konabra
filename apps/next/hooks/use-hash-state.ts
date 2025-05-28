@@ -1,7 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState, useInsertionEffect } from "react";
+import { useCallback, useEffect, useInsertionEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
+// Extend the History interface to include the _patched property
+declare global {
+  interface History {
+    _patched?: boolean;
+  }
+}
 
 // Centralized event emitter for hash changes
 const hashChangeEmitter = {
@@ -12,29 +19,29 @@ const hashChangeEmitter = {
   },
   notify: () => {
     if (typeof window === "undefined") return;
-    hashChangeEmitter.listeners.forEach(callback => callback());
+    hashChangeEmitter.listeners.forEach((callback) => callback());
   }
 };
 
 // Monkey-patch history methods once
 if (typeof window !== "undefined" && !window.history._patched) {
   const { pushState, replaceState } = window.history;
-  
-  const patched = function(method: typeof pushState) {
-    return function(this: any, ...args: any[]) {
-      const result = method.apply(this, args);
-      if (args[2] !== window.location.href) {
+
+  const patched = function (method: typeof pushState) {
+    return function (this: any, data: any, unused: string, url?: string | URL | null | undefined) {
+      const result = method.apply(this, [data, unused, url]);
+      if (url !== window.location.href) {
         setTimeout(hashChangeEmitter.notify, 0);
       }
       return result;
     };
   };
-  
+
   window.history.pushState = patched(pushState);
   window.history.replaceState = patched(replaceState);
   window.history._patched = true;
-  
-  window.addEventListener('hashchange', () => setTimeout(hashChangeEmitter.notify, 0));
+
+  window.addEventListener("hashchange", () => setTimeout(hashChangeEmitter.notify, 0));
 }
 
 export const useHashState = () => {
@@ -50,7 +57,7 @@ export const useHashState = () => {
   // Use useInsertionEffect for subscription setup
   useInsertionEffect(() => {
     if (typeof window === "undefined") return;
-    
+
     // This effect only sets up the subscription
     const unsubscribe = hashChangeEmitter.subscribe(() => {
       // The actual state update will happen in a useEffect
@@ -58,8 +65,8 @@ export const useHashState = () => {
         setHashState(getCurrentHash());
       });
     });
-    
-    return unsubscribe;
+
+    return () => { unsubscribe(); };
   }, []);
 
   // Use regular useEffect for the initial hash sync

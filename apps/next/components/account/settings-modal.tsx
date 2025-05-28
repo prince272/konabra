@@ -882,14 +882,6 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
 export function SettingsModalRouter() {
   const { closeModal, currentModal, mountedModal } = useModalRouter();
-  const [account] = useAccountState();
-
-  useEffect(() => {
-    if (currentModal?.split(":")[0] === "settings" && !account) {
-      closeModal();
-    }
-  }, [account, currentModal, closeModal]);
-
   return (
     <>
       {mountedModal?.split(":")[0] === "settings" ? (

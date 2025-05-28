@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import NextLink from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@heroui/button";
 import { Divider } from "@heroui/divider";
 import { Input } from "@heroui/input";
@@ -32,6 +33,8 @@ export default function SignInModal({
   const [isInitialRender, setIsInitialRender] = useState<boolean>(true);
   const [, setAccount] = useAccountState();
   const isSmallScreen = useBreakpoint("sm", "down");
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const form = useForm<SignInForm>({
     mode: "onChange"
@@ -87,12 +90,14 @@ export default function SignInModal({
             color: "success"
           });
           onClose?.();
+          const returnUrl = searchParams.get("returnUrl") || "/dashboard";
+          router.replace(returnUrl);
         }
       } finally {
         setIsLoading(false);
       }
     }),
-    []
+    [searchParams]
   );
 
   return (
