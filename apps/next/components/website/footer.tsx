@@ -44,17 +44,12 @@ export const Footer = () => {
 
   return (
     <footer className="bg-background">
-      <div className="container mx-auto px-6 pt-16 pb-8 md:px-8">
+      <div className="container mx-auto px-6 pb-8 pt-16 md:px-8">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-2">
             <div className="mb-6 flex items-center gap-2">
               <div className="rounded-full bg-gradient-to-r from-warning to-warning-600 p-2">
-                <Icon
-                  icon="solar:map-point-bold"
-                  width="20"
-                  height="20"
-                  className="text-success"
-                />
+                <Icon icon="solar:map-point-bold" width="20" height="20" className="text-success" />
               </div>
               <p className="font-montserrat text-xl font-bold text-inherit">Konabra</p>
             </div>
@@ -78,7 +73,7 @@ export const Footer = () => {
 
           {footerLinks.map((column, index) => (
             <div key={index}>
-              <h3 className="font-montserrat relative mb-6 inline-block text-lg font-semibold">
+              <h3 className="relative mb-6 inline-block font-montserrat text-lg font-semibold">
                 {column.title}
                 <span className="absolute -bottom-2 left-0 h-0.5 w-1/2 bg-warning"></span>
               </h3>

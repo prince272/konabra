@@ -8,7 +8,12 @@ import { Modal, ModalBody, ModalContent, ModalHeader } from "@heroui/modal";
 import { cn } from "@heroui/theme";
 import { Icon } from "@iconify-icon/react";
 import countries from "i18n-iso-countries";
-import { CountryCode, getCountries, getCountryCallingCode, parsePhoneNumberFromString } from "libphonenumber-js";
+import {
+  CountryCode,
+  getCountries,
+  getCountryCallingCode,
+  parsePhoneNumberFromString
+} from "libphonenumber-js";
 import { maybePhoneNumber } from "@/utils";
 import { useBreakpoint, useMeasure } from "@/hooks";
 

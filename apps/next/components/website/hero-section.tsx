@@ -201,7 +201,8 @@ export const HeroSection = () => {
                       <Icon
                         icon="solar:map-point-rotate-broken"
                         className="text-success-500"
-                     width="20" height="20"
+                        width="20"
+                        height="20"
                       />
                     </div>
                     <span className="text-xs font-medium dark:text-foreground-400">

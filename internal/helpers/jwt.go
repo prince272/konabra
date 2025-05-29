@@ -17,7 +17,7 @@ import (
 	"slices"
 
 	"github.com/prince272/konabra/internal/constants"
-	models "github.com/prince272/konabra/internal/models/identity"
+	models "github.com/prince272/konabra/internal/models"
 	"github.com/prince272/konabra/internal/problems"
 	"github.com/prince272/konabra/utils"
 )

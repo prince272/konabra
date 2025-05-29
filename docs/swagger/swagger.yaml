@@ -132,7 +132,6 @@ paths:
     post:
       consumes:
       - application/json
-      description: Starts the process of changing account email or phone number
       parameters:
       - description: Account change details
         in: body
@@ -145,14 +144,13 @@ paths:
       responses: {}
       security:
       - BearerAuth: []
-      summary: Initiate account change
+      summary: Send account change verification code (email or phone)
       tags:
       - Account
   /account/change/complete:
     post:
       consumes:
       - application/json
-      description: Completes the process of changing account email or phone number
       parameters:
       - description: Account change completion details
         in: body
@@ -165,14 +163,13 @@ paths:
       responses: {}
       security:
       - BearerAuth: []
-      summary: Complete account change
+      summary: Complete account change (email or phone)
       tags:
       - Account
   /account/create:
     post:
       consumes:
       - application/json
-      description: Creates a new user account with the provided details
       parameters:
       - description: Account creation details
         in: body
@@ -190,7 +187,6 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Deletes the authenticated user's account permanently
       produces:
       - application/json
       responses: {}
@@ -202,7 +198,6 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieves details of the authenticated user
       produces:
       - application/json
       responses: {}
@@ -215,7 +210,6 @@ paths:
     post:
       consumes:
       - application/json
-      description: Changes the password for the authenticated user
       parameters:
       - description: Password change details
         in: body
@@ -235,7 +229,6 @@ paths:
     post:
       consumes:
       - application/json
-      description: Starts the process of resetting the password for the account
       parameters:
       - description: Password reset details
         in: body
@@ -246,14 +239,13 @@ paths:
       produces:
       - application/json
       responses: {}
-      summary: Initiate password reset
+      summary: Send password reset code
       tags:
       - Account
   /account/password/reset/complete:
     post:
       consumes:
       - application/json
-      description: Completes the password reset process using the received token
       parameters:
       - description: Password reset completion details
         in: body
@@ -271,7 +263,6 @@ paths:
     post:
       consumes:
       - application/json
-      description: Authenticates a user with email and password
       parameters:
       - description: Sign-in credentials
         in: body
@@ -289,8 +280,6 @@ paths:
     post:
       consumes:
       - application/json
-      description: Authenticates a user using a refresh token to obtain new access
-        tokens
       parameters:
       - description: Refresh token details
         in: body
@@ -308,7 +297,6 @@ paths:
     post:
       consumes:
       - application/json
-      description: Logs out the user and invalidates the session/token
       parameters:
       - description: Sign-out request details
         in: body
@@ -326,7 +314,6 @@ paths:
     post:
       consumes:
       - application/json
-      description: Starts the verification process for the account (email or phone)
       parameters:
       - description: Verification details
         in: body
@@ -337,14 +324,13 @@ paths:
       produces:
       - application/json
       responses: {}
-      summary: Initiate account verification
+      summary: Send account verification code (email or phone)
       tags:
       - Account
   /account/verify/complete:
     post:
       consumes:
       - application/json
-      description: Completes the verification process using the received token
       parameters:
       - description: Verification completion details
         in: body
@@ -355,9 +341,77 @@ paths:
       produces:
       - application/json
       responses: {}
-      summary: Complete account verification
+      summary: Complete account verification (email or phone)
       tags:
       - Account
+  /categories:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: order
+        type: string
+      - in: query
+        name: search
+        type: string
+      - in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get paginated categories
+      tags:
+      - Categories
+  /categories/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Category Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get category by Id
+      tags:
+      - Categories
+  /categories/all:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - in: query
+        name: order
+        type: string
+      - in: query
+        name: search
+        type: string
+      - in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get all categories
+      tags:
+      - Categories
 securityDefinitions:
   BearerAuth:
     in: header

@@ -84,7 +84,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, path, icon, children, onItem
           className="mx-auto mb-2"
           onPress={handleItemClick}
         >
-          <Icon icon={icon} className="text-xl" />
+          <Icon icon={icon} width="20" height="20" />
         </Button>
       </Tooltip>
     );
@@ -101,11 +101,13 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, path, icon, children, onItem
           radius="full"
           color={isChildActive({ title, path, icon, children }) ? "primary" : "default"}
           className="mb-1 w-full justify-start"
-          startContent={<Icon icon={icon} className="text-xl" />}
+          startContent={<Icon icon={icon} width="20" height="20" />}
           endContent={
             <Icon
               icon="solar:alt-arrow-right-linear"
-              className={cn("ml-auto text-lg transition-transform", { "rotate-90": isExpanded })}
+              width="20"
+              height="20"
+              className={cn("ml-auto transition-transform", { "rotate-90": isExpanded })}
             />
           }
           onPress={handleItemClick}
@@ -133,7 +135,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, path, icon, children, onItem
       variant={isActive(path) ? "flat" : "light"}
       color={isActive(path) ? "primary" : "default"}
       className="mb-1 w-full justify-start"
-      startContent={<Icon icon={icon} className="text-xl" />}
+      startContent={<Icon icon={icon} width="20" height="20" />}
       onPress={handleItemClick}
     >
       {title}
@@ -199,7 +201,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
       </div>
 
       <div className="flex-1 overflow-y-auto py-4">
-        <nav className={cn("space-y-1", { "px-1": collapsed, "px-2": !collapsed })}>
+        <nav
+          className={cn("flex flex-col justify-center space-y-1", {
+            "px-1": collapsed,
+            "px-2": !collapsed
+          })}
+        >
           <MenuContext.Provider value={contextValue}>
             <MenuItem
               title="Dashboard"
@@ -281,12 +288,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
         </nav>
       </div>
 
-      <div className="p-4">
+      <div
+        className={cn("space-1 flex flex-col justify-center py-4", {
+          "px-1": collapsed,
+          "px-2": !collapsed
+        })}
+      >
         {collapsed ? (
           <Tooltip content="John Doe - Administrator" placement="right">
             <Dropdown>
               <DropdownTrigger>
-                <Button variant="light" size="lg" className="w-full justify-start px-2" isIconOnly>
+                <Button variant="light" size="lg" isIconOnly>
                   <Avatar size="sm" name={currentAccount?.fullName} />
                 </Button>
               </DropdownTrigger>
@@ -295,7 +307,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                   key="settings"
                   as={NextLink}
                   href="#settings"
-                  startContent={<Icon icon="solar:settings-linear" width={20} height={20} />}
+                  startContent={<Icon icon="solar:settings-linear" width="20" height="20" />}
                 >
                   Settings
                 </DropdownItem>
@@ -303,7 +315,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                   key="signout"
                   as={NextLink}
                   href="#signout"
-                  startContent={<Icon icon="solar:logout-2-linear" width={20} height={20} />}
+                  startContent={<Icon icon="solar:logout-2-linear" width="20" height="20" />}
                   color="primary"
                 >
                   Sign Out
@@ -331,7 +343,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                 key="settings"
                 as={NextLink}
                 href="#settings"
-                startContent={<Icon icon="solar:settings-linear" width={20} height={20} />}
+                startContent={<Icon icon="solar:settings-linear" width="20" height="20" />}
               >
                 Settings
               </DropdownItem>
@@ -339,7 +351,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                 key="signout"
                 as={NextLink}
                 href="#signout"
-                startContent={<Icon icon="solar:logout-2-linear" width={20} height={20} />}
+                startContent={<Icon icon="solar:logout-2-linear" width="20" height="20" />}
                 color="primary"
               >
                 Sign Out

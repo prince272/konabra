@@ -66,7 +66,9 @@ export const useHashState = () => {
       });
     });
 
-    return () => { unsubscribe(); };
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   // Use regular useEffect for the initial hash sync

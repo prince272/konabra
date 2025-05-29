@@ -15,7 +15,8 @@ import (
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
 	"github.com/prince272/konabra/internal/helpers"
-	models "github.com/prince272/konabra/internal/models/identity"
+	models "github.com/prince272/konabra/internal/models"
+
 	"github.com/prince272/konabra/internal/problems"
 	"github.com/prince272/konabra/pkg/di"
 	"go.uber.org/zap"
@@ -181,7 +182,7 @@ func (api *Api) registerDefaultDB() error {
 		return fmt.Errorf("failed to open database: %w", err)
 	}
 
-	if err := db.AutoMigrate(&models.User{}, &models.Role{}, &models.JwtToken{}); err != nil {
+	if err := db.AutoMigrate(&models.User{}, &models.Role{}, &models.JwtToken{}, &models.Category{}); err != nil {
 		return fmt.Errorf("auto migration failed: %w", err)
 	}
 

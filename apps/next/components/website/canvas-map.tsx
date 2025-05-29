@@ -40,7 +40,7 @@ export const CanvasMap: React.FC<CanvasMapProps> = ({ className = "" }) => {
         warningColor: isDarkMode ? "#fbbf24" : "#ffb800",
         successColor: isDarkMode ? "#34d399" : "#10b981",
         textColor: isDarkMode ? "#f8f8f8" : "#111111",
-        secondaryTextColor: isDarkMode ? "#9e9e9e" : "#757575",
+        secondaryTextColor: isDarkMode ? "#9e9e9e" : "#757575"
       };
     };
 
@@ -54,14 +54,14 @@ export const CanvasMap: React.FC<CanvasMapProps> = ({ className = "" }) => {
       { x1: 200, y1: 0, x2: 200, y2: 500, main: true },
       { x1: 300, y1: 0, x2: 300, y2: 500, main: false },
       { x1: 400, y1: 0, x2: 400, y2: 500, main: true },
-      { x1: 500, y1: 0, x2: 500, y2: 500, main: false },
+      { x1: 500, y1: 0, x2: 500, y2: 500, main: false }
     ];
 
     const incidents = [
       { x: 200, y: 100, type: "accident", radius: 10 },
       { x: 400, y: 300, type: "traffic", radius: 8 },
       { x: 100, y: 400, type: "pothole", radius: 6 },
-      { x: 500, y: 200, type: "police", radius: 7 },
+      { x: 500, y: 200, type: "police", radius: 7 }
     ];
 
     // Draw function

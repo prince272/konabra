@@ -22,7 +22,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Starts the process of changing account email or phone number",
                 "consumes": [
                     "application/json"
                 ],
@@ -32,7 +31,7 @@ const docTemplate = `{
                 "tags": [
                     "Account"
                 ],
-                "summary": "Initiate account change",
+                "summary": "Send account change verification code (email or phone)",
                 "parameters": [
                     {
                         "description": "Account change details",
@@ -54,7 +53,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Completes the process of changing account email or phone number",
                 "consumes": [
                     "application/json"
                 ],
@@ -64,7 +62,7 @@ const docTemplate = `{
                 "tags": [
                     "Account"
                 ],
-                "summary": "Complete account change",
+                "summary": "Complete account change (email or phone)",
                 "parameters": [
                     {
                         "description": "Account change completion details",
@@ -81,7 +79,6 @@ const docTemplate = `{
         },
         "/account/create": {
             "post": {
-                "description": "Creates a new user account with the provided details",
                 "consumes": [
                     "application/json"
                 ],
@@ -113,7 +110,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieves details of the authenticated user",
                 "consumes": [
                     "application/json"
                 ],
@@ -132,7 +128,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Deletes the authenticated user's account permanently",
                 "consumes": [
                     "application/json"
                 ],
@@ -153,7 +148,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Changes the password for the authenticated user",
                 "consumes": [
                     "application/json"
                 ],
@@ -180,7 +174,6 @@ const docTemplate = `{
         },
         "/account/password/reset": {
             "post": {
-                "description": "Starts the process of resetting the password for the account",
                 "consumes": [
                     "application/json"
                 ],
@@ -190,7 +183,7 @@ const docTemplate = `{
                 "tags": [
                     "Account"
                 ],
-                "summary": "Initiate password reset",
+                "summary": "Send password reset code",
                 "parameters": [
                     {
                         "description": "Password reset details",
@@ -207,7 +200,6 @@ const docTemplate = `{
         },
         "/account/password/reset/complete": {
             "post": {
-                "description": "Completes the password reset process using the received token",
                 "consumes": [
                     "application/json"
                 ],
@@ -234,7 +226,6 @@ const docTemplate = `{
         },
         "/account/signin": {
             "post": {
-                "description": "Authenticates a user with email and password",
                 "consumes": [
                     "application/json"
                 ],
@@ -261,7 +252,6 @@ const docTemplate = `{
         },
         "/account/signin/refresh": {
             "post": {
-                "description": "Authenticates a user using a refresh token to obtain new access tokens",
                 "consumes": [
                     "application/json"
                 ],
@@ -288,7 +278,6 @@ const docTemplate = `{
         },
         "/account/signout": {
             "post": {
-                "description": "Logs out the user and invalidates the session/token",
                 "consumes": [
                     "application/json"
                 ],
@@ -315,7 +304,6 @@ const docTemplate = `{
         },
         "/account/verify": {
             "post": {
-                "description": "Starts the verification process for the account (email or phone)",
                 "consumes": [
                     "application/json"
                 ],
@@ -325,7 +313,7 @@ const docTemplate = `{
                 "tags": [
                     "Account"
                 ],
-                "summary": "Initiate account verification",
+                "summary": "Send account verification code (email or phone)",
                 "parameters": [
                     {
                         "description": "Verification details",
@@ -342,7 +330,6 @@ const docTemplate = `{
         },
         "/account/verify/complete": {
             "post": {
-                "description": "Completes the verification process using the received token",
                 "consumes": [
                     "application/json"
                 ],
@@ -352,7 +339,7 @@ const docTemplate = `{
                 "tags": [
                     "Account"
                 ],
-                "summary": "Complete account verification",
+                "summary": "Complete account verification (email or phone)",
                 "parameters": [
                     {
                         "description": "Verification completion details",
@@ -362,6 +349,119 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/services.CompleteVerifyAccountForm"
                         }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/categories": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Get paginated categories",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "order",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "sort",
+                        "in": "query"
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/categories/all": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Get all categories",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "order",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "sort",
+                        "in": "query"
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/categories/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Get category by Id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category Id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {}

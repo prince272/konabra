@@ -49,13 +49,13 @@ export default function ContactUsModal({
       setIsLoading(true);
       try {
         const problem = {
-            message: "An error occurred while sending the message.",
-            errors: {
-                name: "Name is required",
-                email: "Email is required",
-                message: "Message is required"
-            }
-        }
+          message: "An error occurred while sending the message.",
+          errors: {
+            name: "Name is required",
+            email: "Email is required",
+            message: "Message is required"
+          }
+        };
 
         if (problem) {
           const errors = Object.entries(problem.errors || {});

@@ -176,7 +176,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                 <div className="rounded-medium bg-content2 p-3">
                   <div className="flex items-start gap-3">
                     <div className="rounded-full bg-primary-100 p-2 dark:bg-primary-900">
-                      <Icon icon="solar:danger-triangle-broken" className="text-primary"  width="20" height="20" />
+                      <Icon
+                        icon="solar:danger-triangle-broken"
+                        className="text-primary"
+                        width="20"
+                        height="20"
+                      />
                     </div>
                     <div>
                       <p className="font-medium">New accident reported</p>
@@ -191,7 +196,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                 <div className="rounded-medium bg-content2 p-3">
                   <div className="flex items-start gap-3">
                     <div className="rounded-full bg-warning-100 p-2 dark:bg-warning-900">
-                      <Icon icon="solar:traffic-cone-broken" className="text-warning" width="20" height="20" />
+                      <Icon
+                        icon="solar:traffic-cone-broken"
+                        className="text-warning"
+                        width="20"
+                        height="20"
+                      />
                     </div>
                     <div>
                       <p className="font-medium">Traffic jam alert</p>
@@ -206,7 +216,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                 <div className="rounded-medium bg-content2 p-3">
                   <div className="flex items-start gap-3">
                     <div className="rounded-full bg-success-100 p-2 dark:bg-success-900">
-                      <Icon icon="solar:user-check-broken" className="text-success" width="20" height="20" />
+                      <Icon
+                        icon="solar:user-check-broken"
+                        className="text-success"
+                        width="20"
+                        height="20"
+                      />
                     </div>
                     <div>
                       <p className="font-medium">New user registered</p>

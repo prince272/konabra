@@ -67,7 +67,7 @@ export const Navbar = () => {
       onMenuOpenChange={setIsMenuOpen}
       isMenuOpen={isMenuOpen}
       isBordered={false}
-      className="bg-background/50 shadow-sm backdrop-blur-lg dark:bg-background/80 dark:shadow-none z-50"
+      className="z-50 bg-background/50 shadow-sm backdrop-blur-lg dark:bg-background/80 dark:shadow-none"
       maxWidth="xl"
     >
       <NavbarContent className="gap-0">
@@ -153,10 +153,7 @@ export const Navbar = () => {
           )}
         </NavbarItem>
         <NavbarItem className="ml-2 flex md:hidden">
-          <NavbarMenuToggle
-            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-            className="p-3"
-          />
+          <NavbarMenuToggle aria-label={isMenuOpen ? "Close menu" : "Open menu"} className="p-3" />
         </NavbarItem>
       </NavbarContent>
 
@@ -190,8 +187,8 @@ export const Navbar = () => {
                   <Icon
                     icon="solar:settings-broken"
                     className="text-primary"
-                    width={20}
-                    height={20}
+                    width="20"
+                    height="20"
                   />
                   Settings
                 </div>
@@ -201,8 +198,8 @@ export const Navbar = () => {
                   <Icon
                     icon="solar:logout-2-broken"
                     className="text-primary"
-                    width={20}
-                    height={20}
+                    width="20"
+                    height="20"
                   />
                   Sign Out
                 </div>
@@ -211,7 +208,7 @@ export const Navbar = () => {
           ) : (
             <Link color="foreground" className="w-full py-3" href="#signin" size="lg">
               <div className="flex items-center gap-3 px-4">
-                <Icon icon="solar:login-3-bold" className="text-primary" width={20} height={20} />
+                <Icon icon="solar:login-3-bold" className="text-primary" width="20" height="20" />
                 Sign In
               </div>
             </Link>
@@ -219,7 +216,7 @@ export const Navbar = () => {
         </NavbarMenuItem>
         <NavbarMenuItem>
           <div className="flex items-center gap-3 px-4 py-3">
-            <Icon icon="solar:sun-bold-duotone" className="text-primary" width={20} height={20} />
+            <Icon icon="solar:sun-bold-duotone" className="text-primary" width="20" height="20" />
             <span>Theme</span>
             <div className="ml-auto">
               <ThemeSwitcher />
@@ -235,18 +232,18 @@ export const Navbar = () => {
 function getMenuIcon(name: string) {
   switch (name) {
     case "Home":
-      return <Icon icon="solar:home-bold" className="text-primary" width={20} height={20} />;
+      return <Icon icon="solar:home-bold" className="text-primary" width="20" height="20" />;
     case "Features":
-      return <Icon icon="solar:widget-bold" className="text-primary" width={20} height={20} />;
+      return <Icon icon="solar:widget-bold" className="text-primary" width="20" height="20" />;
     case "How It Works":
-      return <Icon icon="solar:info-circle-bold" className="text-primary" width={20} height={20} />;
+      return <Icon icon="solar:info-circle-bold" className="text-primary" width="20" height="20" />;
     case "Impact":
-      return <Icon icon="solar:chart-bold" className="text-primary" width={20} height={20} />;
+      return <Icon icon="solar:chart-bold" className="text-primary" width="20" height="20" />;
     case "Testimonials":
       return (
-        <Icon icon="solar:chat-round-dots-bold" className="text-primary" width={20} height={20} />
+        <Icon icon="solar:chat-round-dots-bold" className="text-primary" width="20" height="20" />
       );
     default:
-      return <Icon icon="solar:menu-dots-bold" className="text-primary" width={20} height={20} />;
+      return <Icon icon="solar:menu-dots-bold" className="text-primary" width="20" height="20" />;
   }
 }

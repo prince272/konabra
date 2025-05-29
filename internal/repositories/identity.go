@@ -4,11 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/gobeam/stringy"
 	"github.com/google/uuid"
 	"github.com/prince272/konabra/internal/builds"
-	models "github.com/prince272/konabra/internal/models/identity"
+	models "github.com/prince272/konabra/internal/models"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -26,6 +27,8 @@ func NewIdentityRepository(logger *zap.Logger, defaultDB *builds.DefaultDB) *Ide
 }
 
 func (repository *IdentityRepository) CreateUser(user *models.User) error {
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
 	result := repository.defaultDB.Create(user)
 	if result.Error != nil {
 		return result.Error
@@ -34,6 +37,7 @@ func (repository *IdentityRepository) CreateUser(user *models.User) error {
 }
 
 func (repository *IdentityRepository) UpdateUser(user *models.User) error {
+	user.UpdatedAt = time.Now()
 	result := repository.defaultDB.Save(user)
 	if result.Error != nil {
 		return result.Error
@@ -56,7 +60,7 @@ func (repository *IdentityRepository) DeleteUser(user *models.User) error {
 	return nil
 }
 
-func (repository *IdentityRepository) FindUserByUsername(username string) *models.User {
+func (repository *IdentityRepository) GetUserByUsername(username string) *models.User {
 	user := &models.User{}
 
 	result := repository.defaultDB.Model(&models.User{}).Preload("UserRoles").
@@ -74,7 +78,7 @@ func (repository *IdentityRepository) FindUserByUsername(username string) *model
 	return user
 }
 
-func (repository *IdentityRepository) FindUserById(id string) *models.User {
+func (repository *IdentityRepository) GetUserById(id string) *models.User {
 	user := &models.User{}
 	result := repository.defaultDB.Model(&models.User{}).Preload("UserRoles").
 		Where("id = ?", id).
@@ -104,7 +108,7 @@ func (repository *IdentityRepository) UsernameExists(username string) bool {
 	return count > 0
 }
 
-func (repository *IdentityRepository) NameExists(name string) bool {
+func (repository *IdentityRepository) UserNameExists(name string) bool {
 	var count int64
 	result := repository.defaultDB.Model(&models.User{}).
 		Where("LOWER(user_name) = LOWER(?)", name).
@@ -117,7 +121,7 @@ func (repository *IdentityRepository) NameExists(name string) bool {
 	return count > 0
 }
 
-func (repository *IdentityRepository) GenerateName(names ...string) string {
+func (repository *IdentityRepository) GenerateUserName(names ...string) string {
 	var combinedParts []string
 	for _, name := range names {
 		if name != "" {
@@ -144,7 +148,7 @@ func (repository *IdentityRepository) GenerateName(names ...string) string {
 		slug := stringy.New(nameWithCount).SnakeCase().ToLower()
 		userName = strings.ReplaceAll(slug, "_", "-")
 
-		if !repository.NameExists(userName) {
+		if !repository.UserNameExists(userName) {
 			break
 		}
 

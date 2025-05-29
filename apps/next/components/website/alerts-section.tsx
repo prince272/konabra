@@ -147,7 +147,7 @@ export const AlertsSection = () => {
                   color="primary"
                   variant="solid"
                   radius="full"
-                  endContent={<Icon icon="solar:arrow-right-bold" />}
+                  endContent={<Icon icon="solar:arrow-right-broken" />}
                 >
                   Learn More About Alerts
                 </Button>

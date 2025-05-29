@@ -48,7 +48,7 @@ export const Globe = () => {
         size: Math.random() * 2 + 1,
         color: Math.random() > 0.5 ? "#FFB800" : "#17c964",
         name: `Point-${i}`,
-        hasAlert: Math.random() > 0.8,
+        hasAlert: Math.random() > 0.8
       });
     }
 
@@ -112,7 +112,9 @@ export const Globe = () => {
           const opacity = z * 0.5 + 0.5;
           ctx.beginPath();
           ctx.arc(x, y, point.size * opacity, 0, Math.PI * 2);
-          ctx.fillStyle = `${point.color}${Math.floor(opacity * 255).toString(16).padStart(2, "0")}`;
+          ctx.fillStyle = `${point.color}${Math.floor(opacity * 255)
+            .toString(16)
+            .padStart(2, "0")}`;
           ctx.fill();
         }
       });

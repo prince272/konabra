@@ -54,7 +54,6 @@ func (handler *IdentityHandler) handle(handlerFunc func(*gin.Context) (any, *pro
 
 // CreateAccount handles account creation
 // @Summary Create a new user account
-// @Description Creates a new user account with the provided details
 // @Tags Account
 // @Accept json
 // @Produce json
@@ -69,8 +68,7 @@ func (handler *IdentityHandler) CreateAccount(context *gin.Context) (any, *probl
 }
 
 // VerifyAccount handles account verification initiation
-// @Summary Initiate account verification
-// @Description Starts the verification process for the account (email or phone)
+// @Summary Send account verification code (email or phone)
 // @Tags Account
 // @Accept json
 // @Produce json
@@ -88,8 +86,7 @@ func (handler *IdentityHandler) VerifyAccount(context *gin.Context) (any, *probl
 }
 
 // CompleteVerifyAccount handles account verification completion
-// @Summary Complete account verification
-// @Description Completes the verification process using the received token
+// @Summary Complete account verification (email or phone)
 // @Tags Account
 // @Accept json
 // @Produce json
@@ -107,8 +104,7 @@ func (handler *IdentityHandler) CompleteVerifyAccount(context *gin.Context) (any
 }
 
 // ChangeAccount handles account change initiation
-// @Summary Initiate account change
-// @Description Starts the process of changing account email or phone number
+// @Summary Send account change verification code (email or phone)
 // @Tags Account
 // @Accept json
 // @Produce json
@@ -130,8 +126,7 @@ func (handler *IdentityHandler) ChangeAccount(context *gin.Context) (any, *probl
 }
 
 // CompleteChangeAccount handles account change completion
-// @Summary Complete account change
-// @Description Completes the process of changing account email or phone number
+// @Summary Complete account change (email or phone)
 // @Tags Account
 // @Accept json
 // @Produce json
@@ -154,7 +149,6 @@ func (handler *IdentityHandler) CompleteChangeAccount(context *gin.Context) (any
 
 // DeleteCurrentAccount handles account deletion
 // @Summary Delete the current user account
-// @Description Deletes the authenticated user's account permanently
 // @Tags Account
 // @Accept json
 // @Produce json
@@ -170,8 +164,7 @@ func (handler *IdentityHandler) DeleteCurrentAccount(context *gin.Context) (any,
 }
 
 // ResetPassword handles password reset initiation
-// @Summary Initiate password reset
-// @Description Starts the process of resetting the password for the account
+// @Summary Send password reset code
 // @Tags Account
 // @Accept json
 // @Produce json
@@ -191,7 +184,6 @@ func (handler *IdentityHandler) ResetPassword(context *gin.Context) (any, *probl
 
 // CompleteResetPassword handles password reset completion
 // @Summary Complete password reset
-// @Description Completes the password reset process using the received token
 // @Tags Account
 // @Accept json
 // @Produce json
@@ -210,7 +202,6 @@ func (handler *IdentityHandler) CompleteResetPassword(context *gin.Context) (any
 
 // ChangePassword handles password change
 // @Summary Change the current password
-// @Description Changes the password for the authenticated user
 // @Tags Account
 // @Accept json
 // @Produce json
@@ -233,7 +224,6 @@ func (handler *IdentityHandler) ChangePassword(context *gin.Context) (any, *prob
 
 // SignIn handles account sign-in
 // @Summary Sign in to an existing account
-// @Description Authenticates a user with email and password
 // @Tags Account
 // @Accept json
 // @Produce json
@@ -249,7 +239,6 @@ func (handler *IdentityHandler) SignIn(context *gin.Context) (any, *problems.Pro
 
 // SignInWithRefreshToken handles sign-in using a refresh token
 // @Summary Sign in using a refresh token
-// @Description Authenticates a user using a refresh token to obtain new access tokens
 // @Tags Account
 // @Accept json
 // @Produce json
@@ -265,7 +254,6 @@ func (handler *IdentityHandler) SignInWithRefreshToken(context *gin.Context) (an
 
 // SignOut handles account sign-out
 // @Summary Sign out of the current account
-// @Description Logs out the user and invalidates the session/token
 // @Tags Account
 // @Accept json
 // @Produce json
@@ -289,7 +277,6 @@ func (handler *IdentityHandler) SignOut(context *gin.Context) (any, *problems.Pr
 
 // GetCurrentAccount retrieves info for the authenticated user
 // @Summary Get current user account
-// @Description Retrieves details of the authenticated user
 // @Tags Account
 // @Accept json
 // @Produce json

@@ -10,7 +10,6 @@ export const fontMono = FontMono({
   variable: "--font-mono"
 });
 
-
 export const fontMontserrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-montserrat"

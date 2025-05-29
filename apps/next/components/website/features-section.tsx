@@ -136,7 +136,7 @@ export const FeaturesSection = () => {
                   <div
                     className={`${feature.color} ${feature.bgColor} mb-4 flex h-12 w-12 items-center justify-center rounded-lg`}
                   >
-                    <Icon icon={feature.icon} width={24} />
+                    <Icon icon={feature.icon} width="20" height="20" />
                   </div>
                   <h3 className="mb-2 font-montserrat text-xl font-semibold">{feature.title}</h3>
                   <p className="text-foreground-700 dark:text-foreground-500">

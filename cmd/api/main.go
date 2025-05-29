@@ -24,13 +24,16 @@ func main() {
 
 	// Register repositories in the application's container
 	api.Register(repositories.NewIdentityRepository)
+	api.Register(repositories.NewCategoryRepository)
 
 	// Register services in the application's container
 	api.Register(services.NewIdentityService)
+	api.Register(services.NewCategoryService)
 
 	// Register handlers in the application's container
 	api.Register(handlers.NewSwaggerHandler)
 	api.Register(handlers.NewIdentityHandler)
+	api.Register(handlers.NewCategoryHandler)
 
 	// Run the application (starts the server and handles requests)
 	api.Run()

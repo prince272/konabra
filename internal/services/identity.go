@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jinzhu/copier"
 	"github.com/prince272/konabra/internal/helpers"
-	models "github.com/prince272/konabra/internal/models/identity"
+	models "github.com/prince272/konabra/internal/models"
 	"github.com/prince272/konabra/internal/problems"
 	"github.com/prince272/konabra/internal/repositories"
 	"github.com/prince272/konabra/pkg/humanize"
@@ -184,12 +184,10 @@ func (service *IdentityService) CreateAccount(form CreateAccountForm) (*AccountW
 		EmailVerified:         false,
 		PhoneNumber:           form.GetPhoneNumber(),
 		PhoneNumberVerified:   false,
-		UserName:              service.identityRepository.GenerateName(form.FirstName, form.LastName),
+		UserName:              service.identityRepository.GenerateUserName(form.FirstName, form.LastName),
 		PasswordHash:          utils.MustHashPassword(form.Password),
 		HasPassword:           true,
 		SecurityStamp:         uuid.New().String(),
-		CreatedAt:             currentTime,
-		UpdatedAt:             currentTime,
 		LastActiveAt:          currentTime,
 		LastPasswordChangedAt: currentTime,
 	}
@@ -241,7 +239,7 @@ func (service *IdentityService) SignIn(form SignInForm) (*AccountWithTokenModel,
 	// Check if username exists
 	accountType := GetAccountType(form.Username)
 	var user *models.User
-	if user = service.identityRepository.FindUserByUsername(form.Username); user == nil {
+	if user = service.identityRepository.GetUserByUsername(form.Username); user == nil {
 		return nil, problems.NewValidationProblem(map[string]string{"username": fmt.Sprintf("%v does not exist.", humanize.Humanize(string(accountType), humanize.SentenceCase))})
 	}
 
@@ -296,7 +294,7 @@ func (service *IdentityService) SignInWithRefreshToken(form SignInWithRefreshTok
 	}
 
 	// Lookup user
-	user := service.identityRepository.FindUserById(claims["sub"].(string))
+	user := service.identityRepository.GetUserById(claims["sub"].(string))
 	if user == nil {
 		return nil, problems.NewValidationProblem(map[string]string{"refreshToken": "User not found."})
 	}
@@ -356,7 +354,7 @@ func (service *IdentityService) SignOut(userId string, form SignOutForm) *proble
 }
 
 func (service *IdentityService) GetAccountByUserId(userId string) (*AccountModel, *problems.Problem) {
-	user := service.identityRepository.FindUserById(userId)
+	user := service.identityRepository.GetUserById(userId)
 
 	if user == nil {
 		return nil, problems.NewProblem(http.StatusNotFound, "User not found.")
@@ -378,7 +376,7 @@ func (service *IdentityService) VerifyAccount(form VerifyAccountForm) *problems.
 	}
 
 	accountType := GetAccountType(form.Username)
-	user := service.identityRepository.FindUserByUsername(form.Username)
+	user := service.identityRepository.GetUserByUsername(form.Username)
 	if user == nil {
 		return problems.NewValidationProblem(map[string]string{"username": fmt.Sprintf("%v does not exist.", humanize.Humanize(string(accountType), humanize.SentenceCase))})
 	}
@@ -416,7 +414,7 @@ func (service *IdentityService) CompleteVerifyAccount(form CompleteVerifyAccount
 	}
 
 	accountType := GetAccountType(form.Username)
-	user := service.identityRepository.FindUserByUsername(form.Username)
+	user := service.identityRepository.GetUserByUsername(form.Username)
 	if user == nil {
 		return problems.NewValidationProblem(map[string]string{"username": fmt.Sprintf("%v does not exist.", humanize.Humanize(string(accountType), humanize.SentenceCase))})
 	}
@@ -460,7 +458,7 @@ func (service *IdentityService) CompleteVerifyAccount(form CompleteVerifyAccount
 }
 
 func (service *IdentityService) DeleteAccount(userId string) *problems.Problem {
-	user := service.identityRepository.FindUserById(userId)
+	user := service.identityRepository.GetUserById(userId)
 
 	if user == nil {
 		return problems.NewProblem(http.StatusNotFound, "User not found.")
@@ -480,7 +478,7 @@ func (service *IdentityService) ChangeAccount(userId string, form ChangeAccountF
 	}
 
 	accountType := GetAccountType(form.NewUsername)
-	user := service.identityRepository.FindUserById(userId)
+	user := service.identityRepository.GetUserById(userId)
 
 	if user == nil {
 		return problems.NewProblem(http.StatusNotFound, "User not found.")
@@ -524,7 +522,7 @@ func (service *IdentityService) CompleteChangeAccount(userId string, form Comple
 	}
 
 	accountType := GetAccountType(form.NewUsername)
-	user := service.identityRepository.FindUserById(userId)
+	user := service.identityRepository.GetUserById(userId)
 
 	if user == nil {
 		return problems.NewProblem(http.StatusNotFound, "User not found.")
@@ -580,7 +578,7 @@ func (service *IdentityService) ResetPassword(form ResetPasswordForm) *problems.
 	}
 
 	accountType := GetAccountType(form.Username)
-	user := service.identityRepository.FindUserByUsername(form.Username)
+	user := service.identityRepository.GetUserByUsername(form.Username)
 
 	if user == nil {
 		return problems.NewValidationProblem(map[string]string{"username": fmt.Sprintf("%v does not exist.", humanize.Humanize(string(accountType), humanize.SentenceCase))})
@@ -618,7 +616,7 @@ func (service *IdentityService) CompleteResetPassword(form CompleteResetPassword
 	}
 
 	accountType := GetAccountType(form.Username)
-	user := service.identityRepository.FindUserByUsername(form.Username)
+	user := service.identityRepository.GetUserByUsername(form.Username)
 
 	if user == nil {
 		return problems.NewValidationProblem(map[string]string{"username": fmt.Sprintf("%v does not exist.", humanize.Humanize(string(accountType), humanize.SentenceCase))})
@@ -665,7 +663,7 @@ func (service *IdentityService) ChangePassword(userId string, form ChangePasswor
 		return problems.FromError(err)
 	}
 
-	user := service.identityRepository.FindUserById(userId)
+	user := service.identityRepository.GetUserById(userId)
 
 	if user == nil {
 		return problems.NewProblem(http.StatusNotFound, "User not found.")

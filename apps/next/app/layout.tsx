@@ -4,12 +4,12 @@ import "@/styles/globals.css";
 import { Metadata, Viewport } from "next";
 import { cookies as getCookiesStore } from "next/headers";
 import { cn } from "@heroui/theme";
-import { Providers } from "../components/providers";
 import { ResetPasswordModalRouter } from "../components/account/reset-password-modal";
 import { SettingsModalRouter } from "../components/account/settings-modal";
+import { SignOutModalRouter } from "../components/account/sign-out-modal";
 import { SignInModalRouter } from "../components/account/signin-modal";
 import { SignUpModalRouter } from "../components/account/signup-modal";
-import { SignOutModalRouter } from "../components/account/sign-out-modal";
+import { Providers } from "../components/providers";
 
 export const metadata: Metadata = {
   title: {
@@ -39,7 +39,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html suppressHydrationWarning lang="en">
       <head />
-      <body className={cn("min-h-screen bg-background font-sans antialiased", fontSans.variable, fontMontserrat.variable)}>
+      <body
+        className={cn(
+          "min-h-screen bg-background font-sans antialiased",
+          fontSans.variable,
+          fontMontserrat.variable
+        )}
+      >
         <Providers cookies={cookies} themeProps={{ attribute: "class", defaultTheme: "dark" }}>
           {children}
           <SignUpModalRouter />
