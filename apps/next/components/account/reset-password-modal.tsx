@@ -14,7 +14,7 @@ import { Controller, useForm } from "react-hook-form";
 import { identityService } from "@/services";
 import { CompleteResetPasswordForm } from "@/services/identity-service";
 import { useBreakpoint, useTimer } from "@/hooks";
-import { useModalRouter } from "@/components/common/models";
+import { useModalRouter } from "@/components/common/modals";
 
 export default function ResetPasswordModal({
   isOpen,

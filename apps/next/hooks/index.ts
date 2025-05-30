@@ -8,3 +8,4 @@ export * from "./use-timer";
 export * from "./use-window-size";
 export * from "./use-interval";
 export * from "./use-measure";
+export * from "./use-async-memo";

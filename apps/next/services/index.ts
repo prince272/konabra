@@ -1,7 +1,8 @@
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosResponse, isAxiosError } from "axios";
 import PQueue from "p-queue";
 import Cookies from "universal-cookie";
-import { AccountWithTokenModel, IdentityService } from "./identity-service";
+import { CategoryService } from "./category-service";
+import { AccountWithToken, IdentityService } from "./identity-service";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -23,7 +24,7 @@ const refreshQueue = new PQueue({ concurrency: 1 });
 api.interceptors.request.use(
   (config) => {
     try {
-      const currentAccount: AccountWithTokenModel | undefined = cookies.get("current-account");
+      const currentAccount: AccountWithToken | undefined = cookies.get("current-account");
       if (currentAccount?.accessToken) {
         config.headers.Authorization = `Bearer ${currentAccount.accessToken}`;
       }
@@ -43,7 +44,7 @@ api.interceptors.response.use(
 
     // Only handle 401 errors and avoid infinite retry loops
     if (error.response?.status === 401 && !originalRequest._retry) {
-      const currentAccount: AccountWithTokenModel | undefined = cookies.get("current-account");
+      const currentAccount: AccountWithToken | undefined = cookies.get("current-account");
 
       if (!currentAccount?.refreshToken) {
         console.error("No refresh token available. Redirecting to sign-in.");
@@ -63,7 +64,7 @@ api.interceptors.response.use(
       try {
         // Execute refresh request in queue to prevent concurrent refreshes
         const response = (await refreshQueue.add(() =>
-          axios.post<AccountWithTokenModel>(
+          axios.post<AccountWithToken>(
             `/account/signin/refresh`,
             {
               refreshToken: currentAccount.refreshToken
@@ -79,7 +80,7 @@ api.interceptors.response.use(
               }
             }
           )
-        )) as AxiosResponse<AccountWithTokenModel, any>;
+        )) as AxiosResponse<AccountWithToken, any>;
 
         const newAccount = response.data;
 
@@ -110,6 +111,56 @@ api.interceptors.response.use(
   }
 );
 
-const identityService = new IdentityService(api);
+export const identityService = new IdentityService(api);
+export const categoryService = new CategoryService(api);
 
-export { api, identityService };
+export type Problem = {
+  type: string;
+  message: string;
+  status: number;
+  errors: Record<string, string>;
+  reason: string;
+};
+
+const DEFAULT_PROBLEM: Problem = {
+  type: "https://httpstatuses.com",
+  message: "An unknown error occurred.",
+  status: -999,
+  errors: {},
+  reason: "Unknown error"
+};
+
+const NETWORK_ERROR: Problem = {
+  ...DEFAULT_PROBLEM,
+  message: "A network error occurred.",
+  status: -1,
+  reason: "Network error"
+};
+
+export function parseProblem(error: unknown): Problem {
+  if (!isAxiosError(error)) {
+    return DEFAULT_PROBLEM;
+  }
+
+  const axiosError = error as AxiosError<any>;
+  const { response } = axiosError;
+
+  if (!response) {
+    return NETWORK_ERROR;
+  }
+
+  const { data } = response;
+
+  if (data && typeof data === "object") {
+    // Use nullish coalescing to default missing fields
+    return {
+      type: (data.type as string) ?? DEFAULT_PROBLEM.type,
+      message: (data.message as string) ?? DEFAULT_PROBLEM.message,
+      status: (data.status as number) ?? DEFAULT_PROBLEM.status,
+      errors: (data.errors as Record<string, any>) ?? DEFAULT_PROBLEM.errors,
+      reason: (data.reason as string) ?? DEFAULT_PROBLEM.reason
+    };
+  }
+
+  return DEFAULT_PROBLEM;
+}

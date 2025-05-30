@@ -1,6 +1,5 @@
 import { AxiosInstance } from "axios";
-import { Problem } from "./types/problem";
-import { parseProblem } from "./utils";
+import { parseProblem, Problem } from ".";
 
 export type CreateAccountForm = {
   firstName: string;
@@ -11,7 +10,7 @@ export type CreateAccountForm = {
   validateOnly: boolean;
 };
 
-export type AccountModel = {
+export type Account = {
   id: string;
   firstName: string;
   lastName: string;
@@ -33,13 +32,13 @@ export type AccountModel = {
   };
 };
 
-export type AccountWithTokenModel = {
+export type AccountWithToken = {
   tokenType: string;
   accessToken: string;
   accessTokenExpiresAt: string;
   refreshToken: string;
   refreshTokenExpiresAt: string;
-} & AccountModel;
+} & Account;
 
 export type SignInForm = {
   username: string;
@@ -86,7 +85,7 @@ export class IdentityService {
 
   public async createAccount(
     data: CreateAccountForm
-  ): Promise<readonly [AccountWithTokenModel, Problem?]> {
+  ): Promise<readonly [AccountWithToken, Problem?]> {
     try {
       const response = await this.api.post("/account/create", data);
       return [response.data, undefined] as const;
@@ -135,7 +134,7 @@ export class IdentityService {
     }
   }
 
-  public async signIn(data: SignInForm): Promise<readonly [AccountWithTokenModel, Problem?]> {
+  public async signIn(data: SignInForm): Promise<readonly [AccountWithToken, Problem?]> {
     try {
       const response = await this.api.post("/account/signin", data);
       return [response.data, undefined] as const;
@@ -173,7 +172,7 @@ export class IdentityService {
     }
   }
 
-  public async getCurrentAccount(): Promise<readonly [AccountModel, Problem?]> {
+  public async getCurrentAccount(): Promise<readonly [Account, Problem?]> {
     try {
       const response = await this.api.get("/account/current");
       return [response.data, undefined] as const;

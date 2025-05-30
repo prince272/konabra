@@ -10,7 +10,7 @@ import { Icon } from "@iconify-icon/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Controller, useForm } from "react-hook-form";
 import { useBreakpoint } from "@/hooks";
-import { useModalRouter } from "@/components/common/models";
+import { useModalRouter } from "@/components/common/modals";
 
 interface ContactUsForm {
   name: string;

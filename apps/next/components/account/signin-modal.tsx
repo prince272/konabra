@@ -17,7 +17,7 @@ import { identityService } from "@/services";
 import { SignInForm } from "@/services/identity-service";
 import { useAccountState } from "@/states";
 import { useBreakpoint } from "@/hooks";
-import { useModalRouter } from "@/components/common/models";
+import { useModalRouter } from "@/components/common/modals";
 import { InputPhone } from "../common/input-phone";
 
 export default function SignInModal({

@@ -22,11 +22,11 @@ func NewIdentityHandler(router *gin.Engine, jwtHelper *helpers.JwtHelper, identi
 
 	identityGroup := router.Group("/account")
 	{
-		identityGroup.POST("/create", handler.handle(handler.CreateAccount))
-		identityGroup.POST("/signin", handler.handle(handler.SignIn))
-		identityGroup.POST("/signin/refresh", handler.handle(handler.SignInWithRefreshToken))
+		identityGroup.POST("/create", handler.handleWithData(handler.CreateAccount))
+		identityGroup.POST("/signin", handler.handleWithData(handler.SignIn))
+		identityGroup.POST("/signin/refresh", handler.handleWithData(handler.SignInWithRefreshToken))
 		identityGroup.POST("/signout", jwtHelper.RequireAuth(), handler.handle(handler.SignOut))
-		identityGroup.GET("/current", jwtHelper.RequireAuth(), handler.handle(handler.GetCurrentAccount))
+		identityGroup.GET("/current", jwtHelper.RequireAuth(), handler.handleWithData(handler.GetCurrentAccount))
 		identityGroup.DELETE("/current", jwtHelper.RequireAuth(), handler.handle(handler.DeleteCurrentAccount))
 		identityGroup.POST("/verify", handler.handle(handler.VerifyAccount))
 		identityGroup.POST("/verify/complete", handler.handle(handler.CompleteVerifyAccount))
@@ -41,7 +41,7 @@ func NewIdentityHandler(router *gin.Engine, jwtHelper *helpers.JwtHelper, identi
 }
 
 // handle wraps handler functions for consistent error handling
-func (handler *IdentityHandler) handle(handlerFunc func(*gin.Context) (any, *problems.Problem)) gin.HandlerFunc {
+func (handler *IdentityHandler) handleWithData(handlerFunc func(*gin.Context) (any, *problems.Problem)) gin.HandlerFunc {
 	return func(context *gin.Context) {
 		response, problem := handlerFunc(context)
 		if problem != nil {
@@ -49,6 +49,17 @@ func (handler *IdentityHandler) handle(handlerFunc func(*gin.Context) (any, *pro
 			return
 		}
 		context.JSON(http.StatusOK, response)
+	}
+}
+
+func (handler *IdentityHandler) handle(handlerFunc func(*gin.Context) *problems.Problem) gin.HandlerFunc {
+	return func(context *gin.Context) {
+		problem := handlerFunc(context)
+		if problem != nil {
+			context.JSON(problem.Status, problem)
+			return
+		}
+		context.JSON(http.StatusOK, nil)
 	}
 }
 
@@ -74,15 +85,13 @@ func (handler *IdentityHandler) CreateAccount(context *gin.Context) (any, *probl
 // @Produce json
 // @Param body body services.VerifyAccountForm true "Verification details"
 // @Router /account/verify [post]
-func (handler *IdentityHandler) VerifyAccount(context *gin.Context) (any, *problems.Problem) {
+func (handler *IdentityHandler) VerifyAccount(context *gin.Context) *problems.Problem {
 	var form services.VerifyAccountForm
 	if err := context.ShouldBindJSON(&form); err != nil {
-		return nil, problems.FromError(err)
+		return problems.FromError(err)
 	}
-	if problem := handler.identityService.VerifyAccount(form); problem != nil {
-		return nil, problem
-	}
-	return gin.H{}, nil
+
+	return handler.identityService.VerifyAccount(form)
 }
 
 // CompleteVerifyAccount handles account verification completion
@@ -92,15 +101,13 @@ func (handler *IdentityHandler) VerifyAccount(context *gin.Context) (any, *probl
 // @Produce json
 // @Param body body services.CompleteVerifyAccountForm true "Verification completion details"
 // @Router /account/verify/complete [post]
-func (handler *IdentityHandler) CompleteVerifyAccount(context *gin.Context) (any, *problems.Problem) {
+func (handler *IdentityHandler) CompleteVerifyAccount(context *gin.Context) *problems.Problem {
 	var form services.CompleteVerifyAccountForm
 	if err := context.ShouldBindJSON(&form); err != nil {
-		return nil, problems.FromError(err)
+		return problems.FromError(err)
 	}
-	if problem := handler.identityService.CompleteVerifyAccount(form); problem != nil {
-		return nil, problem
-	}
-	return gin.H{}, nil
+
+	return handler.identityService.CompleteVerifyAccount(form)
 }
 
 // ChangeAccount handles account change initiation
@@ -111,18 +118,16 @@ func (handler *IdentityHandler) CompleteVerifyAccount(context *gin.Context) (any
 // @Security BearerAuth
 // @Param body body services.ChangeAccountForm true "Account change details"
 // @Router /account/change [post]
-func (handler *IdentityHandler) ChangeAccount(context *gin.Context) (any, *problems.Problem) {
+func (handler *IdentityHandler) ChangeAccount(context *gin.Context) *problems.Problem {
 	claims := context.MustGet(constants.ContextClaimsKey).(map[string]any)
 	userId := claims["sub"].(string)
 
 	var form services.ChangeAccountForm
 	if err := context.ShouldBindJSON(&form); err != nil {
-		return nil, problems.FromError(err)
+		return problems.FromError(err)
 	}
-	if problem := handler.identityService.ChangeAccount(userId, form); problem != nil {
-		return nil, problem
-	}
-	return gin.H{}, nil
+
+	return handler.identityService.ChangeAccount(userId, form)
 }
 
 // CompleteChangeAccount handles account change completion
@@ -133,18 +138,16 @@ func (handler *IdentityHandler) ChangeAccount(context *gin.Context) (any, *probl
 // @Security BearerAuth
 // @Param body body services.CompleteChangeAccountForm true "Account change completion details"
 // @Router /account/change/complete [post]
-func (handler *IdentityHandler) CompleteChangeAccount(context *gin.Context) (any, *problems.Problem) {
+func (handler *IdentityHandler) CompleteChangeAccount(context *gin.Context) *problems.Problem {
 	claims := context.MustGet(constants.ContextClaimsKey).(map[string]any)
 	userId := claims["sub"].(string)
 
 	var form services.CompleteChangeAccountForm
 	if err := context.ShouldBindJSON(&form); err != nil {
-		return nil, problems.FromError(err)
+		return problems.FromError(err)
 	}
-	if problem := handler.identityService.CompleteChangeAccount(userId, form); problem != nil {
-		return nil, problem
-	}
-	return gin.H{}, nil
+
+	return handler.identityService.CompleteChangeAccount(userId, form)
 }
 
 // DeleteCurrentAccount handles account deletion
@@ -154,13 +157,11 @@ func (handler *IdentityHandler) CompleteChangeAccount(context *gin.Context) (any
 // @Produce json
 // @Security BearerAuth
 // @Router /account/current [delete]
-func (handler *IdentityHandler) DeleteCurrentAccount(context *gin.Context) (any, *problems.Problem) {
+func (handler *IdentityHandler) DeleteCurrentAccount(context *gin.Context) *problems.Problem {
 	claims := context.MustGet(constants.ContextClaimsKey).(map[string]any)
 	userId := claims["sub"].(string)
-	if problem := handler.identityService.DeleteAccount(userId); problem != nil {
-		return nil, problem
-	}
-	return gin.H{}, nil
+
+	return handler.identityService.DeleteAccount(userId)
 }
 
 // ResetPassword handles password reset initiation
@@ -170,16 +171,13 @@ func (handler *IdentityHandler) DeleteCurrentAccount(context *gin.Context) (any,
 // @Produce json
 // @Param body body services.ResetPasswordForm true "Password reset details"
 // @Router /account/password/reset [post]
-func (handler *IdentityHandler) ResetPassword(context *gin.Context) (any, *problems.Problem) {
+func (handler *IdentityHandler) ResetPassword(context *gin.Context) *problems.Problem {
 	var form services.ResetPasswordForm
 	if err := context.ShouldBindJSON(&form); err != nil {
-		return nil, problems.FromError(err)
+		return problems.FromError(err)
 	}
 
-	if problem := handler.identityService.ResetPassword(form); problem != nil {
-		return nil, problem
-	}
-	return gin.H{}, nil
+	return handler.identityService.ResetPassword(form)
 }
 
 // CompleteResetPassword handles password reset completion
@@ -189,15 +187,13 @@ func (handler *IdentityHandler) ResetPassword(context *gin.Context) (any, *probl
 // @Produce json
 // @Param body body services.CompleteResetPasswordForm true "Password reset completion details"
 // @Router /account/password/reset/complete [post]
-func (handler *IdentityHandler) CompleteResetPassword(context *gin.Context) (any, *problems.Problem) {
+func (handler *IdentityHandler) CompleteResetPassword(context *gin.Context) *problems.Problem {
 	var form services.CompleteResetPasswordForm
 	if err := context.ShouldBindJSON(&form); err != nil {
-		return nil, problems.FromError(err)
+		return problems.FromError(err)
 	}
-	if problem := handler.identityService.CompleteResetPassword(form); problem != nil {
-		return nil, problem
-	}
-	return gin.H{}, nil
+
+	return handler.identityService.CompleteResetPassword(form)
 }
 
 // ChangePassword handles password change
@@ -208,18 +204,16 @@ func (handler *IdentityHandler) CompleteResetPassword(context *gin.Context) (any
 // @Security BearerAuth
 // @Param body body services.ChangePasswordForm true "Password change details"
 // @Router /account/password/change [post]
-func (handler *IdentityHandler) ChangePassword(context *gin.Context) (any, *problems.Problem) {
+func (handler *IdentityHandler) ChangePassword(context *gin.Context) *problems.Problem {
 	claims := context.MustGet(constants.ContextClaimsKey).(map[string]any)
 	userId := claims["sub"].(string)
 
 	var form services.ChangePasswordForm
 	if err := context.ShouldBindJSON(&form); err != nil {
-		return nil, problems.FromError(err)
+		return problems.FromError(err)
 	}
-	if problem := handler.identityService.ChangePassword(userId, form); problem != nil {
-		return nil, problem
-	}
-	return gin.H{}, nil
+
+	return handler.identityService.ChangePassword(userId, form)
 }
 
 // SignIn handles account sign-in
@@ -234,6 +228,7 @@ func (handler *IdentityHandler) SignIn(context *gin.Context) (any, *problems.Pro
 	if err := context.ShouldBindJSON(&form); err != nil {
 		return nil, problems.FromError(err)
 	}
+
 	return handler.identityService.SignIn(form)
 }
 
@@ -249,6 +244,7 @@ func (handler *IdentityHandler) SignInWithRefreshToken(context *gin.Context) (an
 	if err := context.ShouldBindJSON(&form); err != nil {
 		return nil, problems.FromError(err)
 	}
+
 	return handler.identityService.SignInWithRefreshToken(form)
 }
 
@@ -259,20 +255,16 @@ func (handler *IdentityHandler) SignInWithRefreshToken(context *gin.Context) (an
 // @Produce json
 // @Param body body services.SignOutForm true "Sign-out request details"
 // @Router /account/signout [post]
-func (handler *IdentityHandler) SignOut(context *gin.Context) (any, *problems.Problem) {
+func (handler *IdentityHandler) SignOut(context *gin.Context) *problems.Problem {
 	claims := context.MustGet(constants.ContextClaimsKey).(map[string]any)
 	userId := claims["sub"].(string)
 
 	var form services.SignOutForm
 	if err := context.ShouldBindJSON(&form); err != nil {
-		return nil, problems.FromError(err)
+		return problems.FromError(err)
 	}
 
-	if problem := handler.identityService.SignOut(userId, form); problem != nil {
-		return nil, problem
-	}
-
-	return gin.H{}, nil
+	return handler.identityService.SignOut(userId, form)
 }
 
 // GetCurrentAccount retrieves info for the authenticated user

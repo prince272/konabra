@@ -13,7 +13,7 @@ import { identityService } from "@/services";
 import { SignOutForm } from "@/services/identity-service";
 import { useAccountState } from "@/states";
 import { useBreakpoint } from "@/hooks";
-import { useModalRouter } from "@/components/common/models";
+import { useModalRouter } from "@/components/common/modals";
 
 export default function SignOutModal({
   isOpen,

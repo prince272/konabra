@@ -399,6 +399,35 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {}
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Create a new category",
+                "parameters": [
+                    {
+                        "description": "Category creation form",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.CreateCategoryForm"
+                        }
+                    }
+                ],
+                "responses": {}
             }
         },
         "/categories/all": {
@@ -455,6 +484,69 @@ const docTemplate = `{
                     "Categories"
                 ],
                 "summary": "Get category by Id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category Id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Update an existing category",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category Id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Category update form",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.UpdateCategoryForm"
+                        }
+                    }
+                ],
+                "responses": {}
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Delete a category by Id",
                 "parameters": [
                     {
                         "type": "string",
@@ -580,6 +672,22 @@ const docTemplate = `{
                 }
             }
         },
+        "services.CreateCategoryForm": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 1024
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 256
+                }
+            }
+        },
         "services.ResetPasswordForm": {
             "type": "object",
             "required": [
@@ -630,6 +738,22 @@ const docTemplate = `{
                 },
                 "refreshToken": {
                     "type": "string"
+                }
+            }
+        },
+        "services.UpdateCategoryForm": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 1024
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 256
                 }
             }
         },

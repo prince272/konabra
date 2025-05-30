@@ -7,7 +7,7 @@ import { ToastProvider } from "@heroui/toast";
 import type { ThemeProviderProps } from "next-themes";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { CookiesProvider, useBreakpoint } from "@/hooks";
-import { ModalQueueProvider } from "@/components/common/models";
+import { ModalQueueProvider } from "@/components/common/modals";
 
 export interface ProvidersProps {
   children: React.ReactNode;

@@ -77,6 +77,17 @@ definitions:
     - password
     - username
     type: object
+  services.CreateCategoryForm:
+    properties:
+      description:
+        maxLength: 1024
+        type: string
+      name:
+        maxLength: 256
+        type: string
+    required:
+    - name
+    type: object
   services.ResetPasswordForm:
     properties:
       username:
@@ -111,6 +122,17 @@ definitions:
         type: string
     required:
     - refreshToken
+    type: object
+  services.UpdateCategoryForm:
+    properties:
+      description:
+        maxLength: 1024
+        type: string
+      name:
+        maxLength: 256
+        type: string
+    required:
+    - name
     type: object
   services.VerifyAccountForm:
     properties:
@@ -372,7 +394,42 @@ paths:
       summary: Get paginated categories
       tags:
       - Categories
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Category creation form
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateCategoryForm'
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Create a new category
+      tags:
+      - Categories
   /categories/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Category Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Delete a category by Id
+      tags:
+      - Categories
     get:
       consumes:
       - application/json
@@ -388,6 +445,29 @@ paths:
       security:
       - BearerAuth: []
       summary: Get category by Id
+      tags:
+      - Categories
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Category Id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Category update form
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/services.UpdateCategoryForm'
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Update an existing category
       tags:
       - Categories
   /categories/all:

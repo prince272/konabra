@@ -15,13 +15,13 @@ import { Controller, useForm } from "react-hook-form";
 import { formatInternationalNumber } from "@/utils";
 import { identityService } from "@/services";
 import {
-  AccountWithTokenModel,
+  AccountWithToken,
   CompleteChangeAccountForm,
   CompleteVerifyAccountForm
 } from "@/services/identity-service";
 import { useAccountState } from "@/states";
 import { useBreakpoint, useHashState, useInterval, useTimer } from "@/hooks";
-import { useModalRouter } from "@/components/common/models";
+import { useModalRouter } from "@/components/common/modals";
 
 interface ViewContextType {
   title: string;
@@ -292,7 +292,7 @@ function CreateAccountView(
             const [updatedAccount] = await identityService.getCurrentAccount();
             if (updatedAccount) {
               setAccount(
-                (prevAccount) => ({ ...prevAccount, ...updatedAccount }) as AccountWithTokenModel
+                (prevAccount) => ({ ...prevAccount, ...updatedAccount }) as AccountWithToken
               );
             }
 

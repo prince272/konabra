@@ -1,8 +1,8 @@
-import { AccountWithTokenModel } from "@/services/identity-service";
+import { AccountWithToken } from "@/services/identity-service";
 import { useCookieState } from "@/hooks";
 
 export const useAccountState = () =>
-  useCookieState<AccountWithTokenModel | null>("current-account", null);
+  useCookieState<AccountWithToken | null>("current-account", null);
 
 export const useAppState = () =>
   useCookieState<{ theme: string; language: string }>("app-state", {
