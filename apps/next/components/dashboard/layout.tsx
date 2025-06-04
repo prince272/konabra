@@ -8,7 +8,9 @@ import { Navbar, NavbarContent, NavbarItem } from "@heroui/navbar";
 import { Tooltip } from "@heroui/tooltip";
 import { Icon } from "@iconify-icon/react";
 import { stringifyPath } from "@/utils";
+import { categoryService } from "@/services";
 import { useAccountState } from "@/states";
+import { categoryStore } from "@/states/categories";
 import { useBreakpoint, useHashState } from "@/hooks";
 import { Sidebar } from "./sidebar";
 
@@ -57,6 +59,18 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
       router.replace(signinUrl);
     }
   }, [currentAccount, returnUrl]);
+
+  useEffect(() => {
+    categoryStore.load(async () => {
+      const [categories, problem] = await categoryService.getCategories();
+      if (problem) {
+        console.error("Failed to load categories:", problem);
+        return [];
+      }
+
+      return categories;
+    });
+  }, []);
 
   if (!currentAccount) {
     return null;

@@ -9,40 +9,30 @@ import {
   useContext,
   useEffect,
   useRef,
-  useState
+  useState,
 } from "react";
+import { BehaviorSubject } from "rxjs";
+import { distinctUntilChanged } from "rxjs/operators";
 import { isEqual } from "lodash";
-
 import Cookies from "universal-cookie";
 
-// Centralized event emitter for cookie state changes
-const cookieListeners: { [key: string]: Array<(value: any) => void> } = {};
-
-function subscribeToCookie(key: string, callback: (value: any) => void) {
-  if (!cookieListeners[key]) {
-    cookieListeners[key] = [];
-  }
-  cookieListeners[key].push(callback);
-  return () => {
-    cookieListeners[key] = cookieListeners[key].filter((cb) => cb !== callback);
-  };
-}
-
-function emitCookieChange(key: string, value: any) {
-  if (cookieListeners[key]) {
-    requestAnimationFrame(() => {
-      cookieListeners[key].forEach((callback) => callback(value));
-    });
-  }
-}
-
+// ----- TYPES -----
 type CookiesContextValue = string | object | null | undefined;
 
+type CookieOptions = {
+  path?: string;
+  expires?: Date;
+  maxAge?: number;
+  secure?: boolean;
+  sameSite?: "strict" | "lax" | "none";
+};
+
+// ----- CONTEXT PROVIDER -----
 const CookiesContext = createContext<CookiesContextValue>(undefined);
 
 export const CookiesProvider = ({
   children,
-  value
+  value,
 }: {
   children: ReactNode;
   value?: CookiesContextValue;
@@ -50,6 +40,7 @@ export const CookiesProvider = ({
   return <CookiesContext.Provider value={value}>{children}</CookiesContext.Provider>;
 };
 
+// ----- COOKIES HOOK -----
 export const useCookies = () => {
   const context = useContext(CookiesContext);
   const cookiesRef = useRef<Cookies>();
@@ -61,14 +52,24 @@ export const useCookies = () => {
   return cookiesRef.current;
 };
 
-type CookieOptions = {
-  path?: string;
-  expires?: Date;
-  maxAge?: number;
-  secure?: boolean;
-  sameSite?: "strict" | "lax" | "none";
-};
+// ----- COOKIE SUBJECT REGISTRY -----
+const cookieSubjects: { [key: string]: BehaviorSubject<any> } = {};
 
+function getCookieSubject<S>(key: string, initialValue: S): BehaviorSubject<S> {
+  if (!cookieSubjects[key]) {
+    cookieSubjects[key] = new BehaviorSubject<S>(initialValue);
+  }
+  return cookieSubjects[key] as BehaviorSubject<S>;
+}
+
+export function clearCookieSubject(key: string) {
+  if (cookieSubjects[key]) {
+    cookieSubjects[key].complete();
+    delete cookieSubjects[key];
+  }
+}
+
+// ----- useCookieState HOOK -----
 export function useCookieState<S>(
   key: string,
   initialState: S | (() => S),
@@ -78,54 +79,48 @@ export function useCookieState<S>(
   const optionsRef = useRef(options);
   const isMountedRef = useRef(false);
 
-  const [state, setState] = useState<S>(() => {
+  const initial = useRef(() => {
     const cookieValue = cookies.get(key);
-    // Handle null/undefined cookie values
     if (cookieValue !== undefined && cookieValue !== null) {
       return cookieValue;
     }
     return typeof initialState === "function" ? (initialState as () => S)() : initialState;
   });
 
-  // Sync state with external cookie updates
-  useEffect(() => {
-    const unsubscribe = subscribeToCookie(key, (newValue) => {
-      if (isMountedRef.current) {
-        setState((prevState) => (isEqual(prevState, newValue) ? prevState : newValue));
-      }
-    });
-    return unsubscribe;
-  }, [key]);
+  const subject = getCookieSubject<S>(key, initial.current());
+  const [state, setState] = useState<S>(subject.value);
 
-  // Update cookie when state changes
+  // Subscribe to subject updates
+  useEffect(() => {
+    const sub = subject.pipe(distinctUntilChanged(isEqual)).subscribe(setState);
+    return () => sub.unsubscribe();
+  }, [subject]);
+
+  // Sync cookie on state change
   useEffect(() => {
     if (isMountedRef.current) {
-      // Serialize state to ensure it's safe for cookies
       const serializedState =
         typeof state === "object" && state !== null ? JSON.parse(JSON.stringify(state)) : state;
       cookies.set(key, serializedState, optionsRef.current || { path: "/" });
-      emitCookieChange(key, serializedState);
+      subject.next(serializedState);
     } else {
       isMountedRef.current = true;
     }
-  }, [key, state, cookies]);
+  }, [key, state]);
 
+  // Updater function
   const setCookieState: Dispatch<SetStateAction<S>> = useCallback(
     (action) => {
-      setState((prevState) => {
-        const newValue =
-          typeof action === "function" ? (action as (prevState: S) => S)(prevState) : action;
-        // Serialize newValue to ensure it's safe for cookies
-        const serializedValue =
-          typeof newValue === "object" && newValue !== null
-            ? JSON.parse(JSON.stringify(newValue))
-            : newValue;
-        cookies.set(key, serializedValue, optionsRef.current || { path: "/" });
-        emitCookieChange(key, serializedValue);
-        return serializedValue;
-      });
+      const newValue =
+        typeof action === "function" ? (action as (prev: S) => S)(subject.value) : action;
+      const serializedValue =
+        typeof newValue === "object" && newValue !== null
+          ? JSON.parse(JSON.stringify(newValue))
+          : newValue;
+      cookies.set(key, serializedValue, optionsRef.current || { path: "/" });
+      subject.next(serializedValue);
     },
-    [key, cookies]
+    [subject, key, cookies]
   );
 
   return [state, setCookieState];

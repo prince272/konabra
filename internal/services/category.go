@@ -9,6 +9,7 @@ import (
 	"github.com/prince272/konabra/internal/models"
 	"github.com/prince272/konabra/internal/problems"
 	"github.com/prince272/konabra/internal/repositories"
+	"github.com/prince272/konabra/utils"
 	"go.uber.org/zap"
 )
 
@@ -66,7 +67,7 @@ func (service *CategoryService) CreateCategory(form CreateCategoryForm) (*Catego
 	}
 
 	category.Id = uuid.New().String()
-	category.ShortName = service.categoryRepository.GenerateCategoryShortName(form.Name)
+	category.ShortName = utils.GenerateSlug([]string{form.Name}, service.categoryRepository.CategoryShortNameExists)
 	err := service.categoryRepository.CreateCategory(category)
 
 	if err != nil {
@@ -105,7 +106,15 @@ func (service *CategoryService) UpdateCategory(id string, form UpdateCategoryFor
 		return nil, problems.FromError(err)
 	}
 
-	category.ShortName = service.categoryRepository.GenerateCategoryShortName(form.Name)
+	formShortName := utils.GenerateSlug([]string{form.Name})
+
+	if exists := service.categoryRepository.CategoryShortNameExists(formShortName); exists {
+		if category.ShortName != formShortName {
+			category.ShortName = utils.GenerateSlug([]string{form.Name}, service.categoryRepository.CategoryShortNameExists)
+		}
+	}
+
+	category.ShortName = formShortName
 	err := service.categoryRepository.UpdateCategory(category)
 
 	if err != nil {

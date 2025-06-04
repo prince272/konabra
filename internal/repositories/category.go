@@ -3,7 +3,6 @@ package repositories
 import (
 	"errors"
 	"fmt"
-	"regexp"
 	"strings"
 	"time"
 
@@ -85,53 +84,6 @@ func (repository *CategoryRepository) CategoryShortNameExists(name string) bool 
 	}
 
 	return count > 0
-}
-
-func (repository *CategoryRepository) GenerateCategoryShortName(names ...string) string {
-	var combinedParts []string
-	for _, name := range names {
-		if name != "" {
-			combinedParts = append(combinedParts, name)
-		}
-	}
-
-	baseName := ""
-	if len(combinedParts) > 0 {
-		baseName = strings.Join(combinedParts, " ")
-	}
-
-	// Convert to lowercase only for filtering
-	validCharsRegex := regexp.MustCompile(`[^a-zA-Z0-9\- ]+`)
-	spaceToHyphenRegex := regexp.MustCompile(`[ \/_]+`)
-
-	count := 1
-	var shortName string
-
-	for {
-		var nameWithCount string
-		if count == 1 {
-			nameWithCount = baseName
-		} else {
-			nameWithCount = fmt.Sprintf("%v %d", baseName, count)
-		}
-
-		// Clean unwanted characters but retain original case
-		cleaned := validCharsRegex.ReplaceAllString(nameWithCount, "")
-		// Replace spaces, slashes, underscores with single hyphen
-		slug := spaceToHyphenRegex.ReplaceAllString(cleaned, "-")
-		// Collapse multiple hyphens (just in case)
-		slug = regexp.MustCompile(`-+`).ReplaceAllString(slug, "-")
-		// Trim trailing hyphens
-		shortName = strings.Trim(slug, "-")
-
-		if !repository.CategoryShortNameExists(shortName) {
-			break
-		}
-
-		count++
-	}
-
-	return shortName
 }
 
 func (repository *CategoryRepository) GetCategoryById(id string) *models.Category {

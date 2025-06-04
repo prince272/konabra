@@ -184,7 +184,7 @@ func (service *IdentityService) CreateAccount(form CreateAccountForm) (*AccountW
 		EmailVerified:         false,
 		PhoneNumber:           form.GetPhoneNumber(),
 		PhoneNumberVerified:   false,
-		UserName:              service.identityRepository.GenerateUserName(form.FirstName, form.LastName),
+		UserName:              utils.GenerateSlug([]string{form.FirstName, form.LastName}, service.identityRepository.UserNameExists),
 		PasswordHash:          utils.MustHashPassword(form.Password),
 		HasPassword:           true,
 		SecurityStamp:         uuid.New().String(),

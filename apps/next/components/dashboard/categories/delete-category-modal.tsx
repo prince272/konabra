@@ -9,6 +9,7 @@ import { Icon } from "@iconify-icon/react";
 import { categoryService } from "@/services";
 import { Category } from "@/services/category-service";
 import { useModalRouter } from "@/components/common/modals";
+import { categoryStore } from "@/states/categories";
 
 interface DeleteCategoryModalProps {
   isOpen: boolean;
@@ -31,11 +32,14 @@ function DeleteCategoryModal({ isOpen, onClose, categoryId, onSuccess }: DeleteC
         color: "danger"
       });
     } else {
+      const category = { id: categoryId } as Category
+
       addToast({
         title: "Category deleted successfully.",
         color: "success"
       });
-      onSuccess?.({ id: categoryId } as Category);
+      onSuccess?.(category);
+      categoryStore.remove(category);
       onClose();
     }
   };

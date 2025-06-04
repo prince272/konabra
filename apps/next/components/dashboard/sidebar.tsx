@@ -1,6 +1,14 @@
 "use client";
 
-import { Children, createContext, isValidElement, ReactNode, useContext, useState } from "react";
+import {
+  Children,
+  createContext,
+  isValidElement,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState
+} from "react";
 import NextLink from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Avatar } from "@heroui/avatar";
@@ -9,8 +17,10 @@ import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/d
 import { cn } from "@heroui/theme";
 import { Tooltip } from "@heroui/tooltip";
 import { Icon } from "@iconify-icon/react";
-import { useAccountState } from "@/states";
 import { categoryService } from "@/services";
+import { Category } from "@/services/category-service";
+import { useAccountState } from "@/states";
+import { categoryStore } from "@/states/categories";
 import { useAsyncMemo } from "@/hooks";
 
 interface SidebarProps {
@@ -151,6 +161,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
   const [currentAccount] = useAccountState();
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
   const [currentToggledMenu, setCurrentToggledMenu] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>(categoryStore.get());
 
   const toggleMenu = (menuTitle: string) => {
     if (collapsed) return;
@@ -188,18 +199,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
     router.push(path);
   };
 
-  const [categories, isCategoriesLoading] = useAsyncMemo(
-    async () => {
-      const [categories, problem] = await categoryService.getCategories();
-      if (problem) {
-        console.error("Failed to fetch categories:", problem);
-        return [];
-      }
-      return categories;
-    },
-    [],
-    []
-  );
+  useEffect(() => {
+    const unsubscribe = categoryStore.subscribe((newCategories) => {
+      setCategories(newCategories);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   return (
     <div className="flex h-full flex-col bg-content1">

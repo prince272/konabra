@@ -11,6 +11,7 @@ import { Controller, useForm } from "react-hook-form";
 import { categoryService } from "@/services";
 import { Category } from "@/services/category-service";
 import { useModalRouter } from "@/components/common/modals";
+import { categoryStore } from "@/states/categories";
 
 export type CreateCategoryForm = {
   name: string;
@@ -103,6 +104,7 @@ function AddEditCategoryModal({
         color: "success"
       });
       onSuccess?.(category);
+      categoryStore.addOrUpdate(category);
       onClose();
     }
   });
