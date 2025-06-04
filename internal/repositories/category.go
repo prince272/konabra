@@ -18,15 +18,15 @@ type CategoryRepository struct {
 }
 
 type CategoryFilter struct {
-	Sort   string
-	Order  string
-	Search string
+	Sort   string `json:"sort" form:"sort"`
+	Order  string `json:"order" form:"order"` // "asc" or "desc"
+	Search string `json:"search" form:"search"`
 }
 
 type CategoryPaginatedFilter struct {
 	CategoryFilter
-	Offset int
-	Limit  int
+	Offset int `json:"offset" form:"offset"`
+	Limit  int `json:"limit" form:"limit"`
 }
 
 func NewCategoryRepository(defaultDB *builds.DefaultDB, logger *zap.Logger) *CategoryRepository {

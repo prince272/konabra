@@ -377,6 +377,7 @@
                     },
                     {
                         "type": "string",
+                        "description": "\"asc\" or \"desc\"",
                         "name": "order",
                         "in": "query"
                     },
@@ -443,6 +444,7 @@
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "\"asc\" or \"desc\"",
                         "name": "order",
                         "in": "query"
                     },

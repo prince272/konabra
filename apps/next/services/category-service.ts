@@ -23,8 +23,8 @@ export type CategoryFilter = {
 };
 
 export type CategoryPaginatedFilter = CategoryFilter & {
-  offset?: number;
-  limit?: number;
+  offset: number;
+  limit: number;
 };
 
 export class CategoryService {

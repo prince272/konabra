@@ -1,36 +1,40 @@
-import React, { forwardRef } from "react";
+import React from "react";
 import { Button } from "@heroui/button";
 import { Pagination } from "@heroui/pagination";
 import { Spinner } from "@heroui/spinner";
 import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@heroui/table";
+import { cn } from "@heroui/theme";
 import { Icon } from "@iconify-icon/react";
 import { Category } from "@/services/category-service";
-import { cn } from "@heroui/theme";
 
 interface CategoriesTableProps {
   categories: Category[];
+  page: number;
+  pageSize: number;
+  totalPages: number;
   isLoading?: boolean;
   isError?: boolean;
   errorMessage?: string;
   emptyMessage?: string;
+  onReload?: () => void;
   onEdit: (category: Category) => void;
   onDelete: (category: Category) => void;
-}
-
-interface CategoriesTableRowProps {
-  category: Category;
-  onEdit: (category: Category) => void;
-  onDelete: (category: Category) => void;
+  onPageChange?: (page: number) => void;
 }
 
 const CategoriesTable: React.FC<CategoriesTableProps> = ({
   categories,
+  page,
+  pageSize,
+  totalPages,
   isLoading = false,
   isError = false,
   errorMessage,
   emptyMessage,
+  onReload,
   onEdit,
-  onDelete
+  onDelete,
+  onPageChange
 }) => {
   return (
     <Table
@@ -43,7 +47,15 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
       }}
       bottomContent={
         <div className="mt-auto flex w-full justify-center pt-4">
-          <Pagination isCompact showControls showShadow color="primary" page={1} total={100} />
+          <Pagination
+            isCompact
+            showControls
+            showShadow
+            color="primary"
+            page={page}
+            total={totalPages}
+            onChange={(newPage) => onPageChange?.(newPage)}
+          />
         </div>
       }
     >
@@ -64,9 +76,14 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
             <div className="flex h-64 flex-1 flex-col items-center justify-center text-center">
               <Icon icon="solar:bone-broken-broken" className="mb-4 text-6xl text-foreground-300" />
               <p className="mb-2 text-foreground-500">An error occurred</p>
-              <p className="text-sm text-foreground-400">
-                {emptyMessage || "Something went wrong. Please try again later."}
+              <p className="mb-4 text-sm text-foreground-400">
+                {errorMessage || "Something went wrong. Please try again later."}
               </p>
+              {onReload && (
+                <Button color="primary" variant="solid" onPress={onReload}>
+                  Reload
+                </Button>
+              )}
             </div>
           ) : (
             <div className="flex h-64 flex-1 flex-col items-center justify-center text-center">

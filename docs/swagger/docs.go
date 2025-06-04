@@ -384,6 +384,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "\"asc\" or \"desc\"",
                         "name": "order",
                         "in": "query"
                     },
@@ -450,6 +451,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "\"asc\" or \"desc\"",
                         "name": "order",
                         "in": "query"
                     },

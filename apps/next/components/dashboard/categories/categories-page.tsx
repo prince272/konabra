@@ -17,7 +17,9 @@ import { DeleteCategoryModalRouter } from "./delete-category-modal";
 
 type CategoryPageResult = {
   items: Category[];
-  count: number;
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
   problem?: Problem;
 };
 
@@ -25,17 +27,36 @@ const CategoriesPage = () => {
   const router = useRouter();
   const [filter, setFilter] = useState<CategoryPaginatedFilter & { refresh: number }>({
     offset: 0,
-    limit: 20,
+    limit: 3,
     refresh: 0
   });
 
   const [page, isLoading] = useAsyncMemo<CategoryPageResult>(
     async () => {
       const [data, problem] = await categoryService.getPaginatedCategories(filter);
-      return { ...data, problem };
+      if (problem) {
+        return { items: [], pageNumber: 1, pageSize: filter.limit, totalPages: 0, problem };
+      }
+
+      const pageNumber = Math.floor(filter.offset / filter.limit) + 1;
+      const totalPages = Math.ceil(data.count / filter.limit);
+
+      return {
+        items: data.items,
+        pageNumber,
+        pageSize: filter.limit,
+        totalPages,
+        problem: undefined
+      };
     },
     [filter],
-    {} as CategoryPageResult
+    {
+      items: [],
+      pageNumber: 1,
+      pageSize: filter.limit,
+      totalPages: 0,
+      problem: undefined
+    } as CategoryPageResult
   );
 
   const resetPage = useCallback(() => {
@@ -87,11 +108,22 @@ const CategoriesPage = () => {
               categories={page.items || []}
               isLoading={isLoading}
               isError={!!page.problem}
+              errorMessage={page.problem?.message}
               onEdit={(category) => {
                 router.push(`#edit-category-${category.id}`);
               }}
               onDelete={(category) => {
                 router.push(`#delete-category-${category.id}`);
+              }}
+              page={page.pageNumber}
+              pageSize={page.pageSize}
+              totalPages={page.totalPages}
+              onPageChange={(newPage) => {
+                setFilter((prev) => ({
+                  ...prev,
+                  offset: (newPage - 1) * prev.limit,
+                  refresh: prev.refresh + 1
+                }));
               }}
             />
           </CardBody>
