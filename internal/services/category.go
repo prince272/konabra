@@ -30,6 +30,7 @@ type UpdateCategoryForm struct {
 type CategoryModel struct {
 	Id          string `json:"id"`
 	Name        string `json:"name"`
+	ShortName   string `json:"shortName"`
 	Description string `json:"description"`
 }
 
@@ -65,6 +66,7 @@ func (service *CategoryService) CreateCategory(form CreateCategoryForm) (*Catego
 	}
 
 	category.Id = uuid.New().String()
+	category.ShortName = service.categoryRepository.GenerateCategoryShortName(form.Name)
 	err := service.categoryRepository.CreateCategory(category)
 
 	if err != nil {
@@ -103,6 +105,7 @@ func (service *CategoryService) UpdateCategory(id string, form UpdateCategoryFor
 		return nil, problems.FromError(err)
 	}
 
+	category.ShortName = service.categoryRepository.GenerateCategoryShortName(form.Name)
 	err := service.categoryRepository.UpdateCategory(category)
 
 	if err != nil {

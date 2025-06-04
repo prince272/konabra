@@ -10,6 +10,8 @@ import { cn } from "@heroui/theme";
 import { Tooltip } from "@heroui/tooltip";
 import { Icon } from "@iconify-icon/react";
 import { useAccountState } from "@/states";
+import { categoryService } from "@/services";
+import { useAsyncMemo } from "@/hooks";
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -186,6 +188,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
     router.push(path);
   };
 
+  const [categories, isCategoriesLoading] = useAsyncMemo(
+    async () => {
+      const [categories, problem] = await categoryService.getCategories();
+      if (problem) {
+        console.error("Failed to fetch categories:", problem);
+        return [];
+      }
+      return categories;
+    },
+    [],
+    []
+  );
+
   return (
     <div className="flex h-full flex-col bg-content1">
       <div className="flex h-16 items-center px-4">
@@ -226,6 +241,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                 icon="solar:list-broken"
                 onItemClick={handleItemClick}
               />
+              {categories.map((category) => (
+                <MenuItem
+                  key={category.id}
+                  title={category.name}
+                  path={`/incidents/${category.shortName}`}
+                  icon="solar:tag-broken"
+                  onItemClick={handleItemClick}
+                />
+              ))}
             </MenuItem>
             <MenuItem
               title="Categories"

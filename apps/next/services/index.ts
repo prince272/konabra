@@ -94,13 +94,15 @@ api.interceptors.response.use(
         // Retry original request
         return api(originalRequest);
       } catch (refreshError) {
-        console.warn("Redirecting to sign-in due to refresh failure.", refreshError);
+        if (isAxiosError(refreshError) && refreshError.response?.status === 401) {
+          console.warn("Redirecting to sign-in due to refresh failure.", refreshError);
 
-        // Refresh failed - clear tokens and redirect
-        // cookies.remove("current-account", { path: "/" });
+          // Refresh failed - clear tokens and redirect
+          cookies.remove("current-account", { path: "/" });
 
-        if (typeof window !== "undefined") {
-          window.location.href = "#signin";
+          if (typeof window !== "undefined") {
+            window.location.href = "#signin";
+          }
         }
 
         return Promise.reject(refreshError);

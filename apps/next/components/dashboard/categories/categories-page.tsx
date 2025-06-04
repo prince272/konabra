@@ -11,7 +11,6 @@ import { Icon } from "@iconify-icon/react";
 import { categoryService, Problem } from "@/services";
 import { Category, CategoryPaginatedFilter } from "@/services/category-service";
 import { useAsyncMemo, useDebouncedCallback } from "@/hooks";
-import { useThrottledCallback } from "@/hooks/use-throttled-callback";
 import { AddEditCategoryModalRouter } from "./add-edit-category-modal";
 import CategoriesTable from "./categories-table";
 import { DeleteCategoryModalRouter } from "./delete-category-modal";

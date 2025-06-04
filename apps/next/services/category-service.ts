@@ -11,6 +11,7 @@ export type UpdateCategoryForm = CreateCategoryForm & {};
 export type Category = {
   id: string;
   name: string;
+  shortName: string;
   description: string;
   createdAt: string;
   updatedAt: string;

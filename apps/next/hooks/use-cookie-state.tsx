@@ -11,7 +11,7 @@ import {
   useRef,
   useState
 } from "react";
-import { isEqual } from "lodash"; // Add lodash for deep equality checks
+import { isEqual } from "lodash";
 
 import Cookies from "universal-cookie";
 
