@@ -17,8 +17,8 @@ export type Category = {
 };
 
 export type CategoryFilter = {
-  sort?: string;
-  order?: string;
+  sort?: string; // e.g., "name" or "createdAt"
+  order?: "asc" | "desc"; // e.g., "asc" or "desc"
   search?: string;
 };
 

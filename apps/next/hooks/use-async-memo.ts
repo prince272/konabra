@@ -1,26 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function useAsyncMemo<T>(
-  asyncFn: () => Promise<T>,
+  asyncFn: (prevValue: T) => Promise<T>,
   deps: React.DependencyList,
   initialValue: T
 ): [T, boolean] {
   const [value, setValue] = useState<T>(initialValue);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const valueRef = useRef<T>(initialValue);
 
   useEffect(() => {
     let isMounted = true;
     setIsLoading(true);
 
-    asyncFn()
+    asyncFn(valueRef.current)
       .then((result) => {
         if (isMounted) {
+          valueRef.current = result;
           setValue(result);
           setIsLoading(false);
         }
       })
       .catch(() => {
-        // In case of error, we still want to stop loading.
         if (isMounted) {
           setIsLoading(false);
         }

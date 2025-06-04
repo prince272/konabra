@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useState } from "react";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@heroui/button";
@@ -10,7 +10,8 @@ import { Input } from "@heroui/input";
 import { Icon } from "@iconify-icon/react";
 import { categoryService, Problem } from "@/services";
 import { Category, CategoryPaginatedFilter } from "@/services/category-service";
-import { useAsyncMemo } from "@/hooks";
+import { useAsyncMemo, useDebouncedCallback } from "@/hooks";
+import { useThrottledCallback } from "@/hooks/use-throttled-callback";
 import { AddEditCategoryModalRouter } from "./add-edit-category-modal";
 import CategoriesTable from "./categories-table";
 import { DeleteCategoryModalRouter } from "./delete-category-modal";
@@ -28,14 +29,20 @@ const CategoriesPage = () => {
   const [filter, setFilter] = useState<CategoryPaginatedFilter & { refresh: number }>({
     offset: 0,
     limit: 3,
+    sort: "name",
+    order: "asc",
+    search: "",
     refresh: 0
   });
 
+  const [searchTerm, setSearchTerm] = useState("");
+
   const [page, isLoading] = useAsyncMemo<CategoryPageResult>(
-    async () => {
+    async (prevValue) => {
       const [data, problem] = await categoryService.getPaginatedCategories(filter);
+
       if (problem) {
-        return { items: [], pageNumber: 1, pageSize: filter.limit, totalPages: 0, problem };
+        return { ...prevValue, problem };
       }
 
       const pageNumber = Math.floor(filter.offset / filter.limit) + 1;
@@ -54,7 +61,7 @@ const CategoriesPage = () => {
       items: [],
       pageNumber: 1,
       pageSize: filter.limit,
-      totalPages: 0,
+      totalPages: 1,
       problem: undefined
     } as CategoryPageResult
   );
@@ -63,6 +70,47 @@ const CategoriesPage = () => {
     setFilter((prev) => ({ ...prev, offset: 0, refresh: prev.refresh + 1 }));
   }, []);
 
+  const updateDebouncedSearch = useDebouncedCallback(
+    (value: string) => {
+      setFilter((prev) => ({
+        ...prev,
+        search: value,
+        offset: 0,
+        refresh: prev.refresh + 1
+      }));
+    },
+    [],
+    500
+  );
+
+  const clearSearch = () => {
+    setSearchTerm("");
+    setFilter((prev) => ({
+      ...prev,
+      search: "",
+      offset: 0,
+      refresh: prev.refresh + 1
+    }));
+  };
+
+  const updateSort = (key: string) => {
+    setFilter((prev) => ({
+      ...prev,
+      sort: key,
+      order: prev.order === "asc" ? "desc" : "asc",
+      offset: 0,
+      refresh: prev.refresh + 1
+    }));
+  };
+
+  const changePage = (newPage: number) => {
+    setFilter((prev) => ({
+      ...prev,
+      offset: (newPage - 1) * prev.limit,
+      refresh: prev.refresh + 1
+    }));
+  };
+
   return (
     <>
       <div className="flex flex-1 flex-col space-y-3">
@@ -70,6 +118,7 @@ const CategoriesPage = () => {
           <h1 className="text-2xl font-bold">Categories</h1>
           <Button
             color="primary"
+            radius="full"
             startContent={<Icon icon="lucide:plus" />}
             as={NextLink}
             href="#add-category"
@@ -83,8 +132,12 @@ const CategoriesPage = () => {
               <div className="w-full sm:w-72">
                 <Input
                   placeholder="Search categories..."
-                  // value={searchQuery}
-                  // onValueChange={setSearchQuery}
+                  value={searchTerm}
+                  onValueChange={(value) => {
+                    setSearchTerm(value);
+                    updateDebouncedSearch(value);
+                  }}
+                  onClear={clearSearch}
                   startContent={<Icon icon="lucide:search" />}
                   size="sm"
                   isClearable
@@ -96,7 +149,12 @@ const CategoriesPage = () => {
                     Sort
                   </Button>
                 </DropdownTrigger>
-                <DropdownMenu aria-label="Sort options" selectionMode="single">
+                <DropdownMenu
+                  aria-label="Sort options"
+                  selectionMode="single"
+                  selectedKeys={new Set([filter.sort || "name"])}
+                  onAction={(key) => updateSort(key as string)}
+                >
                   <DropdownItem key="name">Name</DropdownItem>
                   <DropdownItem key="description">Description</DropdownItem>
                 </DropdownMenu>
@@ -118,19 +176,14 @@ const CategoriesPage = () => {
               page={page.pageNumber}
               pageSize={page.pageSize}
               totalPages={page.totalPages}
-              onPageChange={(newPage) => {
-                setFilter((prev) => ({
-                  ...prev,
-                  offset: (newPage - 1) * prev.limit,
-                  refresh: prev.refresh + 1
-                }));
-              }}
+              onPageChange={changePage}
+              onReload={resetPage}
             />
           </CardBody>
         </Card>
       </div>
-      <AddEditCategoryModalRouter onSuccess={() => resetPage()} />
-      <DeleteCategoryModalRouter onSuccess={() => resetPage()} />
+      <AddEditCategoryModalRouter onSuccess={resetPage} />
+      <DeleteCategoryModalRouter onSuccess={resetPage} />
     </>
   );
 };

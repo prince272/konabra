@@ -50,7 +50,8 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
           <Pagination
             isCompact
             showControls
-            showShadow
+            showShadow={false}
+            radius="full"
             color="primary"
             page={page}
             total={totalPages}
@@ -80,7 +81,7 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
                 {errorMessage || "Something went wrong. Please try again later."}
               </p>
               {onReload && (
-                <Button color="primary" variant="solid" onPress={onReload}>
+                <Button color="primary" variant="solid" radius="full" onPress={onReload}>
                   Reload
                 </Button>
               )}
@@ -96,7 +97,7 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
           )
         }
       >
-        {categories.map((category) => (
+        {(isError ? [] : categories).map((category) => (
           <TableRow key={category.id}>
             <TableCell className="text-nowrap">{category.name}</TableCell>
             <TableCell>
