@@ -122,6 +122,7 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
                   isIconOnly
                   size="sm"
                   variant="light"
+                  radius="full"
                   onPress={() => onEdit(category)}
                   aria-label="Edit category"
                 >
@@ -131,6 +132,7 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
                   isIconOnly
                   size="sm"
                   variant="light"
+                  radius="full"
                   color="danger"
                   onPress={() => onDelete(category)}
                   aria-label="Delete category"

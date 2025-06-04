@@ -28,7 +28,7 @@ const CategoriesPage = () => {
   const router = useRouter();
   const [filter, setFilter] = useState<CategoryPaginatedFilter & { refresh: number }>({
     offset: 0,
-    limit: 3,
+    limit: 25,
     sort: "name",
     order: "asc",
     search: "",

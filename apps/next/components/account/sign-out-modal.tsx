@@ -24,7 +24,6 @@ export default function SignOutModal({
 }) {
   const [currentAccount] = useAccountState();
   const [, setAccount] = useAccountState();
-  const isSmallScreen = useBreakpoint("sm", "down");
 
   const form = useForm<SignOutForm>({
     mode: "onChange",
@@ -58,7 +57,7 @@ export default function SignOutModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      size={isSmallScreen ? "full" : "md"}
+      size="md"
       scrollBehavior="inside"
       closeButton={
         <Button
@@ -70,11 +69,8 @@ export default function SignOutModal({
           <Icon icon="material-symbols:close-rounded" width="20" height="20" />
         </Button>
       }
-      classNames={{
-        wrapper: cn(isSmallScreen && "h-full")
-      }}
     >
-      <ModalContent className={cn(!isSmallScreen && "min-h-[300px]", "top-0")}>
+      <ModalContent>
         <ModalHeader className="flex flex-col gap-4 px-6 pt-8">
           <div className="flex flex-col items-center justify-center text-center">
             <h3 className="text-lg font-medium">Sign Out</h3>
