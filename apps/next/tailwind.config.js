@@ -18,6 +18,7 @@ const config = {
   },
   darkMode: "class",
   plugins: [
+    require("@tailwindcss/line-clamp"),
     heroui({
       themes: {
         light: {

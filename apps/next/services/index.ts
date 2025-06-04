@@ -97,7 +97,7 @@ api.interceptors.response.use(
         console.warn("Redirecting to sign-in due to refresh failure.", refreshError);
 
         // Refresh failed - clear tokens and redirect
-        cookies.remove("current-account", { path: "/" });
+        // cookies.remove("current-account", { path: "/" });
 
         if (typeof window !== "undefined") {
           window.location.href = "#signin";

@@ -86,18 +86,23 @@ func (service *CategoryService) UpdateCategory(id string, form UpdateCategoryFor
 		return nil, problems.FromError(err)
 	}
 
-	if exists := service.categoryRepository.CategoryNameExists(form.Name); exists {
-		return nil, problems.NewValidationProblem(map[string]string{"name": "Category name already exists."})
+	category := service.categoryRepository.GetCategoryById(id)
+
+	if category == nil {
+		return nil, problems.NewProblem(http.StatusNotFound, "Category not found.")
 	}
 
-	category := &models.Category{}
+	if exists := service.categoryRepository.CategoryNameExists(form.Name); exists {
+		if category.Name != form.Name {
+			return nil, problems.NewValidationProblem(map[string]string{"name": "Category name already exists for another category."})
+		}
+	}
 
 	if err := copier.Copy(category, form); err != nil {
 		service.logger.Error("Error copying form to category: ", zap.Error(err))
 		return nil, problems.FromError(err)
 	}
 
-	category.Id = id
 	err := service.categoryRepository.UpdateCategory(category)
 
 	if err != nil {

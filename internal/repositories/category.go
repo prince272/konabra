@@ -74,10 +74,10 @@ func (repository *CategoryRepository) CategoryNameExists(name string) bool {
 }
 
 func (repository *CategoryRepository) GetCategoryById(id string) *models.Category {
-	user := &models.Category{}
-	result := repository.defaultDB.Model(&models.Category{}).Preload("UserRoles").
+	category := &models.Category{}
+	result := repository.defaultDB.Model(&models.Category{}).
 		Where("id = ?", id).
-		First(user)
+		First(category)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -87,7 +87,7 @@ func (repository *CategoryRepository) GetCategoryById(id string) *models.Categor
 		panic(fmt.Errorf("failed to find category by id: %w", result.Error))
 	}
 
-	return user
+	return category
 }
 
 func (repository *CategoryRepository) GetPaginatedCategories(filter CategoryPaginatedFilter) (items []*models.Category, count int64) {

@@ -23,6 +23,7 @@ func NewCategoryHandler(router *gin.Engine, categoryService *services.CategorySe
 	categoryGroup := router.Group("/categories", jwtHelper.RequireAuth())
 	{
 		categoryGroup.GET("", handler.handleWithData(handler.GetPaginatedCategories))
+		categoryGroup.GET("/all", handler.handleWithData(handler.GetCategories))
 		categoryGroup.GET("/:id", handler.handleWithData(handler.GetCategoryById))
 		categoryGroup.POST("", handler.handleWithData(handler.CreateCategory))
 		categoryGroup.PUT("/:id", handler.handleWithData(handler.UpdateCategory))

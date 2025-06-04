@@ -216,7 +216,9 @@ function CreateAccountView(
     const form = useForm<CompleteVerifyAccountForm & CompleteChangeAccountForm>({
       mode: "onChange",
       defaultValues: {
-        username: accountType === "email" ? currentAccount?.email : currentAccount?.phoneNumber
+        username: accountType === "email" ? currentAccount?.email : currentAccount?.phoneNumber,
+        newUsername: "",
+        code: ""
       }
     });
     const formErrors = useMemo(
@@ -466,7 +468,7 @@ function AccountDeleteView({ navigateTo, currentView }: BaseViewProps) {
         });
       } else {
         addToast({
-          title: "Account deleted successfully",
+          title: "Account deleted successfully.",
           color: "success"
         });
         // Clear the current account state

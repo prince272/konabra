@@ -23,35 +23,32 @@ export default function SignOutModal({
   onClose?: () => void;
 }) {
   const [currentAccount] = useAccountState();
-  const {
-    control,
-    handleSubmit,
-    formState: { isSubmitting }
-  } = useForm<SignOutForm>({
+  const [, setAccount] = useAccountState();
+  const isSmallScreen = useBreakpoint("sm", "down");
+
+  const form = useForm<SignOutForm>({
     mode: "onChange",
     defaultValues: {
       refreshToken: currentAccount?.refreshToken,
       global: false
     }
   });
-  const [, setAccount] = useAccountState();
-  const isSmallScreen = useBreakpoint("sm", "down");
 
-  const onSubmit = useCallback(
+  const handleSubmit = useCallback(
     async (data: SignOutForm) => {
-      try {
-        await identityService.signOut(data);
+      const problem = await identityService.signOut(data);
+      if (problem) {
+        addToast({
+          title: problem.message,
+          color: "danger"
+        });
+      } else {
         setAccount(null);
         addToast({
           title: `Signed out successfully${data.global ? " from all sessions" : ""}.`,
           color: "success"
         });
         onClose?.();
-      } catch (error) {
-        addToast({
-          title: "Failed to sign out. Please try again.",
-          color: "danger"
-        });
       }
     },
     [onClose, setAccount]
@@ -62,7 +59,7 @@ export default function SignOutModal({
       isOpen={isOpen}
       onClose={onClose}
       size={isSmallScreen ? "full" : "md"}
-      scrollBehavior={"inside"}
+      scrollBehavior="inside"
       closeButton={
         <Button
           isIconOnly
@@ -88,11 +85,11 @@ export default function SignOutModal({
         </ModalHeader>
 
         <ModalBody className="px-6 py-6">
-          <form id="sign-out-form" onSubmit={handleSubmit(onSubmit)}>
+          <form id="sign-out-form" onSubmit={form.handleSubmit(handleSubmit)}>
             <div className="space-y-4">
               <Controller
                 name="global"
-                control={control}
+                control={form.control}
                 render={({ field }) => (
                   <Checkbox
                     isSelected={field.value}
@@ -111,8 +108,8 @@ export default function SignOutModal({
           <Button
             radius="full"
             color="primary"
-            isDisabled={isSubmitting}
-            isLoading={isSubmitting}
+            isDisabled={form.formState.isSubmitting}
+            isLoading={form.formState.isSubmitting}
             form="sign-out-form"
             type="submit"
             startContent={<Icon icon="solar:logout-2-broken" width="20" height="20" />}

@@ -38,6 +38,7 @@
     "@heroui/toast": "^2.0.9",
     "@react-aria/ssr": "3.9.8",
     "@react-aria/visually-hidden": "3.8.22",
+    "@tailwindcss/line-clamp": "^0.4.4",
     "axios": "^1.9.0",
     "clsx": "2.1.1",
     "date-fns": "^4.1.0",

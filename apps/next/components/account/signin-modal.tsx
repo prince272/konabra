@@ -37,7 +37,11 @@ export default function SignInModal({
   const searchParams = useSearchParams();
 
   const form = useForm<SignInForm>({
-    mode: "onChange"
+    mode: "onChange",
+    defaultValues: {
+      username: "",
+      password: ""
+    },
   });
 
   const formErrors = useMemo(

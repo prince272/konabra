@@ -1,89 +1,105 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
+import NextLink from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@heroui/button";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 import { Input } from "@heroui/input";
-import { Pagination } from "@heroui/pagination";
 import { Icon } from "@iconify-icon/react";
 import { categoryService, Problem } from "@/services";
-import { Category, CategoryPaginatedFilter, CreateCategoryForm } from "@/services/category-service";
+import { Category, CategoryPaginatedFilter } from "@/services/category-service";
 import { useAsyncMemo } from "@/hooks";
+import { AddEditCategoryModalRouter } from "./add-edit-category-modal";
 import CategoriesTable from "./categories-table";
+import { DeleteCategoryModalRouter } from "./delete-category-modal";
 
 type CategoryPageResult = {
-  isLoading: boolean;
-  data?: {
-    items: Category[];
-    count: number;
-  };
+  items: Category[];
+  count: number;
   problem?: Problem;
 };
 
 const CategoriesPage = () => {
-  const [filter, setFilter] = useState<CategoryPaginatedFilter>({
+  const router = useRouter();
+  const [filter, setFilter] = useState<CategoryPaginatedFilter & { refresh: number }>({
     offset: 0,
-    limit: 20
+    limit: 20,
+    refresh: 0
   });
 
-  const page = useAsyncMemo<CategoryPageResult>(
+  const [page, isLoading] = useAsyncMemo<CategoryPageResult>(
     async () => {
       const [data, problem] = await categoryService.getPaginatedCategories(filter);
-      return { data, problem, isLoading: false };
+      return { ...data, problem };
     },
     [filter],
-    { isLoading: true }
+    {} as CategoryPageResult
   );
 
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold">Categories</h1>
-        <Button color="primary" startContent={<Icon icon="lucide:plus" />}>
-          Add Category
-        </Button>
-      </div>
+  const resetPage = useCallback(() => {
+    setFilter((prev) => ({ ...prev, offset: 0, refresh: prev.refresh + 1 }));
+  }, []);
 
-      <Card disableRipple>
-        <CardHeader className="flex justify-end">
-          <div className="flex w-full items-center justify-end gap-4 sm:w-auto">
-            <div className="w-full sm:w-72">
-              <Input
-                placeholder="Search categories..."
-                // value={searchQuery}
-                // onValueChange={setSearchQuery}
-                startContent={<Icon icon="lucide:search" />}
-                size="sm"
-                isClearable
-              />
+  return (
+    <>
+      <div className="flex flex-1 flex-col space-y-3">
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="text-2xl font-bold">Categories</h1>
+          <Button
+            color="primary"
+            startContent={<Icon icon="lucide:plus" />}
+            as={NextLink}
+            href="#add-category"
+          >
+            Add Category
+          </Button>
+        </div>
+        <Card className="flex-1" disableRipple shadow="none">
+          <CardHeader className="flex justify-end">
+            <div className="flex w-full items-center justify-end gap-4 sm:w-auto">
+              <div className="w-full sm:w-72">
+                <Input
+                  placeholder="Search categories..."
+                  // value={searchQuery}
+                  // onValueChange={setSearchQuery}
+                  startContent={<Icon icon="lucide:search" />}
+                  size="sm"
+                  isClearable
+                />
+              </div>
+              <Dropdown>
+                <DropdownTrigger>
+                  <Button variant="flat" size="sm" startContent={<Icon icon="lucide:sort" />}>
+                    Sort
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu aria-label="Sort options" selectionMode="single">
+                  <DropdownItem key="name">Name</DropdownItem>
+                  <DropdownItem key="description">Description</DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
             </div>
-            <Dropdown>
-              <DropdownTrigger>
-                <Button variant="flat" size="sm" startContent={<Icon icon="lucide:sort" />}>
-                  Sort
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu aria-label="Sort options" selectionMode="single">
-                <DropdownItem key="name">Name</DropdownItem>
-                <DropdownItem key="description">Description</DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
-          </div>
-        </CardHeader>
-        <CardBody>
-          <CategoriesTable
-            categories={page.data?.items || []}
-            isLoading={page.isLoading}
-            onEdit={() => {}}
-            onDelete={() => {}}
-          />
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination isCompact showControls showShadow color="primary" page={1} total={100} />
-          </div>
-        </CardBody>
-      </Card>
-    </div>
+          </CardHeader>
+          <CardBody className="flex-1">
+            <CategoriesTable
+              categories={page.items || []}
+              isLoading={isLoading}
+              isError={!!page.problem}
+              onEdit={(category) => {
+                router.push(`#edit-category-${category.id}`);
+              }}
+              onDelete={(category) => {
+                router.push(`#delete-category-${category.id}`);
+              }}
+            />
+          </CardBody>
+        </Card>
+      </div>
+      <AddEditCategoryModalRouter onSuccess={() => resetPage()} />
+      <DeleteCategoryModalRouter onSuccess={() => resetPage()} />
+    </>
   );
 };
 

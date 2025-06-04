@@ -5,6 +5,7 @@ import { useIsomorphicEffect as useEffect } from "./use-isomorphic-effect";
 interface RefCountedMediaQueryList extends MediaQueryList {
   refCount: number;
 }
+
 const matchersByWindow = new WeakMap<Window, Map<string, RefCountedMediaQueryList>>();
 
 const getMatcher = (
@@ -26,6 +27,7 @@ const getMatcher = (
   }
   return mql;
 };
+
 /**
  * Match a media query and get updates as the match changes. The media string is
  * passed directly to `window.matchMedia` and run as a Layout Effect, so initial
@@ -56,22 +58,23 @@ export default function useMediaQuery(
   useEffect(() => {
     let mql = getMatcher(query, targetWindow);
     if (!mql) {
-      return setMatches(false);
+      setMatches(false);
+      return;
     }
 
-    let matchers = matchersByWindow.get(targetWindow!);
+    const matchers = matchersByWindow.get(targetWindow!);
 
     const handleChange = () => {
       setMatches(mql!.matches);
     };
 
     mql.refCount++;
-    mql.addListener(handleChange);
+    mql.addEventListener("change", handleChange);
 
     handleChange();
 
     return () => {
-      mql!.removeListener(handleChange);
+      mql!.removeEventListener("change", handleChange);
       mql!.refCount--;
       if (mql!.refCount <= 0) {
         matchers?.delete(mql!.media);

@@ -44,7 +44,13 @@ export default function ResetPasswordModal({
   });
 
   const form = useForm<CompleteResetPasswordForm>({
-    mode: "onChange"
+    mode: "onChange",
+    defaultValues: {
+      username: "",
+      code: "",
+      newPassword: "",
+      confirmPassword: ""
+    },
   });
 
   const formErrors = useMemo(

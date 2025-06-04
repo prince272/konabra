@@ -35,7 +35,14 @@ export default function SignUpModal({
   const isSmallScreen = useBreakpoint("sm", "down");
 
   const form = useForm<CreateAccountForm>({
-    mode: "onChange"
+    mode: "onChange",
+    defaultValues: {
+      username: "",
+      firstName: "",
+      lastName: "",
+      password: "",
+      confirmPassword: ""
+    }
   });
 
   const formErrors = useMemo(

@@ -61,32 +61,33 @@ function useModalQueue() {
 }
 
 export function useModalRouter() {
-  const [hash, setModalHash, removeModalHash] = useHashState();
-  const modalHash = useMemo(() => hash?.split(":")[0], [hash]);
+  const [hash, setHash, removeHash] = useHashState();
+  const modalName = useMemo(() => hash?.split(":")[0], [hash]);
   const { openModal, closeModal, currentModal, mountedModal } = useModalQueue();
 
   useEffect(() => {
-    if (modalHash) {
-      openModal(modalHash);
+    if (modalName) {
+      openModal(modalName);
     } else {
       closeModal();
     }
-  }, [modalHash]);
+  }, [modalName]);
 
   const handleOpenModal = useCallback(
     (modalName: string) => {
-      setModalHash(modalName);
+      setHash(modalName);
       openModal(modalName);
     },
-    [openModal, setModalHash]
+    [openModal, setHash]
   );
 
   const handleCloseModal = useCallback(() => {
-    removeModalHash();
+    removeHash();
     closeModal();
-  }, [removeModalHash, closeModal]);
+  }, [removeHash, closeModal]);
 
   return {
+    hash,
     mountedModal,
     currentModal,
     openModal: handleOpenModal,

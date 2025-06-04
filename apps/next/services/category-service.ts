@@ -30,9 +30,7 @@ export type CategoryPaginatedFilter = CategoryFilter & {
 export class CategoryService {
   constructor(private readonly api: AxiosInstance) {}
 
-  public async createCategory(
-    form: CreateCategoryForm
-  ): Promise<readonly [Category, Problem?]> {
+  public async createCategory(form: CreateCategoryForm): Promise<readonly [Category, Problem?]> {
     try {
       const response = await this.api.post("/categories", form);
       return [response.data, undefined];
@@ -71,9 +69,7 @@ export class CategoryService {
     }
   }
 
-  public async getCategories(
-    filter?: CategoryFilter
-  ): Promise<readonly [Category[], Problem?]> {
+  public async getCategories(filter?: CategoryFilter): Promise<readonly [Category[], Problem?]> {
     try {
       const response = await this.api.get("/categories/all", { params: filter });
       return [response.data, undefined];
