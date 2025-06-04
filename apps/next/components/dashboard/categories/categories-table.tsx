@@ -75,20 +75,26 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
         emptyContent={
           isError ? (
             <div className="flex h-64 flex-1 flex-col items-center justify-center text-center">
-              <Icon icon="solar:bone-broken-broken" className="mb-4 text-6xl text-foreground-300" />
+              <Icon icon="solar:danger-broken" className="mb-4 text-6xl text-foreground-300" />
               <p className="mb-2 text-foreground-500">An error occurred</p>
               <p className="mb-4 text-sm text-foreground-400">
                 {errorMessage || "Something went wrong. Please try again later."}
               </p>
               {onReload && (
-                <Button color="primary" variant="solid" radius="full" onPress={onReload}>
+                <Button 
+                  color="primary" 
+                  variant="solid" 
+                  radius="full" 
+                  onPress={onReload}
+                  startContent={<Icon icon="solar:refresh-broken" />}
+                >
                   Reload
                 </Button>
               )}
             </div>
           ) : (
             <div className="flex h-64 flex-1 flex-col items-center justify-center text-center">
-              <Icon icon="solar:list-cross-broken" className="mb-4 text-6xl text-foreground-300" />
+              <Icon icon="solar:folder-with-files-broken" className="mb-4 text-6xl text-foreground-300" />
               <p className="mb-2 text-foreground-500">No categories found</p>
               <p className="text-sm text-foreground-400">
                 {emptyMessage || "No matching results. Please try a different keyword."}
@@ -119,7 +125,7 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
                   onPress={() => onEdit(category)}
                   aria-label="Edit category"
                 >
-                  <Icon icon="solar:edit-broken" />
+                  <Icon icon="solar:pen-new-square-broken" width="20" height="20" />
                 </Button>
                 <Button
                   isIconOnly
@@ -129,7 +135,7 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
                   onPress={() => onDelete(category)}
                   aria-label="Delete category"
                 >
-                  <Icon icon="solar:trash-bin-broken" />
+                  <Icon icon="solar:trash-bin-trash-broken" width="20" height="20" />
                 </Button>
               </div>
             </TableCell>

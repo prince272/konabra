@@ -119,7 +119,7 @@ const CategoriesPage = () => {
           <Button
             color="primary"
             radius="full"
-            startContent={<Icon icon="lucide:plus" />}
+            startContent={<Icon icon="solar:add-circle-broken" width="20" height="20" />}
             as={NextLink}
             href="#add-category"
           >
@@ -138,14 +138,14 @@ const CategoriesPage = () => {
                     updateDebouncedSearch(value);
                   }}
                   onClear={clearSearch}
-                  startContent={<Icon icon="lucide:search" />}
+                  startContent={<Icon icon="solar:magnifer-broken" />}
                   size="sm"
                   isClearable
                 />
               </div>
               <Dropdown>
                 <DropdownTrigger>
-                  <Button variant="flat" size="sm" startContent={<Icon icon="lucide:sort" />}>
+                  <Button variant="flat" size="sm" startContent={<Icon icon="solar:sort-from-top-to-bottom-broken" width="20" height="20" />}>
                     Sort
                   </Button>
                 </DropdownTrigger>
