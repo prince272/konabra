@@ -144,7 +144,13 @@ const CategoriesPage = () => {
               </div>
               <Dropdown>
                 <DropdownTrigger>
-                  <Button variant="flat" size="sm" startContent={<Icon icon="solar:sort-from-top-to-bottom-broken" width="20" height="20" />}>
+                  <Button
+                    variant="flat"
+                    size="sm"
+                    startContent={
+                      <Icon icon="solar:sort-from-top-to-bottom-broken" width="20" height="20" />
+                    }
+                  >
                     Sort
                   </Button>
                 </DropdownTrigger>

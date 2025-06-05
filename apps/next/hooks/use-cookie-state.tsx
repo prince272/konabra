@@ -9,11 +9,11 @@ import {
   useContext,
   useEffect,
   useRef,
-  useState,
+  useState
 } from "react";
+import { isEqual } from "lodash";
 import { BehaviorSubject } from "rxjs";
 import { distinctUntilChanged } from "rxjs/operators";
-import { isEqual } from "lodash";
 import Cookies from "universal-cookie";
 
 // ----- TYPES -----
@@ -32,7 +32,7 @@ const CookiesContext = createContext<CookiesContextValue>(undefined);
 
 export const CookiesProvider = ({
   children,
-  value,
+  value
 }: {
   children: ReactNode;
   value?: CookiesContextValue;

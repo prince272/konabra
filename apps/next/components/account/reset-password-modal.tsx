@@ -50,7 +50,7 @@ export default function ResetPasswordModal({
       code: "",
       newPassword: "",
       confirmPassword: ""
-    },
+    }
   });
 
   const formErrors = useMemo(

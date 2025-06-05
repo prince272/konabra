@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useInsertionEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { BehaviorSubject } from "rxjs";
 
 // Extend the History interface to include the _patched property
 declare global {
@@ -10,18 +11,10 @@ declare global {
   }
 }
 
-// Centralized event emitter for hash changes
-const hashChangeEmitter = {
-  listeners: new Set<() => void>(),
-  subscribe: (callback: () => void) => {
-    hashChangeEmitter.listeners.add(callback);
-    return () => hashChangeEmitter.listeners.delete(callback);
-  },
-  notify: () => {
-    if (typeof window === "undefined") return;
-    hashChangeEmitter.listeners.forEach((callback) => callback());
-  }
-};
+// Create a BehaviorSubject for hash changes
+const hashChangeSubject = new BehaviorSubject<string>(
+  typeof window !== "undefined" ? window.location.hash.replace(/^#!?/, "") : ""
+);
 
 // Monkey-patch history methods once
 if (typeof window !== "undefined" && !window.history._patched) {
@@ -31,7 +24,9 @@ if (typeof window !== "undefined" && !window.history._patched) {
     return function (this: any, data: any, unused: string, url?: string | URL | null | undefined) {
       const result = method.apply(this, [data, unused, url]);
       if (url !== window.location.href) {
-        setTimeout(hashChangeEmitter.notify, 0);
+        setTimeout(() => {
+          hashChangeSubject.next(window.location.hash.replace(/^#!?/, ""));
+        }, 0);
       }
       return result;
     };
@@ -41,7 +36,11 @@ if (typeof window !== "undefined" && !window.history._patched) {
   window.history.replaceState = patched(replaceState);
   window.history._patched = true;
 
-  window.addEventListener("hashchange", () => setTimeout(hashChangeEmitter.notify, 0));
+  window.addEventListener("hashchange", () => {
+    setTimeout(() => {
+      hashChangeSubject.next(window.location.hash.replace(/^#!?/, ""));
+    }, 0);
+  });
 }
 
 export const useHashState = () => {
@@ -58,16 +57,14 @@ export const useHashState = () => {
   useInsertionEffect(() => {
     if (typeof window === "undefined") return;
 
-    // This effect only sets up the subscription
-    const unsubscribe = hashChangeEmitter.subscribe(() => {
-      // The actual state update will happen in a useEffect
-      requestAnimationFrame(() => {
-        setHashState(getCurrentHash());
-      });
+    const subscription = hashChangeSubject.subscribe({
+      next: (newHash) => {
+        setHashState(newHash);
+      }
     });
 
     return () => {
-      unsubscribe();
+      subscription.unsubscribe();
     };
   }, []);
 
@@ -90,7 +87,7 @@ export const useHashState = () => {
             "",
             `${pathname}${searchParams ? `?${searchParams}` : ""}${cleanHash}`
           );
-          setTimeout(hashChangeEmitter.notify, 0);
+          hashChangeSubject.next(newHash);
         } else {
           router.replace(`${pathname}${searchParams ? `?${searchParams}` : ""}${cleanHash}`, {
             scroll: false
@@ -111,7 +108,7 @@ export const useHashState = () => {
           "",
           `${pathname}${searchParams ? `?${searchParams}` : ""}`
         );
-        setTimeout(hashChangeEmitter.notify, 0);
+        hashChangeSubject.next("");
       } else {
         router.replace(`${pathname}${searchParams ? `?${searchParams}` : ""}`, {
           scroll: false

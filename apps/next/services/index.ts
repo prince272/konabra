@@ -1,6 +1,7 @@
 import axios, { AxiosError, AxiosResponse, isAxiosError } from "axios";
 import PQueue from "p-queue";
 import Cookies from "universal-cookie";
+import { stringifyPath } from "@/utils";
 import { CategoryService } from "./category-service";
 import { AccountWithToken, IdentityService } from "./identity-service";
 
@@ -94,14 +95,25 @@ api.interceptors.response.use(
         // Retry original request
         return api(originalRequest);
       } catch (refreshError) {
-        if (isAxiosError(refreshError) && refreshError.response?.status === 401) {
+        if (
+          isAxiosError(refreshError) &&
+          (refreshError.response?.status === 500 || refreshError.response?.status === 400)
+        ) {
           console.warn("Redirecting to sign-in due to refresh failure.", refreshError);
 
           // Refresh failed - clear tokens and redirect
           cookies.remove("current-account", { path: "/" });
 
           if (typeof window !== "undefined") {
-            window.location.href = "#signin";
+            const returnUrl = window.location.href || "/";
+            window.location.href = stringifyPath(
+              {
+                url: "/",
+                query: { returnUrl },
+                fragmentIdentifier: "signin"
+              },
+              { skipNull: true }
+            );
           }
         }
 

@@ -9,14 +9,9 @@ import { addToast } from "@heroui/toast";
 import { Icon } from "@iconify-icon/react";
 import { Controller, useForm } from "react-hook-form";
 import { categoryService } from "@/services";
-import { Category } from "@/services/category-service";
-import { useModalRouter } from "@/components/common/modals";
+import { Category, CreateCategoryForm } from "@/services/category-service";
 import { categoryStore } from "@/states/categories";
-
-export type CreateCategoryForm = {
-  name: string;
-  description: string;
-};
+import { useModalRouter } from "@/components/common/modals";
 
 interface AddEditCategoryModalProps {
   isOpen: boolean;
@@ -143,13 +138,6 @@ function AddEditCategoryModal({
               <Controller
                 name="name"
                 control={form.control}
-                rules={{
-                  required: "Name is required",
-                  minLength: {
-                    value: 3,
-                    message: "Name must be at least 3 characters"
-                  }
-                }}
                 render={({ field }) => (
                   <Input
                     {...field}
@@ -164,12 +152,6 @@ function AddEditCategoryModal({
               <Controller
                 name="description"
                 control={form.control}
-                rules={{
-                  maxLength: {
-                    value: 256,
-                    message: "Description must be less than 256 characters."
-                  }
-                }}
                 render={({ field }) => (
                   <Textarea
                     {...field}

@@ -119,11 +119,11 @@ func (repository *IdentityRepository) UserNameExists(name string) bool {
 	return count > 0
 }
 
-func (repository *IdentityRepository) EnsureRoleExists(roleNames ...string) ([]*models.Role, error) {
-	var resultRoles []*models.Role
+func (repository *IdentityRepository) EnsureRoleExists(roleNames ...string) ([]models.Role, error) {
+	var resultRoles []models.Role
 
 	for _, roleName := range roleNames {
-		var existingRole *models.Role
+		var existingRole models.Role
 		// Check if the role already exists
 		if err := repository.defaultDB.
 			Where("name = ?", roleName).
@@ -137,11 +137,11 @@ func (repository *IdentityRepository) EnsureRoleExists(roleNames ...string) ([]*
 		}
 
 		// Role does not exist, so create it
-		roleModel := &models.Role{
+		roleModel := models.Role{
 			Id:   uuid.New().String(),
 			Name: roleName,
 		}
-		result := repository.defaultDB.Create(roleModel)
+		result := repository.defaultDB.Create(&roleModel)
 		if result.Error != nil {
 			return nil, result.Error
 		}
@@ -164,7 +164,7 @@ func (repository *IdentityRepository) AddUserToRoles(user *models.User, roleName
 		return fmt.Errorf("failed to load existing roles: %w", err)
 	}
 
-	roleMap := make(map[string]*models.Role)
+	roleMap := make(map[string]models.Role)
 	for _, role := range user.UserRoles {
 		roleMap[role.Id] = role
 	}
@@ -172,7 +172,7 @@ func (repository *IdentityRepository) AddUserToRoles(user *models.User, roleName
 		roleMap[role.Id] = role
 	}
 
-	distinctRoles := make([]*models.Role, 0, len(roleMap))
+	distinctRoles := make([]models.Role, 0, len(roleMap))
 	for _, role := range roleMap {
 		distinctRoles = append(distinctRoles, role)
 	}

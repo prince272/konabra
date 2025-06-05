@@ -36,7 +36,7 @@ function emitLocalStateChange(key: string, value: any) {
 
 export function useLocalState<S>(
   key: string,
-  initialState: S | (() => S),
+  initialState: S | (() => S)
 ): [S, Dispatch<SetStateAction<S>>] {
   const isMountedRef = useRef(false);
 

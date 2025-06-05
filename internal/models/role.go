@@ -13,7 +13,7 @@ type Role struct {
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at;index"`
 	Order     int
-	Users     []*User `gorm:"many2many:user_roles;"`
+	Users     []User `gorm:"many2many:user_roles;"`
 }
 
 var (

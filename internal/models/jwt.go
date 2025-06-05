@@ -3,7 +3,7 @@ package models
 import "time"
 
 type JwtToken struct {
-	Id                    string
+	Id                    string `gorm:"primaryKey"`
 	Subject               string
 	TokenType             string
 	IssuedAt              time.Time

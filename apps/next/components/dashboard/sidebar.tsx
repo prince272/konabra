@@ -17,11 +17,8 @@ import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/d
 import { cn } from "@heroui/theme";
 import { Tooltip } from "@heroui/tooltip";
 import { Icon } from "@iconify-icon/react";
-import { categoryService } from "@/services";
-import { Category } from "@/services/category-service";
-import { useAccountState } from "@/states";
 import { categoryStore } from "@/states/categories";
-import { useAsyncMemo } from "@/hooks";
+import { useAccountState } from "@/states";
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -63,6 +60,9 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, path, icon, children, onItem
   const handleItemClick = () => {
     if (hasChildren && !collapsed) {
       toggleMenu(title.toLowerCase());
+      if (onItemClick) {
+        onItemClick(path); // Also navigate when parent clicked
+      }
     } else if (onItemClick) {
       onItemClick(path);
     }
@@ -80,8 +80,8 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, path, icon, children, onItem
                 ? "flat"
                 : "light"
               : isActive(path)
-                ? "flat"
-                : "light"
+              ? "flat"
+              : "light"
           }
           isIconOnly
           color={
@@ -90,8 +90,8 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, path, icon, children, onItem
                 ? "primary"
                 : "default"
               : isActive(path)
-                ? "primary"
-                : "default"
+              ? "primary"
+              : "default"
           }
           className="mx-auto mb-2"
           onPress={handleItemClick}
@@ -109,10 +109,10 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, path, icon, children, onItem
     return (
       <div>
         <Button
-          variant="light"
+          variant={isActive(path) || isChildActive({ title, path, icon, children }) ? "flat" : "light"}
           radius="full"
-          color={isChildActive({ title, path, icon, children }) ? "primary" : "default"}
-          className="mb-1 w-full justify-start"
+          color={isActive(path) || isChildActive({ title, path, icon, children }) ? "primary" : "default"}
+          className="mb-2 w-full justify-start"
           startContent={<Icon icon={icon} width="20" height="20" />}
           endContent={
             <Icon
@@ -146,7 +146,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, path, icon, children, onItem
       radius="full"
       variant={isActive(path) ? "flat" : "light"}
       color={isActive(path) ? "primary" : "default"}
-      className="mb-1 w-full justify-start"
+      className="mb-2 w-full justify-start"
       startContent={<Icon icon={icon} width="20" height="20" />}
       onPress={handleItemClick}
     >
@@ -161,7 +161,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
   const [currentAccount] = useAccountState();
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
   const [currentToggledMenu, setCurrentToggledMenu] = useState<string | null>(null);
-  const [categories, setCategories] = useState<Category[]>(categoryStore.get());
+  const [categories, setCategories] = useState(categoryStore.get());
 
   const toggleMenu = (menuTitle: string) => {
     if (collapsed) return;
@@ -171,6 +171,62 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
     }));
     setCurrentToggledMenu(menuTitle.toLowerCase());
   };
+
+  // Utility function to check if a menu (and its children) contains the active path
+  const checkActiveInMenu = (menuTitle: string, children?: ReactNode): boolean => {
+    const normalizedTitle = menuTitle.toLowerCase();
+
+    // Check if current pathname starts with menuTitle path segment
+    if (pathname.toLowerCase().startsWith(`/${normalizedTitle}`)) return true;
+
+    // Recursively check children paths if available
+    let hasActiveChild = false;
+    if (children) {
+      Children.forEach(children, (child) => {
+        if (isValidElement(child)) {
+          // Check if child's path matches active path or recursively check its children
+          if (pathname === child.props.path) {
+            hasActiveChild = true;
+          } else if (child.props.children) {
+            if (checkActiveInMenu(child.props.title, child.props.children)) {
+              hasActiveChild = true;
+            }
+          }
+        }
+      });
+    }
+    return hasActiveChild;
+  };
+
+  // On pathname change, collapse menus that are expanded but not active or have no active children
+  useEffect(() => {
+    setExpandedMenus((prev) => {
+      const newExpanded: Record<string, boolean> = {};
+
+      Object.keys(prev).forEach((menuKey) => {
+        if (prev[menuKey]) {
+          // We need to find if this menu is active or has active children.
+          // For your case, menus correspond to top-level menu titles in lowercase.
+
+          // Instead of scanning your static menu here, we can do a heuristic by pathname:
+          // Keep expanded if pathname starts with /menuKey
+          // Or else collapse.
+
+          // To do a more precise check, you'd need a reference to the menu structure.
+
+          if (pathname.toLowerCase().startsWith(`/${menuKey}`)) {
+            newExpanded[menuKey] = true;
+          } else {
+            newExpanded[menuKey] = false;
+          }
+        } else {
+          newExpanded[menuKey] = false;
+        }
+      });
+
+      return newExpanded;
+    });
+  }, [pathname]);
 
   const isActive = (path: string) => pathname === path;
 
@@ -225,7 +281,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
 
       <div className="flex-1 overflow-y-auto py-4">
         <nav
-          className={cn("flex flex-col justify-center space-y-1", {
+          className={cn("flex flex-col justify-center", {
             "px-1": collapsed,
             "px-2": !collapsed
           })}
@@ -243,17 +299,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
               icon="solar:danger-circle-broken"
               onItemClick={handleItemClick}
             >
-              <MenuItem
-                title="All Incidents"
-                path="/incidents"
-                icon="solar:list-broken"
-                onItemClick={handleItemClick}
-              />
               {categories.map((category) => (
                 <MenuItem
                   key={category.id}
                   title={category.name}
-                  path={`/incidents/${category.shortName}`}
+                  path={`/incidents/${category.slug}`}
                   icon="solar:tag-broken"
                   onItemClick={handleItemClick}
                 />

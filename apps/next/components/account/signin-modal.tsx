@@ -41,7 +41,7 @@ export default function SignInModal({
     defaultValues: {
       username: "",
       password: ""
-    },
+    }
   });
 
   const formErrors = useMemo(

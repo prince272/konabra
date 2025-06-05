@@ -73,7 +73,7 @@ func (repository *CategoryRepository) CategoryNameExists(name string) bool {
 	return count > 0
 }
 
-func (repository *CategoryRepository) CategoryShortNameExists(name string) bool {
+func (repository *CategoryRepository) CategorySlugExists(name string) bool {
 	var count int64
 	result := repository.defaultDB.Model(&models.Category{}).
 		Where("LOWER(short_name) = LOWER(?)", name).
@@ -111,12 +111,12 @@ func (repository *CategoryRepository) GetPaginatedCategories(filter CategoryPagi
 		query = query.Where("LOWER(name) LIKE LOWER(?)", "%"+filter.Search+"%")
 	}
 
-	// Define allowed sort fields and orders to prevent SQL injection
-	allowedSortFields := map[string]bool{
-		"name":       true,
-		"created_at": true,
-		"updated_at": true,
-		"order":      true,
+	// Define allowed sort fields in camelCase and their corresponding DB columns
+	allowedSortFields := map[string]string{
+		"name":      "name",
+		"createdAt": "created_at",
+		"updatedAt": "updated_at",
+		"order":     "\"order\"", // quoted to avoid reserved keyword issues
 	}
 
 	allowedOrders := map[string]string{
@@ -124,19 +124,21 @@ func (repository *CategoryRepository) GetPaginatedCategories(filter CategoryPagi
 		"desc": "DESC",
 	}
 
-	sortField := "order"
+	// Default sort settings
+	sortField := "\"order\""
 	sortOrder := "ASC"
 
-	if allowedSortFields[filter.Sort] {
-		sortField = filter.Sort
+	// Use camelCase filter.Sort and map to actual DB column
+	if dbField, ok := allowedSortFields[filter.Sort]; ok {
+		sortField = dbField
 	}
 
 	if val, ok := allowedOrders[strings.ToLower(filter.Order)]; ok {
 		sortOrder = val
 	}
 
-	// Apply default order by created_at first, then additional sort field if provided
-	query = query.Order("created_at ASC").Order(fmt.Sprintf("\"%s\" %s", sortField, sortOrder))
+	// Apply ordering
+	query = query.Order("created_at ASC").Order(fmt.Sprintf("%s %s", sortField, sortOrder))
 
 	// Count total items
 	if countResult := query.Count(&count); countResult.Error != nil {
@@ -171,12 +173,12 @@ func (repository *CategoryRepository) GetCategories(filter CategoryFilter) []*mo
 		query = query.Where("LOWER(name) LIKE LOWER(?)", "%"+filter.Search+"%")
 	}
 
-	// Define allowed sort fields and orders to prevent SQL injection
-	allowedSortFields := map[string]bool{
-		"name":       true,
-		"created_at": true,
-		"updated_at": true,
-		"order":      true,
+	// Define allowed camelCase sort fields and their corresponding DB columns
+	allowedSortFields := map[string]string{
+		"name":      "name",
+		"createdAt": "created_at",
+		"updatedAt": "updated_at",
+		"order":     "\"order\"",
 	}
 
 	allowedOrders := map[string]string{
@@ -184,19 +186,21 @@ func (repository *CategoryRepository) GetCategories(filter CategoryFilter) []*mo
 		"desc": "DESC",
 	}
 
-	sortField := "order"
+	// Default sort settings
+	sortField := "\"order\""
 	sortOrder := "ASC"
 
-	if allowedSortFields[filter.Sort] {
-		sortField = filter.Sort
+	// Map camelCase input to actual DB column
+	if dbField, ok := allowedSortFields[filter.Sort]; ok {
+		sortField = dbField
 	}
 
 	if val, ok := allowedOrders[strings.ToLower(filter.Order)]; ok {
 		sortOrder = val
 	}
 
-	// Apply default order by created_at first, then additional sort field if provided
-	query = query.Order("created_at ASC").Order(fmt.Sprintf("\"%s\" %s", sortField, sortOrder))
+	// Apply ordering
+	query = query.Order("created_at ASC").Order(fmt.Sprintf("%s %s", sortField, sortOrder))
 
 	// Fetch filtered items
 	if result := query.Find(&items); result.Error != nil {

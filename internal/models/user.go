@@ -23,7 +23,7 @@ type User struct {
 	UpdatedAt             time.Time
 	LastActiveAt          time.Time
 	LastPasswordChangedAt time.Time
-	UserRoles             []*Role        `gorm:"many2many:user_roles;"`
+	UserRoles             []Role         `gorm:"many2many:user_roles;"`
 	DeletedAt             gorm.DeletedAt `gorm:"column:deleted_at;index"`
 }
 

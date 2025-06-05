@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { AppProgressProvider as ProgressProvider } from "@bprogress/next";
 import { HeroUIProvider } from "@heroui/system";
 import { ToastProvider } from "@heroui/toast";
 import type { ThemeProviderProps } from "next-themes";
@@ -28,10 +29,18 @@ export function Providers({ children, cookies, themeProps }: ProvidersProps) {
   return (
     <HeroUIProvider navigate={router.push}>
       <NextThemesProvider {...themeProps}>
-        <ToastProvider placement={isSmallScreen ? "bottom-center" : "top-center"} />
-        <CookiesProvider value={cookies}>
-          <ModalQueueProvider>{children}</ModalQueueProvider>
-        </CookiesProvider>
+        <ProgressProvider
+          height="4px"
+          color="hsl(var(--heroui-primary))"
+          options={{ showSpinner: false }}
+          delay ={100}
+          shallowRouting
+        >
+          <ToastProvider placement={isSmallScreen ? "bottom-center" : "top-center"} />
+          <CookiesProvider value={cookies}>
+            <ModalQueueProvider>{children}</ModalQueueProvider>
+          </CookiesProvider>
+        </ProgressProvider>
       </NextThemesProvider>
     </HeroUIProvider>
   );

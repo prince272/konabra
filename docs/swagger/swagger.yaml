@@ -1,5 +1,29 @@
 basePath: /
 definitions:
+  models.IncidentSeverity:
+    enum:
+    - low
+    - medium
+    - high
+    - critical
+    type: string
+    x-enum-varnames:
+    - SeverityLow
+    - SeverityMedium
+    - SeverityHigh
+    - SeverityCritical
+  models.IncidentStatus:
+    enum:
+    - pending
+    - investigating
+    - resolved
+    - falseAlarm
+    type: string
+    x-enum-varnames:
+    - StatusPending
+    - StatusInvestigating
+    - StatusResolved
+    - StatusFalseAlarm
   services.ChangeAccountForm:
     properties:
       newUsername:
@@ -83,10 +107,36 @@ definitions:
         maxLength: 1024
         type: string
       name:
-        maxLength: 256
+        maxLength: 512
         type: string
     required:
     - name
+    type: object
+  services.CreateIncidentForm:
+    properties:
+      categoryId:
+        type: string
+      description:
+        maxLength: 1024
+        type: string
+      latitude:
+        type: number
+      location:
+        type: string
+      longitude:
+        type: number
+      severity:
+        $ref: '#/definitions/models.IncidentSeverity'
+      status:
+        $ref: '#/definitions/models.IncidentStatus'
+      title:
+        maxLength: 256
+        type: string
+    required:
+    - categoryId
+    - severity
+    - status
+    - title
     type: object
   services.ResetPasswordForm:
     properties:
@@ -129,10 +179,36 @@ definitions:
         maxLength: 1024
         type: string
       name:
-        maxLength: 256
+        maxLength: 512
         type: string
     required:
     - name
+    type: object
+  services.UpdateIncidentForm:
+    properties:
+      categoryId:
+        type: string
+      description:
+        maxLength: 1024
+        type: string
+      latitude:
+        type: number
+      location:
+        type: string
+      longitude:
+        type: number
+      severity:
+        $ref: '#/definitions/models.IncidentSeverity'
+      status:
+        $ref: '#/definitions/models.IncidentStatus'
+      title:
+        maxLength: 256
+        type: string
+    required:
+    - categoryId
+    - severity
+    - status
+    - title
     type: object
   services.VerifyAccountForm:
     properties:
@@ -494,6 +570,143 @@ paths:
       summary: Get all categories
       tags:
       - Categories
+  /incidents:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - in: query
+        name: endDate
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - description: asc or desc
+        in: query
+        name: order
+        type: string
+      - in: query
+        name: search
+        type: string
+      - enum:
+        - low
+        - medium
+        - high
+        - critical
+        in: query
+        name: severity
+        type: string
+        x-enum-varnames:
+        - SeverityLow
+        - SeverityMedium
+        - SeverityHigh
+        - SeverityCritical
+      - in: query
+        name: sort
+        type: string
+      - in: query
+        name: startDate
+        type: string
+      - enum:
+        - pending
+        - investigating
+        - resolved
+        - falseAlarm
+        in: query
+        name: status
+        type: string
+        x-enum-varnames:
+        - StatusPending
+        - StatusInvestigating
+        - StatusResolved
+        - StatusFalseAlarm
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get paginated incidents
+      tags:
+      - Incidents
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Incident creation form
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateIncidentForm'
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Create a new incident
+      tags:
+      - Incidents
+  /incidents/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Incident Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Delete an incident by Id
+      tags:
+      - Incidents
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Incident Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get incident by Id
+      tags:
+      - Incidents
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Incident Id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Incident update form
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/services.UpdateIncidentForm'
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Update an existing incident
+      tags:
+      - Incidents
 securityDefinitions:
   BearerAuth:
     in: header

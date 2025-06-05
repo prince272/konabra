@@ -1,6 +1,16 @@
 import { AxiosInstance } from "axios";
 import { parseProblem, Problem } from ".";
 
+
+export const Severities = {
+  Low: "Low",
+  Medium: "Medium",
+  High: "High",
+  Critical: "Critical",
+} as const;
+
+export type Severity = (typeof Severities)[keyof typeof Severities];
+
 export type CreateCategoryForm = {
   name: string;
   description: string;
@@ -11,15 +21,15 @@ export type UpdateCategoryForm = CreateCategoryForm & {};
 export type Category = {
   id: string;
   name: string;
-  shortName: string;
+  slug: string;
   description: string;
   createdAt: string;
   updatedAt: string;
 };
 
 export type CategoryFilter = {
-  sort?: string; // e.g., "name" or "createdAt"
-  order?: "asc" | "desc"; // e.g., "asc" or "desc"
+  sort?: string;
+  order?: "asc" | "desc";
   search?: string;
 };
 

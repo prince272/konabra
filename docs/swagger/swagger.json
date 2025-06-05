@@ -553,9 +553,252 @@
                 ],
                 "responses": {}
             }
+        },
+        "/incidents": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Incidents"
+                ],
+                "summary": "Get paginated incidents",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "endDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "asc or desc",
+                        "name": "order",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "low",
+                            "medium",
+                            "high",
+                            "critical"
+                        ],
+                        "type": "string",
+                        "x-enum-varnames": [
+                            "SeverityLow",
+                            "SeverityMedium",
+                            "SeverityHigh",
+                            "SeverityCritical"
+                        ],
+                        "name": "severity",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "startDate",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "pending",
+                            "investigating",
+                            "resolved",
+                            "falseAlarm"
+                        ],
+                        "type": "string",
+                        "x-enum-varnames": [
+                            "StatusPending",
+                            "StatusInvestigating",
+                            "StatusResolved",
+                            "StatusFalseAlarm"
+                        ],
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {}
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Incidents"
+                ],
+                "summary": "Create a new incident",
+                "parameters": [
+                    {
+                        "description": "Incident creation form",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.CreateIncidentForm"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/incidents/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Incidents"
+                ],
+                "summary": "Get incident by Id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Incident Id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Incidents"
+                ],
+                "summary": "Update an existing incident",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Incident Id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Incident update form",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.UpdateIncidentForm"
+                        }
+                    }
+                ],
+                "responses": {}
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Incidents"
+                ],
+                "summary": "Delete an incident by Id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Incident Id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
         }
     },
     "definitions": {
+        "models.IncidentSeverity": {
+            "type": "string",
+            "enum": [
+                "low",
+                "medium",
+                "high",
+                "critical"
+            ],
+            "x-enum-varnames": [
+                "SeverityLow",
+                "SeverityMedium",
+                "SeverityHigh",
+                "SeverityCritical"
+            ]
+        },
+        "models.IncidentStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "investigating",
+                "resolved",
+                "falseAlarm"
+            ],
+            "x-enum-varnames": [
+                "StatusPending",
+                "StatusInvestigating",
+                "StatusResolved",
+                "StatusFalseAlarm"
+            ]
+        },
         "services.ChangeAccountForm": {
             "type": "object",
             "required": [
@@ -679,6 +922,43 @@
                 },
                 "name": {
                     "type": "string",
+                    "maxLength": 512
+                }
+            }
+        },
+        "services.CreateIncidentForm": {
+            "type": "object",
+            "required": [
+                "categoryId",
+                "severity",
+                "status",
+                "title"
+            ],
+            "properties": {
+                "categoryId": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 1024
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "longitude": {
+                    "type": "number"
+                },
+                "severity": {
+                    "$ref": "#/definitions/models.IncidentSeverity"
+                },
+                "status": {
+                    "$ref": "#/definitions/models.IncidentStatus"
+                },
+                "title": {
+                    "type": "string",
                     "maxLength": 256
                 }
             }
@@ -747,6 +1027,43 @@
                     "maxLength": 1024
                 },
                 "name": {
+                    "type": "string",
+                    "maxLength": 512
+                }
+            }
+        },
+        "services.UpdateIncidentForm": {
+            "type": "object",
+            "required": [
+                "categoryId",
+                "severity",
+                "status",
+                "title"
+            ],
+            "properties": {
+                "categoryId": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 1024
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "longitude": {
+                    "type": "number"
+                },
+                "severity": {
+                    "$ref": "#/definitions/models.IncidentSeverity"
+                },
+                "status": {
+                    "$ref": "#/definitions/models.IncidentStatus"
+                },
+                "title": {
                     "type": "string",
                     "maxLength": 256
                 }

@@ -35,13 +35,8 @@ export default function SignOutModal({
 
   const handleSubmit = useCallback(
     async (data: SignOutForm) => {
-      const problem = await identityService.signOut(data);
-      if (problem) {
-        addToast({
-          title: problem.message,
-          color: "danger"
-        });
-      } else {
+      await identityService.signOut(data);
+      {
         setAccount(null);
         addToast({
           title: `Signed out successfully${data.global ? " from all sessions" : ""}.`,

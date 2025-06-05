@@ -28,7 +28,6 @@ export function stringifyPath(object: UrlObject, options?: StringifyOptions): st
       url: `${BASE}${originalUrl}`
     };
 
-    // 2) stringify
     const full = queryString.stringifyUrl(withBase, options);
     return full.replace(BASE, "");
   }

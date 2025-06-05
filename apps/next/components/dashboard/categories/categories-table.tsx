@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from 
 import { cn } from "@heroui/theme";
 import { Icon } from "@iconify-icon/react";
 import { Category } from "@/services/category-service";
+import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 
 interface CategoriesTableProps {
   categories: Category[];
@@ -81,10 +82,10 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
                 {errorMessage || "Something went wrong. Please try again later."}
               </p>
               {onReload && (
-                <Button 
-                  color="primary" 
-                  variant="solid" 
-                  radius="full" 
+                <Button
+                  color="primary"
+                  variant="solid"
+                  radius="full"
                   onPress={onReload}
                   startContent={<Icon icon="solar:refresh-broken" />}
                 >
@@ -94,7 +95,10 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
             </div>
           ) : (
             <div className="flex h-64 flex-1 flex-col items-center justify-center text-center">
-              <Icon icon="solar:folder-with-files-broken" className="mb-4 text-6xl text-foreground-300" />
+              <Icon
+                icon="solar:folder-with-files-broken"
+                className="mb-4 text-6xl text-foreground-300"
+              />
               <p className="mb-2 text-foreground-500">No categories found</p>
               <p className="text-sm text-foreground-400">
                 {emptyMessage || "No matching results. Please try a different keyword."}
@@ -117,28 +121,43 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
               </div>
             </TableCell>
             <TableCell>
-              <div className="flex justify-end gap-2">
-                <Button
-                  isIconOnly
-                  size="sm"
-                  variant="light"
-                  radius="full"
-                  onPress={() => onEdit(category)}
-                  aria-label="Edit category"
-                >
-                  <Icon icon="solar:pen-new-square-broken" width="20" height="20" />
-                </Button>
-                <Button
-                  isIconOnly
-                  size="sm"
-                  variant="light"
-                  radius="full"
-                  color="danger"
-                  onPress={() => onDelete(category)}
-                  aria-label="Delete category"
-                >
-                  <Icon icon="solar:trash-bin-trash-broken" width="20" height="20" />
-                </Button>
+              <div className="flex justify-end">
+                <Dropdown>
+                  <DropdownTrigger>
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      variant="light"
+                      radius="full"
+                      aria-label="More actions"
+                    >
+                   <Icon icon="material-symbols:more-vert" width="20" height="20" />
+
+                    </Button>
+                  </DropdownTrigger>
+                  <DropdownMenu aria-label="Category actions" variant="flat">
+                    <DropdownItem
+                      key="edit"
+                      onClick={() => onEdit(category)}
+                      startContent={
+                        <Icon icon="solar:pen-new-square-broken" width="18" height="18" />
+                      }
+                    >
+                      Edit
+                    </DropdownItem>
+                    <DropdownItem
+                      key="delete"
+                      className="text-danger"
+                      color="danger"
+                      onClick={() => onDelete(category)}
+                      startContent={
+                        <Icon icon="solar:trash-bin-trash-broken" width="18" height="18" />
+                      }
+                    >
+                      Delete
+                    </DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
               </div>
             </TableCell>
           </TableRow>

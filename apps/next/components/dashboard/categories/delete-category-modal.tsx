@@ -8,8 +8,8 @@ import { addToast } from "@heroui/toast";
 import { Icon } from "@iconify-icon/react";
 import { categoryService } from "@/services";
 import { Category } from "@/services/category-service";
-import { useModalRouter } from "@/components/common/modals";
 import { categoryStore } from "@/states/categories";
+import { useModalRouter } from "@/components/common/modals";
 
 interface DeleteCategoryModalProps {
   isOpen: boolean;
@@ -32,7 +32,7 @@ function DeleteCategoryModal({ isOpen, onClose, categoryId, onSuccess }: DeleteC
         color: "danger"
       });
     } else {
-      const category = { id: categoryId } as Category
+      const category = { id: categoryId } as Category;
 
       addToast({
         title: "Category deleted successfully.",

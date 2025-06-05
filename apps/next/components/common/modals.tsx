@@ -6,8 +6,11 @@ import { useHashState, useQueue } from "@/hooks";
 interface ModalQueueContextValue {
   currentModal: string | null;
   mountedModal: string | null;
+  hash: string | null;
   openModal: (modalName: string) => void;
   closeModal: () => void;
+  setHash: (hash: string) => void;
+  removeHash: () => void;
 }
 
 const ModalQueueContext = createContext<ModalQueueContextValue | undefined>(undefined);
@@ -15,7 +18,18 @@ const ModalQueueContext = createContext<ModalQueueContextValue | undefined>(unde
 export function ModalQueueProvider({ children }: { children: React.ReactNode }) {
   const [currentModal, setCurrentModal] = useState<string | null>(null);
   const [mountedModal, setMountedModal] = useState<string | null>(null);
+  const [hash, setHash, removeHash] = useHashState();
   const modalQueue = useQueue();
+
+  const modalName = useMemo(() => hash?.split(":")[0], [hash]);
+
+  useEffect(() => {
+    if (modalName) {
+      openModal(modalName);
+    } else {
+      closeModal();
+    }
+  }, [modalName]);
 
   const openModal = useCallback(
     (modalName: string) => {
@@ -45,8 +59,11 @@ export function ModalQueueProvider({ children }: { children: React.ReactNode }) 
   const value: ModalQueueContextValue = {
     currentModal,
     mountedModal,
+    hash,
     openModal,
-    closeModal
+    closeModal,
+    setHash,
+    removeHash
   };
 
   return <ModalQueueContext.Provider value={value}>{children}</ModalQueueContext.Provider>;
@@ -61,17 +78,8 @@ function useModalQueue() {
 }
 
 export function useModalRouter() {
-  const [hash, setHash, removeHash] = useHashState();
-  const modalName = useMemo(() => hash?.split(":")[0], [hash]);
-  const { openModal, closeModal, currentModal, mountedModal } = useModalQueue();
-
-  useEffect(() => {
-    if (modalName) {
-      openModal(modalName);
-    } else {
-      closeModal();
-    }
-  }, [modalName]);
+  const { openModal, closeModal, currentModal, mountedModal, hash, setHash, removeHash } =
+    useModalQueue();
 
   const handleOpenModal = useCallback(
     (modalName: string) => {

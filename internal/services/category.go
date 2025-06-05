@@ -20,7 +20,7 @@ type CategoryService struct {
 }
 
 type CreateCategoryForm struct {
-	Name        string `json:"name" validate:"required,max=256"`
+	Name        string `json:"name" validate:"required,max=512"`
 	Description string `json:"description" validate:"max=1024"`
 }
 
@@ -31,7 +31,7 @@ type UpdateCategoryForm struct {
 type CategoryModel struct {
 	Id          string `json:"id"`
 	Name        string `json:"name"`
-	ShortName   string `json:"shortName"`
+	Slug        string `json:"slug"`
 	Description string `json:"description"`
 }
 
@@ -67,7 +67,7 @@ func (service *CategoryService) CreateCategory(form CreateCategoryForm) (*Catego
 	}
 
 	category.Id = uuid.New().String()
-	category.ShortName = utils.GenerateSlug([]string{form.Name}, service.categoryRepository.CategoryShortNameExists)
+	category.Slug = utils.GenerateSlug([]string{form.Name}, service.categoryRepository.CategorySlugExists)
 	err := service.categoryRepository.CreateCategory(category)
 
 	if err != nil {
@@ -106,15 +106,15 @@ func (service *CategoryService) UpdateCategory(id string, form UpdateCategoryFor
 		return nil, problems.FromError(err)
 	}
 
-	formShortName := utils.GenerateSlug([]string{form.Name})
+	slug := utils.GenerateSlug([]string{form.Name})
 
-	if exists := service.categoryRepository.CategoryShortNameExists(formShortName); exists {
-		if category.ShortName != formShortName {
-			category.ShortName = utils.GenerateSlug([]string{form.Name}, service.categoryRepository.CategoryShortNameExists)
+	if exists := service.categoryRepository.CategorySlugExists(slug); exists {
+		if category.Slug != slug {
+			category.Slug = utils.GenerateSlug([]string{form.Name}, service.categoryRepository.CategorySlugExists)
 		}
 	}
 
-	category.ShortName = formShortName
+	category.Slug = slug
 	err := service.categoryRepository.UpdateCategory(category)
 
 	if err != nil {

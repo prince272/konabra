@@ -182,7 +182,14 @@ func (api *Api) registerDefaultDB() error {
 		return fmt.Errorf("failed to open database: %w", err)
 	}
 
-	if err := db.AutoMigrate(&models.User{}, &models.Role{}, &models.JwtToken{}, &models.Category{}); err != nil {
+	if err := db.AutoMigrate(
+		&models.User{},
+		&models.Role{},
+		&models.JwtToken{},
+		&models.Category{},
+		&models.Incident{},
+		&models.IncidentActivity{},
+	); err != nil {
 		return fmt.Errorf("auto migration failed: %w", err)
 	}
 
