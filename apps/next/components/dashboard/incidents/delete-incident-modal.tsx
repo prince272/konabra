@@ -6,54 +6,59 @@ import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@herou
 import { Spinner } from "@heroui/spinner";
 import { addToast } from "@heroui/toast";
 import { Icon } from "@iconify-icon/react";
-import { categoryService } from "@/services";
-import { Category } from "@/services/category-service";
-import { categoryStore } from "@/states/categories";
+import { incidentService } from "@/services";
+import { Incident } from "@/services/incident-service";
 import { useModalRouter } from "@/components/common/modals";
 
-interface DeleteCategoryModalProps {
+interface DeleteIncidentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  categoryId: string;
-  onSuccess?: (category: Category) => void;
+  incidentId: string;
+  onSuccess?: (incident: Incident) => void;
 }
 
-function DeleteCategoryModal({
+function DeleteIncidentModal({
   isOpen,
   onClose,
-  categoryId,
+  incidentId,
   onSuccess
-}: DeleteCategoryModalProps) {
+}: DeleteIncidentModalProps) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [incident, setIncident] = useState<Incident | null>(null);
   const [loading, setLoading] = useState(true);
-  const [category, setCategory] = useState<Category | null>(null);
 
   useEffect(() => {
-    const fetchCategory = async () => {
+    const fetchIncident = async () => {
+      if (!incidentId) return;
       setLoading(true);
-      const [data, problem] = await categoryService.getCategoryById(categoryId);
-      if (!problem) setCategory(data);
+      const [data, problem] = await incidentService.getIncidentById(incidentId);
+      if (!problem) {
+        setIncident(data);
+      }
       setLoading(false);
     };
 
-    if (isOpen) fetchCategory();
-  }, [categoryId, isOpen]);
+    if (isOpen) {
+      fetchIncident();
+    }
+  }, [incidentId, isOpen]);
 
   const handleDelete = async () => {
     setIsDeleting(true);
-    const problem = await categoryService.deleteCategory(categoryId);
+    const problem = await incidentService.deleteIncident(incidentId);
     setIsDeleting(false);
 
     if (problem) {
       addToast({
-        title: problem.message || "Failed to delete category.",
+        title: problem.message || "Failed to delete incident.",
         color: "danger"
       });
     } else {
-      const deleted = { id: categoryId } as Category;
-      addToast({ title: "Category deleted successfully.", color: "success" });
-      onSuccess?.(deleted);
-      categoryStore.remove(deleted);
+      addToast({
+        title: "Incident deleted successfully.",
+        color: "success"
+      });
+      onSuccess?.({ id: incidentId } as Incident);
       onClose();
     }
   };
@@ -76,7 +81,7 @@ function DeleteCategoryModal({
     >
       <ModalContent>
         <ModalHeader>
-          <h2 className="text-xl font-bold">Delete Category</h2>
+          <h2 className="text-xl font-bold">Delete Incident</h2>
         </ModalHeader>
         <ModalBody>
           {loading ? (
@@ -92,15 +97,14 @@ function DeleteCategoryModal({
                 height="42"
               />
               <p>
-                Are you sure you want to delete the category{" "}
-                <span className="font-semibold text-foreground">
-                  {category?.name || "this category"}
-                </span>
-                ? This action cannot be undone.
+                Are you sure you want to delete the incident{" "}
+                <span className="font-semibold text-foreground">{incident?.title}</span>?<br />
+                This action cannot be undone.
               </p>
             </div>
           )}
         </ModalBody>
+
         <ModalFooter>
           <div className="flex w-full justify-end gap-3">
             <Button radius="full" variant="flat" onPress={onClose} disabled={isDeleting}>
@@ -122,28 +126,28 @@ function DeleteCategoryModal({
   );
 }
 
-export function DeleteCategoryModalRouter({
+export function DeleteIncidentModalRouter({
   onSuccess
 }: {
-  onSuccess?: (category: Category) => void;
+  onSuccess?: (incident: Incident) => void;
 }) {
   const { closeModal, currentModal, mountedModal } = useModalRouter();
 
-  const isDeleteModal = mountedModal?.startsWith("delete-category-");
-  const isOpen = currentModal?.startsWith("delete-category-") || false;
+  const isDeleteModal = mountedModal?.startsWith("delete-incident-");
+  const isOpen = currentModal?.startsWith("delete-incident-") || false;
 
-  const categoryId = currentModal?.startsWith("delete-category-")
-    ? currentModal.replace("delete-category-", "")
+  const incidentId = currentModal?.startsWith("delete-incident-")
+    ? currentModal.replace("delete-incident-", "")
     : "";
 
   return (
     <>
-      {isDeleteModal && categoryId && (
-        <DeleteCategoryModal
+      {isDeleteModal && incidentId && (
+        <DeleteIncidentModal
           isOpen={isOpen}
           onClose={closeModal}
           onSuccess={onSuccess}
-          categoryId={categoryId}
+          incidentId={incidentId}
         />
       )}
     </>

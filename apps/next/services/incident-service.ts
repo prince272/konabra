@@ -9,10 +9,10 @@ export const IncidentStatus = {
 } as const;
 
 export const IncidentSeverity = {
-  Low: "Low",
-  Medium: "Medium",
-  High: "High",
-  Critical: "Critical"
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Critical: "critical"
 } as const;
 
 export type Status = (typeof IncidentStatus)[keyof typeof IncidentStatus];
@@ -23,8 +23,6 @@ export type CreateIncidentForm = {
   title: string;
   description: string;
   severity: Severity;
-  status: Status;
-  reportedById: string;
 };
 
 export type UpdateIncidentForm = Partial<CreateIncidentForm>;

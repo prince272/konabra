@@ -4,6 +4,7 @@ import Cookies from "universal-cookie";
 import { stringifyPath } from "@/utils";
 import { CategoryService } from "./category-service";
 import { AccountWithToken, IdentityService } from "./identity-service";
+import { IncidentService } from "./incident-service";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -127,6 +128,7 @@ api.interceptors.response.use(
 
 export const identityService = new IdentityService(api);
 export const categoryService = new CategoryService(api);
+export const incidentService = new IncidentService(api);
 
 export type Problem = {
   type: string;
