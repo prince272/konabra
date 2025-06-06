@@ -101,7 +101,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
       {/* Main content */}
       <div className="flex h-screen flex-1 flex-col overflow-hidden">
         {/* Top navbar */}
-        <Navbar maxWidth="full" className="bg-content1 shadow-sm">
+        <Navbar maxWidth="full" className="bg-content2">
           <NavbarContent justify="start">
             {isSmallScreen ? (
               <NavbarItem>
@@ -252,7 +252,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
         </Drawer>
 
         {/* Page content */}
-        <main className="flex flex-1 flex-col overflow-y-auto bg-background p-6">{children}</main>
+        <main className="flex flex-1 flex-col overflow-y-auto p-6">{children}</main>
       </div>
     </div>
   );

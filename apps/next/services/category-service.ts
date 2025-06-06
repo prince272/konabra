@@ -28,8 +28,8 @@ export type Category = {
 };
 
 export type CategoryFilter = {
-  sort?: string;
-  order?: "asc" | "desc";
+  sort?: string | null;
+  order?: "asc" | "desc" | null;
   search?: string;
 };
 

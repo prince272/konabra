@@ -80,6 +80,30 @@ export type CompleteChangeAccountForm = {
   code: string;
 };
 
+export type CreateRoleForm = {
+  name: string;
+  description: string;
+};
+
+export type UpdateRoleForm = CreateRoleForm;
+
+export type Role = {
+  id: string;
+  name: string;
+  description: string;
+};
+
+export type RoleFilter = {
+  sort?: string | null;
+  order?: "asc" | "desc" | null;
+  search?: string;
+};
+
+export type RolePaginatedFilter = RoleFilter & {
+  offset: number;
+  limit: number;
+};
+
 export class IdentityService {
   constructor(private readonly api: AxiosInstance) {}
 
@@ -187,6 +211,66 @@ export class IdentityService {
       return undefined;
     } catch (error) {
       return parseProblem(error);
+    }
+  }
+
+  public async createRole(form: CreateRoleForm): Promise<readonly [Role, Problem?]> {
+    try {
+      const response = await this.api.post("/roles", form);
+      return [response.data, undefined] as const;
+    } catch (error) {
+      return [undefined!, parseProblem(error)] as const;
+    }
+  }
+
+  public async updateRole(id: string, form: UpdateRoleForm): Promise<readonly [Role, Problem?]> {
+    try {
+      const response = await this.api.put(`/roles/${id}`, form);
+      return [response.data, undefined] as const;
+    } catch (error) {
+      return [undefined!, parseProblem(error)] as const;
+    }
+  }
+
+  public async deleteRole(id: string): Promise<Problem | undefined> {
+    try {
+      await this.api.delete(`/roles/${id}`);
+      return undefined;
+    } catch (error) {
+      return parseProblem(error);
+    }
+  }
+
+  public async getPaginatedRoles(
+    filter?: RolePaginatedFilter
+  ): Promise<readonly [{ items: Role[]; count: number }, Problem?]> {
+    try {
+      const response = await this.api.get("/roles", {
+        params: filter
+      });
+      return [response.data, undefined] as const;
+    } catch (error) {
+      return [undefined!, parseProblem(error)] as const;
+    }
+  }
+
+  public async getRoles(filter?: RoleFilter): Promise<readonly [Role[], Problem?]> {
+    try {
+      const response = await this.api.get("/roles/all", {
+        params: filter
+      });
+      return [response.data, undefined] as const;
+    } catch (error) {
+      return [undefined!, parseProblem(error)] as const;
+    }
+  }
+
+  public async getRoleById(id: string): Promise<readonly [Role, Problem?]> {
+    try {
+      const response = await this.api.get(`/roles/${id}`);
+      return [response.data, undefined] as const;
+    } catch (error) {
+      return [undefined!, parseProblem(error)] as const;
     }
   }
 }

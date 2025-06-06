@@ -2,14 +2,26 @@ import React from "react";
 import { Button } from "@heroui/button";
 import { Pagination } from "@heroui/pagination";
 import { Spinner } from "@heroui/spinner";
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@heroui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow
+} from "@heroui/table";
 import { cn } from "@heroui/theme";
 import { Icon } from "@iconify-icon/react";
-import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
-import { Incident } from "@/services/incident-service";
+import { Role } from "@/services/identity-service";
+import {
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger
+} from "@heroui/dropdown";
 
-interface IncidentsTableProps {
-  incidents: Incident[];
+interface RolesTableProps {
+  roles: Role[];
   page: number;
   pageSize: number;
   totalPages: number;
@@ -18,13 +30,13 @@ interface IncidentsTableProps {
   errorMessage?: string;
   emptyMessage?: string;
   onReload?: () => void;
-  onEdit: (incident: Incident) => void;
-  onDelete: (incident: Incident) => void;
+  onEdit: (role: Role) => void;
+  onDelete: (role: Role) => void;
   onPageChange?: (page: number) => void;
 }
 
-const IncidentsTable: React.FC<IncidentsTableProps> = ({
-  incidents,
+const RolesTable: React.FC<RolesTableProps> = ({
+  roles,
   page,
   pageSize,
   totalPages,
@@ -39,7 +51,7 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
 }) => {
   return (
     <Table
-      aria-label="Incidents table"
+      aria-label="Roles table"
       removeWrapper
       className="flex flex-1"
       classNames={{
@@ -62,10 +74,8 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
       }
     >
       <TableHeader>
-        <TableColumn>TITLE</TableColumn>
+        <TableColumn>NAME</TableColumn>
         <TableColumn>DESCRIPTION</TableColumn>
-        <TableColumn>SEVERITY</TableColumn>
-        <TableColumn>STATUS</TableColumn>
         <TableColumn className="text-right">ACTIONS</TableColumn>
       </TableHeader>
       <TableBody
@@ -97,30 +107,31 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
             </div>
           ) : (
             <div className="flex h-64 flex-1 flex-col items-center justify-center text-center">
-              <Icon icon="solar:folder-with-files-broken" width="64" height="64" className="mb-4 text-foreground-300" />
-              <p className="mb-2 text-foreground-500">No incidents found</p>
+              <Icon
+                icon="solar:shield-check-broken"
+                className="mb-4 text-6xl text-foreground-300"
+              />
+              <p className="mb-2 text-foreground-500">No roles found</p>
               <p className="text-sm text-foreground-400">
-                {emptyMessage || "No matching results. Please try a different filter or search."}
+                {emptyMessage || "No matching results. Please try a different keyword."}
               </p>
             </div>
           )
         }
       >
-        {(isError ? [] : incidents).map((incident) => (
-          <TableRow key={incident.id}>
-            <TableCell className="text-nowrap">{incident.title}</TableCell>
+        {(isError ? [] : roles).map((role) => (
+          <TableRow key={role.id}>
+            <TableCell className="text-nowrap">{role.name}</TableCell>
             <TableCell>
               <div
                 className={cn(
                   "line-clamp-2 truncate text-wrap",
-                  !incident.description?.trim() && "italic text-default-400"
+                  !role.description?.trim() && "italic text-default-400"
                 )}
               >
-                {incident.description?.trim() || "No description"}
+                {role.description?.trim() || "No description"}
               </div>
             </TableCell>
-            <TableCell>{incident.severity}</TableCell>
-            <TableCell className="capitalize">{incident.status}</TableCell>
             <TableCell>
               <div className="flex justify-end">
                 <Dropdown>
@@ -135,10 +146,10 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
                       <Icon icon="material-symbols:more-vert" width="20" height="20" />
                     </Button>
                   </DropdownTrigger>
-                  <DropdownMenu aria-label="Incident actions" variant="flat">
+                  <DropdownMenu aria-label="Role actions" variant="flat">
                     <DropdownItem
                       key="edit"
-                      onClick={() => onEdit(incident)}
+                      onClick={() => onEdit(role)}
                       startContent={<Icon icon="solar:pen-new-square-broken" width="20" height="20" />}
                     >
                       Edit
@@ -147,7 +158,7 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
                       key="delete"
                       className="text-danger"
                       color="danger"
-                      onClick={() => onDelete(incident)}
+                      onClick={() => onDelete(role)}
                       startContent={<Icon icon="solar:trash-bin-trash-broken" width="20" height="20" />}
                     >
                       Delete
@@ -163,4 +174,4 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
   );
 };
 
-export default IncidentsTable;
+export default RolesTable;

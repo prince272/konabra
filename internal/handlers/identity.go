@@ -7,6 +7,7 @@ import (
 	"github.com/prince272/konabra/internal/constants"
 	"github.com/prince272/konabra/internal/helpers"
 	"github.com/prince272/konabra/internal/problems"
+	"github.com/prince272/konabra/internal/repositories"
 	"github.com/prince272/konabra/internal/services"
 )
 
@@ -35,6 +36,17 @@ func NewIdentityHandler(router *gin.Engine, jwtHelper *helpers.JwtHelper, identi
 		identityGroup.POST("/password/reset", handler.handle(handler.ResetPassword))
 		identityGroup.POST("/password/reset/complete", handler.handle(handler.CompleteResetPassword))
 		identityGroup.POST("/password/change", jwtHelper.RequireAuth(), handler.handle(handler.ChangePassword))
+	}
+
+	// Roles
+	rolesGroup := router.Group("/roles")
+	{
+		rolesGroup.POST("", jwtHelper.RequireAuth(), handler.handleWithData(handler.CreateRole))
+		rolesGroup.PUT("/:id", jwtHelper.RequireAuth(), handler.handleWithData(handler.UpdateRole))
+		rolesGroup.GET("/:id", jwtHelper.RequireAuth(), handler.handleWithData(handler.GetRoleById))
+		rolesGroup.DELETE("/:id", jwtHelper.RequireAuth(), handler.handle(handler.DeleteRole))
+		rolesGroup.GET("", jwtHelper.RequireAuth(), handler.handleWithData(handler.GetPaginatedRoles))
+		rolesGroup.GET("/all", jwtHelper.RequireAuth(), handler.handleWithData(handler.GetRoles))
 	}
 
 	return handler
@@ -278,4 +290,112 @@ func (handler *IdentityHandler) GetCurrentAccount(context *gin.Context) (any, *p
 	claims := context.MustGet(constants.ContextClaimsKey).(map[string]any)
 	userId := claims["sub"].(string)
 	return handler.identityService.GetAccountByUserId(userId)
+}
+
+// CreateRole creates a new role
+// @Summary Create a new role
+// @Tags Roles
+// @Accept json
+// @Produce json
+// @Param body body services.CreateRoleForm true "Role creation form"
+// @Security BearerAuth
+// @Router /roles [post]
+func (handler *IdentityHandler) CreateRole(context *gin.Context) (any, *problems.Problem) {
+	var form services.CreateRoleForm
+	if err := context.ShouldBindJSON(&form); err != nil {
+		return nil, problems.FromError(err)
+	}
+
+	return handler.identityService.CreateRole(form)
+}
+
+// UpdateRole updates an existing role
+// @Summary Update an existing role
+// @Tags Roles
+// @Accept json
+// @Produce json
+// @Param id path string true "Role Id"
+// @Param body body services.UpdateRoleForm true "Role update form"
+// @Security BearerAuth
+// @Router /roles/{id} [put]
+func (handler *IdentityHandler) UpdateRole(context *gin.Context) (any, *problems.Problem) {
+	id := context.Param("id")
+	if id == "" {
+		return nil, problems.NewProblem(http.StatusNotFound, "Role not found.")
+	}
+
+	var form services.UpdateRoleForm
+	if err := context.ShouldBindJSON(&form); err != nil {
+		return nil, problems.FromError(err)
+	}
+
+	return handler.identityService.UpdateRole(id, form)
+}
+
+// DeleteRole deletes a role by Id
+// @Summary Delete a role by Id
+// @Tags Roles
+// @Accept json
+// @Produce json
+// @Param id path string true "Role Id"
+// @Security BearerAuth
+// @Router /roles/{id} [delete]
+func (handler *IdentityHandler) DeleteRole(context *gin.Context) *problems.Problem {
+	id := context.Param("id")
+	if id == "" {
+		return problems.NewProblem(http.StatusNotFound, "Role not found.")
+	}
+
+	return handler.identityService.DeleteRole(id)
+}
+
+// GetPaginatedRoles retrieves paginated roles based on filters
+// @Summary Get paginated roles
+// @Tags Roles
+// @Accept json
+// @Produce json
+// @Param filter query repositories.RolePaginatedFilter false "Role filter"
+// @Security BearerAuth
+// @Router /roles [get]
+func (handler *IdentityHandler) GetPaginatedRoles(context *gin.Context) (any, *problems.Problem) {
+	var filter repositories.RolePaginatedFilter
+	if err := context.ShouldBindQuery(&filter); err != nil {
+		return nil, problems.FromError(err)
+	}
+
+	return handler.identityService.GetPaginatedRoles(filter)
+}
+
+// GetRoles retrieves all roles
+// @Summary Get all roles
+// @Tags Roles
+// @Accept json
+// @Produce json
+// @Param filter query repositories.RoleFilter false "Role filter"
+// @Security BearerAuth
+// @Router /roles/all [get]
+func (handler *IdentityHandler) GetRoles(context *gin.Context) (any, *problems.Problem) {
+	var filter repositories.RoleFilter
+	if err := context.ShouldBindQuery(&filter); err != nil {
+		return nil, problems.FromError(err)
+	}
+
+	return handler.identityService.GetRoles(filter)
+}
+
+// GetRoleById retrieves a role by Id
+// @Summary Get a role by Id
+// @Tags Roles
+// @Accept json
+// @Produce json
+// @Param id path string true "Role Id"
+// @Security BearerAuth
+// @Router /roles/{id} [get]
+func (handler *IdentityHandler) GetRoleById(context *gin.Context) (any, *problems.Problem) {
+	id := context.Param("id")
+	if id == "" {
+		return nil, problems.NewProblem(http.StatusNotFound, "Role not found.")
+	}
+
+	return handler.identityService.GetRoleById(id)
 }

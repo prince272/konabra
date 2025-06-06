@@ -5,12 +5,16 @@ import { stringifyPath } from "@/utils";
 import { CategoryService } from "./category-service";
 import { AccountWithToken, IdentityService } from "./identity-service";
 import { IncidentService } from "./incident-service";
+import queryString from "query-string";
 
 const isDev = process.env.NODE_ENV === "development";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_SERVER_URL,
-  withCredentials: !isDev
+  withCredentials: !isDev,
+  paramsSerializer: {
+    serialize: (params) => queryString.stringify(params, { arrayFormat: "bracket" })
+  }
 });
 
 if (api.defaults.baseURL) {

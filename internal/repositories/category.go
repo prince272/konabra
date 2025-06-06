@@ -103,7 +103,7 @@ func (repository *CategoryRepository) GetCategoryById(id string) *models.Categor
 	return category
 }
 
-func (repository *CategoryRepository) GetPaginatedCategories(filter CategoryPaginatedFilter) (items []*models.Category, count int64) {
+func (repository *CategoryRepository) GetPaginatedCategories(filter CategoryPaginatedFilter) (items []models.Category, count int64) {
 	query := repository.defaultDB.Model(&models.Category{})
 
 	// Apply search filter
@@ -111,7 +111,6 @@ func (repository *CategoryRepository) GetPaginatedCategories(filter CategoryPagi
 		query = query.Where("LOWER(name) LIKE LOWER(?)", "%"+filter.Search+"%")
 	}
 
-	// Define allowed sort fields in camelCase and their corresponding DB columns
 	allowedSortFields := map[string]string{
 		"name":      "name",
 		"createdAt": "created_at",
@@ -138,7 +137,7 @@ func (repository *CategoryRepository) GetPaginatedCategories(filter CategoryPagi
 	}
 
 	// Apply ordering
-	query = query.Order("created_at ASC").Order(fmt.Sprintf("%s %s", sortField, sortOrder))
+	query = query.Order(fmt.Sprintf("%s %s", sortField, sortOrder))
 
 	// Count total items
 	if countResult := query.Count(&count); countResult.Error != nil {
@@ -164,8 +163,8 @@ func (repository *CategoryRepository) GetPaginatedCategories(filter CategoryPagi
 	return items, count
 }
 
-func (repository *CategoryRepository) GetCategories(filter CategoryFilter) []*models.Category {
-	var items []*models.Category
+func (repository *CategoryRepository) GetCategories(filter CategoryFilter) []models.Category {
+	var items []models.Category
 	query := repository.defaultDB.Model(&models.Category{})
 
 	// Apply search filter
@@ -173,7 +172,6 @@ func (repository *CategoryRepository) GetCategories(filter CategoryFilter) []*mo
 		query = query.Where("LOWER(name) LIKE LOWER(?)", "%"+filter.Search+"%")
 	}
 
-	// Define allowed camelCase sort fields and their corresponding DB columns
 	allowedSortFields := map[string]string{
 		"name":      "name",
 		"createdAt": "created_at",
@@ -200,7 +198,7 @@ func (repository *CategoryRepository) GetCategories(filter CategoryFilter) []*mo
 	}
 
 	// Apply ordering
-	query = query.Order("created_at ASC").Order(fmt.Sprintf("%s %s", sortField, sortOrder))
+	query = query.Order(fmt.Sprintf("%s %s", sortField, sortOrder))
 
 	// Fetch filtered items
 	if result := query.Find(&items); result.Error != nil {

@@ -266,7 +266,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
   }, []);
 
   return (
-    <div className="flex h-full flex-col bg-content1">
+    <div className="flex h-full flex-col">
       <div className="flex h-16 items-center px-4">
         <div
           className={cn("flex items-center", {
@@ -345,7 +345,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
               title="Management"
               path="/users"
               icon="solar:users-group-two-rounded-broken"
-              onItemClick={handleItemClick}
             >
               <MenuItem
                 title="Users"
@@ -355,7 +354,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
               />
               <MenuItem
                 title="Roles"
-                path="/Roles"
+                path="/roles"
                 icon="solar:shield-user-broken"
                 onItemClick={handleItemClick}
               />

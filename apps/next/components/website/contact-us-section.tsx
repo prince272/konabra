@@ -3,7 +3,7 @@
 import React from "react";
 import NextLink from "next/link";
 import { Button } from "@heroui/button";
-import { Icon } from "@iconify-icon/react"; // Import Iconify
+import { Icon } from "@iconify-icon/react";
 import { motion } from "framer-motion";
 
 export const ContactUsSection = () => {
@@ -22,7 +22,7 @@ export const ContactUsSection = () => {
   };
 
   return (
-    <section id="contact" className="relative overflow-hidden py-24">
+    <section id="contact" className="relative overflow-hidden bg-background py-24">
       {/* Background gradients */}
       <div className="absolute inset-0 -z-10 bg-gradient-to-br from-background via-default-50/30 to-background dark:from-background dark:via-default-900/20 dark:to-background"></div>
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,184,0,0.15),transparent_70%)] dark:bg-[radial-gradient(ellipse_at_top_right,rgba(255,184,0,0.1),transparent_90%)]"></div>

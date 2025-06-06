@@ -105,7 +105,7 @@ export const Footer = () => {
               color="foreground"
               className="flex items-center gap-1 text-sm text-foreground-500 transition-colors hover:text-warning"
             >
-              <Icon icon="solar:shield-check-broken" width="18" height="18" />
+              <Icon icon="solar:shield-check-broken" width="20" height="20" />
               Privacy Policy
             </Link>
             <Link
@@ -113,7 +113,7 @@ export const Footer = () => {
               color="foreground"
               className="flex items-center gap-1 text-sm text-foreground-500 transition-colors hover:text-warning"
             >
-              <Icon icon="solar:document-broken" width="18" height="18" />
+              <Icon icon="solar:document-broken" width="20" height="20" />
               Terms of Service
             </Link>
           </div>

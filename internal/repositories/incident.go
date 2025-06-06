@@ -37,26 +37,26 @@ func NewIncidentRepository(defaultDB *builds.DefaultDB, logger *zap.Logger) *Inc
 	return &IncidentRepository{defaultDB, logger}
 }
 
-func (r *IncidentRepository) CreateIncident(incident *models.Incident) error {
+func (repository *IncidentRepository) CreateIncident(incident *models.Incident) error {
 	now := time.Now()
 	incident.UpdatedAt = now
 	incident.ReportedAt = now
-	result := r.defaultDB.Create(incident)
+	result := repository.defaultDB.Create(incident)
 	return result.Error
 }
 
-func (r *IncidentRepository) UpdateIncident(incident *models.Incident) error {
+func (repository *IncidentRepository) UpdateIncident(incident *models.Incident) error {
 	incident.UpdatedAt = time.Now()
-	return r.defaultDB.Save(incident).Error
+	return repository.defaultDB.Save(incident).Error
 }
 
-func (r *IncidentRepository) DeleteIncident(incident *models.Incident) error {
-	return r.defaultDB.Delete(incident).Error
+func (repository *IncidentRepository) DeleteIncident(incident *models.Incident) error {
+	return repository.defaultDB.Delete(incident).Error
 }
 
-func (r *IncidentRepository) GetIncidentById(id string) *models.Incident {
+func (repository *IncidentRepository) GetIncidentById(id string) *models.Incident {
 	incident := &models.Incident{}
-	result := r.defaultDB.Preload("ReportedBy").Preload("Activities").
+	result := repository.defaultDB.Preload("ReportedBy").Preload("Activities").
 		Where("id = ?", id).
 		First(incident)
 
@@ -70,8 +70,8 @@ func (r *IncidentRepository) GetIncidentById(id string) *models.Incident {
 	return incident
 }
 
-func (r *IncidentRepository) GetPaginatedIncidents(filter IncidentPaginatedFilter) (items []*models.Incident, count int64) {
-	query := r.defaultDB.Model(&models.Incident{}).
+func (repository *IncidentRepository) GetPaginatedIncidents(filter IncidentPaginatedFilter) (items []models.Incident, count int64) {
+	query := repository.defaultDB.Model(&models.Incident{}).
 		Preload("ReportedBy")
 
 	if filter.Search != "" {
@@ -98,7 +98,6 @@ func (r *IncidentRepository) GetPaginatedIncidents(filter IncidentPaginatedFilte
 		}
 	}
 
-	// CamelCase to DB column mapping
 	allowedSortFields := map[string]string{
 		"title":      "title",
 		"reportedAt": "reported_at",

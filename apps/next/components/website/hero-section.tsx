@@ -34,7 +34,7 @@ export const HeroSection = () => {
   }, []);
 
   return (
-    <section ref={heroRef} className="relative overflow-hidden pb-32 pt-16 md:pt-20 lg:pt-28">
+    <section ref={heroRef} className="relative overflow-hidden bg-background pb-32 pt-16 md:pt-20 lg:pt-28">
       {/* Subtle gradient overlay - Increased opacity */}
       <div className="absolute inset-0 bg-gradient-to-b from-primary/20 to-transparent dark:from-primary/10" />
 

@@ -39,8 +39,8 @@ export type Incident = {
 };
 
 export type IncidentFilter = {
-  sort?: string;
-  order?: "asc" | "desc";
+  sort?: string | null;
+  order?: "asc" | "desc" | null;
   search?: string;
   status?: Status;
   severity?: Severity;

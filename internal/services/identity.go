@@ -135,6 +135,28 @@ const (
 	PurposeResetPassword = "ResetPassword"
 )
 
+type CreateRoleForm struct {
+	Name        string `json:"name" validate:"required,max=256"`
+	Description string `json:"description" validate:"max=1024"`
+}
+
+type UpdateRoleForm struct {
+	CreateRoleForm
+}
+
+type RoleModel struct {
+	Id          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+type RolePaginatedListModel struct {
+	Items []RoleModel `json:"items"`
+	Count int64       `json:"count"`
+}
+
+type RoleListModel []RoleModel
+
 type IdentityService struct {
 	identityRepository *repositories.IdentityRepository
 	jwtHelper          *helpers.JwtHelper
@@ -685,4 +707,143 @@ func (service *IdentityService) ChangePassword(userId string, form ChangePasswor
 	}
 
 	return nil
+}
+
+func (service *IdentityService) CreateRole(form CreateRoleForm) (*RoleModel, *problems.Problem) {
+	if err := service.validator.ValidateStruct(form); err != nil {
+		return nil, problems.FromError(err)
+	}
+
+	if exists := service.identityRepository.RoleNameExists(form.Name); exists {
+		return nil, problems.NewValidationProblem(map[string]string{"name": "Role name already exists."})
+	}
+
+	role := &models.Role{}
+
+	if err := copier.Copy(role, form); err != nil {
+		service.logger.Error("Error copying form to category: ", zap.Error(err))
+		return nil, problems.FromError(err)
+	}
+
+	role.Id = uuid.New().String()
+	err := service.identityRepository.CreateRole(role)
+
+	if err != nil {
+		return nil, problems.FromError(err)
+	}
+
+	model := &RoleModel{}
+
+	if err := copier.Copy(model, role); err != nil {
+		service.logger.Error("Error copying role to model: ", zap.Error(err))
+		return nil, problems.FromError(err)
+	}
+
+	return model, nil
+}
+
+func (service *IdentityService) UpdateRole(id string, form UpdateRoleForm) (*RoleModel, *problems.Problem) {
+	if err := service.validator.ValidateStruct(form); err != nil {
+		return nil, problems.FromError(err)
+	}
+
+	role := service.identityRepository.GetRoleById(id)
+
+	if role == nil {
+		return nil, problems.NewProblem(http.StatusNotFound, "Role not found.")
+	}
+
+	if exists := service.identityRepository.RoleNameExists(form.Name); exists {
+		if role.Name != form.Name {
+			return nil, problems.NewValidationProblem(map[string]string{"name": "Role name already exists for another role."})
+		}
+	}
+
+	if err := copier.Copy(role, form); err != nil {
+		service.logger.Error("Error copying form to role: ", zap.Error(err))
+		return nil, problems.FromError(err)
+	}
+
+	err := service.identityRepository.UpdateRole(role)
+
+	if err != nil {
+		return nil, problems.FromError(err)
+	}
+
+	model := &RoleModel{}
+
+	if err := copier.Copy(model, role); err != nil {
+		service.logger.Error("Error copying role to model: ", zap.Error(err))
+		return nil, problems.FromError(err)
+	}
+
+	return model, nil
+}
+
+func (service *IdentityService) DeleteRole(id string) *problems.Problem {
+	role := service.identityRepository.GetRoleById(id)
+
+	if role == nil {
+		return problems.NewProblem(http.StatusNotFound, "Role not found.")
+	}
+
+	if err := service.identityRepository.DeleteRole(role); err != nil {
+		service.logger.Error("Error deleting role: ", zap.Error(err))
+		return problems.FromError(err)
+	}
+
+	return nil
+}
+
+func (service *IdentityService) GetPaginatedRoles(filter repositories.RolePaginatedFilter) (*RolePaginatedListModel, *problems.Problem) {
+	items, count := service.identityRepository.GetPaginatedRoles(filter)
+
+	models := make([]RoleModel, 0, len(items))
+	for _, item := range items {
+		model := &RoleModel{}
+		if err := copier.Copy(model, item); err != nil {
+			service.logger.Error("Error copying category to model: ", zap.Error(err))
+			return nil, problems.FromError(err)
+		}
+		models = append(models, *model)
+	}
+
+	return &RolePaginatedListModel{
+		Items: models,
+		Count: count,
+	}, nil
+}
+
+func (service *IdentityService) GetRoles(filter repositories.RoleFilter) (*RoleListModel, *problems.Problem) {
+	items := service.identityRepository.GetRoles(filter)
+
+	models := make([]RoleModel, 0, len(items))
+	for _, item := range items {
+		model := &RoleModel{}
+		if err := copier.Copy(model, item); err != nil {
+			service.logger.Error("Error copying category to model: ", zap.Error(err))
+			return nil, problems.FromError(err)
+		}
+		models = append(models, *model)
+	}
+
+	listModel := RoleListModel(models)
+	return &listModel, nil
+}
+
+func (service *IdentityService) GetRoleById(id string) (*RoleModel, *problems.Problem) {
+	role := service.identityRepository.GetRoleById(id)
+
+	if role == nil {
+		return nil, problems.NewProblem(http.StatusNotFound, "Role not found.")
+	}
+
+	model := &RoleModel{}
+
+	if err := copier.Copy(model, role); err != nil {
+		service.logger.Error("Error copying role to model: ", zap.Error(err))
+		return nil, problems.FromError(err)
+	}
+
+	return model, nil
 }

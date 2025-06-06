@@ -138,6 +138,17 @@ definitions:
     - status
     - title
     type: object
+  services.CreateRoleForm:
+    properties:
+      description:
+        maxLength: 1024
+        type: string
+      name:
+        maxLength: 256
+        type: string
+    required:
+    - name
+    type: object
   services.ResetPasswordForm:
     properties:
       username:
@@ -209,6 +220,17 @@ definitions:
     - severity
     - status
     - title
+    type: object
+  services.UpdateRoleForm:
+    properties:
+      description:
+        maxLength: 1024
+        type: string
+      name:
+        maxLength: 256
+        type: string
+    required:
+    - name
     type: object
   services.VerifyAccountForm:
     properties:
@@ -707,6 +729,134 @@ paths:
       summary: Update an existing incident
       tags:
       - Incidents
+  /roles:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - description: '"asc" or "desc"'
+        in: query
+        name: order
+        type: string
+      - in: query
+        name: search
+        type: string
+      - in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get paginated roles
+      tags:
+      - Roles
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Role creation form
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateRoleForm'
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Create a new role
+      tags:
+      - Roles
+  /roles/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Role Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Delete a role by Id
+      tags:
+      - Roles
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Role Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get a role by Id
+      tags:
+      - Roles
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Role Id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Role update form
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/services.UpdateRoleForm'
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Update an existing role
+      tags:
+      - Roles
+  /roles/all:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: '"asc" or "desc"'
+        in: query
+        name: order
+        type: string
+      - in: query
+        name: search
+        type: string
+      - in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get all roles
+      tags:
+      - Roles
 securityDefinitions:
   BearerAuth:
     in: header

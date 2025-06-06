@@ -76,7 +76,7 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
         emptyContent={
           isError ? (
             <div className="flex h-64 flex-1 flex-col items-center justify-center text-center">
-              <Icon icon="solar:danger-broken" className="mb-4 text-6xl text-foreground-300" />
+              <Icon icon="solar:danger-broken" width="64" height="64" className="mb-4 text-foreground-300" />
               <p className="mb-2 text-foreground-500">An error occurred</p>
               <p className="mb-4 text-sm text-foreground-400">
                 {errorMessage || "Something went wrong. Please try again later."}
@@ -87,7 +87,7 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
                   variant="solid"
                   radius="full"
                   onPress={onReload}
-                  startContent={<Icon icon="solar:refresh-broken" />}
+                  startContent={<Icon icon="solar:refresh-broken" width="20" height="20" />}
                 >
                   Reload
                 </Button>
@@ -140,7 +140,7 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
                       key="edit"
                       onClick={() => onEdit(category)}
                       startContent={
-                        <Icon icon="solar:pen-new-square-broken" width="18" height="18" />
+                        <Icon icon="solar:pen-new-square-broken" width="20" height="20" />
                       }
                     >
                       Edit
@@ -151,7 +151,7 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
                       color="danger"
                       onClick={() => onDelete(category)}
                       startContent={
-                        <Icon icon="solar:trash-bin-trash-broken" width="18" height="18" />
+                        <Icon icon="solar:trash-bin-trash-broken" width="20" height="20" />
                       }
                     >
                       Delete

@@ -5,28 +5,19 @@ import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, ButtonGroup } from "@heroui/button";
 import { Card, CardBody, CardHeader } from "@heroui/card";
-import {
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger
-} from "@heroui/dropdown";
+import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 import { Input } from "@heroui/input";
-import { Tooltip } from "@heroui/tooltip"; // ✅ Added for tooltip
+import { Tooltip } from "@heroui/tooltip";
 import { Icon } from "@iconify-icon/react";
-import _ from "lodash";
-import { categoryService, Problem } from "@/services";
-import {
-  Category,
-  CategoryPaginatedFilter
-} from "@/services/category-service";
+import { identityService, Problem } from "@/services";
+import { Role, RolePaginatedFilter } from "@/services/identity-service";
 import { useAsyncMemo, useDebouncedCallback } from "@/hooks";
-import { AddEditCategoryModalRouter } from "./add-edit-category-modal";
-import CategoriesTable from "./categories-table";
-import { DeleteCategoryModalRouter } from "./delete-category-modal";
+import { AddEditRoleModalRouter } from "./add-edit-role-modal";
+import { DeleteRoleModalRouter } from "./delete-role-modal";
+import RolesTable from "./roles-table";
 
-type CategoryPageResult = {
-  items: Category[];
+type RolePageResult = {
+  items: Role[];
   pageNumber: number;
   pageSize: number;
   totalPages: number;
@@ -40,9 +31,10 @@ const SORT_FIELDS = [
   { label: "Order", value: "order" }
 ];
 
-const CategoriesPage = () => {
+const RolesPage = () => {
   const router = useRouter();
-  const [filter, setFilter] = useState<CategoryPaginatedFilter & { refresh: number }>({
+
+  const [filter, setFilter] = useState<RolePaginatedFilter & { refresh: number }>({
     offset: 0,
     limit: 25,
     sort: null,
@@ -53,9 +45,9 @@ const CategoriesPage = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [page, isLoading] = useAsyncMemo<CategoryPageResult>(
+  const [page, isLoading] = useAsyncMemo<RolePageResult>(
     async (prevValue) => {
-      const [data, problem] = await categoryService.getPaginatedCategories(filter);
+      const [data, problem] = await identityService.getPaginatedRoles(filter);
 
       if (problem) {
         return { ...prevValue, problem };
@@ -79,7 +71,7 @@ const CategoriesPage = () => {
       pageSize: filter.limit,
       totalPages: 1,
       problem: undefined
-    } as CategoryPageResult
+    } as RolePageResult
   );
 
   const resetPage = useCallback(() => {
@@ -139,15 +131,15 @@ const CategoriesPage = () => {
     <>
       <div className="flex flex-1 flex-col space-y-3">
         <div className="flex items-center justify-between gap-4">
-          <h1 className="text-2xl font-bold">Categories</h1>
+          <h1 className="text-2xl font-bold">Roles</h1>
           <Button
             color="primary"
             radius="full"
             startContent={<Icon icon="solar:add-circle-broken" width="20" height="20" />}
             as={NextLink}
-            href="#add-category"
+            href="#add-role"
           >
-            Add Category
+            Add Role
           </Button>
         </div>
         <Card className="flex-1 border border-divider" disableRipple shadow="none">
@@ -155,21 +147,21 @@ const CategoriesPage = () => {
             <div className="flex w-full items-center justify-end gap-4 sm:w-auto">
               <div className="w-full sm:w-72">
                 <Input
-                  placeholder="Search categories..."
+                  placeholder="Search roles..."
                   value={searchTerm}
                   onValueChange={(value) => {
                     setSearchTerm(value);
                     updateDebouncedSearch(value);
                   }}
                   onClear={clearSearch}
-                  startContent={<Icon icon="solar:magnifer-broken" />}
+                  startContent={<Icon icon="solar:magnifer-broken" width="20" height="20" />}
                   size="sm"
                   isClearable
                 />
               </div>
               <ButtonGroup size="sm" variant="flat">
                 <Tooltip content={`Sort ${filter.order === "asc" ? "descending" : "ascending"}`}>
-                  <Button isIconOnly onPress={() => toggleOrder()}>
+                  <Button isIconOnly onPress={toggleOrder}>
                     {filter.order === "asc" ? (
                       <Icon icon="solar:sort-from-top-to-bottom-broken" width="20" height="20" />
                     ) : (
@@ -207,16 +199,16 @@ const CategoriesPage = () => {
             </div>
           </CardHeader>
           <CardBody className="flex-1">
-            <CategoriesTable
-              categories={page.items || []}
+            <RolesTable
+              roles={page.items || []}
               isLoading={isLoading}
               isError={!!page.problem}
               errorMessage={page.problem?.message}
-              onEdit={(category) => {
-                router.push(`#edit-category-${category.id}`);
+              onEdit={(role) => {
+                router.push(`#edit-role-${role.id}`);
               }}
-              onDelete={(category) => {
-                router.push(`#delete-category-${category.id}`);
+              onDelete={(role) => {
+                router.push(`#delete-role-${role.id}`);
               }}
               page={page.pageNumber}
               pageSize={page.pageSize}
@@ -227,10 +219,10 @@ const CategoriesPage = () => {
           </CardBody>
         </Card>
       </div>
-      <AddEditCategoryModalRouter onSuccess={resetPage} />
-      <DeleteCategoryModalRouter onSuccess={resetPage} />
+      <AddEditRoleModalRouter onSuccess={resetPage} />
+      <DeleteRoleModalRouter onSuccess={resetPage} />
     </>
   );
 };
 
-export default CategoriesPage;
+export default RolesPage;

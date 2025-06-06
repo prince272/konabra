@@ -151,7 +151,7 @@ export const TestimonialsSection = () => {
                     <div
                       className={`${testimonial.color} ${testimonial.bgColor} mb-6 flex h-12 w-12 items-center justify-center rounded-lg`}
                     >
-                      <Icon icon="solar:chat-round-dots-broken" width="24" height="24" />
+                      <Icon icon="solar:chat-round-dots-broken" width="20" height="20" />
                     </div>
                     <p className="mb-6 line-clamp-5">{testimonial.content}</p>
                     <div className="mt-auto flex items-center gap-4">
@@ -177,7 +177,7 @@ export const TestimonialsSection = () => {
               aria-label="Previous testimonial"
               onPress={() => swiperRef.current?.swiper.slidePrev()}
             >
-              <Icon icon="solar:arrow-left-broken" />
+              <Icon icon="solar:arrow-left-broken" width="20" height="20" />
             </Button>
             <Button
               isIconOnly
@@ -186,7 +186,7 @@ export const TestimonialsSection = () => {
               aria-label="Next testimonial"
               onPress={() => swiperRef.current?.swiper.slideNext()}
             >
-              <Icon icon="solar:arrow-right-broken" />
+              <Icon icon="solar:arrow-right-broken" width="20" height="20" />
             </Button>
           </div>
         </div>
