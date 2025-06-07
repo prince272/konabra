@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { Button } from "@heroui/button";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { Spinner } from "@heroui/spinner";
+import { cn } from "@heroui/theme";
 import { addToast } from "@heroui/toast";
 import { Icon } from "@iconify-icon/react";
-import { Role } from "@/services/identity-service";
-import { useModalRouter } from "@/components/common/modals";
 import { identityService } from "@/services";
+import { Role } from "@/services/identity-service";
+import { useBreakpoint } from "@/hooks";
+import { useModalRouter } from "@/components/common/modals";
 
 interface DeleteRoleModalProps {
   isOpen: boolean;
@@ -18,6 +20,7 @@ interface DeleteRoleModalProps {
 }
 
 function DeleteRoleModal({ isOpen, onClose, roleId, onSuccess }: DeleteRoleModalProps) {
+  const isSmallScreen = useBreakpoint("sm", "down");
   const [isDeleting, setIsDeleting] = useState(false);
   const [role, setRole] = useState<Role | null>(null);
   const [loading, setLoading] = useState(true);
@@ -61,8 +64,10 @@ function DeleteRoleModal({ isOpen, onClose, roleId, onSuccess }: DeleteRoleModal
   return (
     <Modal
       isOpen={isOpen}
+      isDismissable={false}
       onClose={onClose}
-      size="sm"
+      size={isSmallScreen ? "full" : "sm"}
+      scrollBehavior={"inside"}
       closeButton={
         <Button
           isIconOnly
@@ -73,18 +78,27 @@ function DeleteRoleModal({ isOpen, onClose, roleId, onSuccess }: DeleteRoleModal
           <Icon icon="material-symbols:close-rounded" width="20" height="20" />
         </Button>
       }
+      classNames={{
+        wrapper: cn(isSmallScreen && "h-full")
+      }}
     >
       <ModalContent>
         <ModalHeader>
           <h2 className="text-xl font-bold">Delete Role</h2>
         </ModalHeader>
         <ModalBody>
-          {loading ? (
-            <div className="flex justify-center items-center py-6">
-              <Spinner size="lg" />
-            </div>
-          ) : (
-            <div className="flex items-start gap-3 text-sm text-foreground-600">
+          <div className="relative">
+            {(loading || isDeleting) && (
+              <div className="absolute inset-0 z-50 flex items-center justify-center bg-content1 bg-opacity-70">
+                <Spinner size="lg" />
+              </div>
+            )}
+
+            <div
+              className={`flex items-start gap-3 text-sm text-foreground-600 ${
+                loading || isDeleting ? "pointer-events-none opacity-50" : ""
+              }`}
+            >
               <Icon
                 icon="solar:trash-bin-trash-broken"
                 className="mt-0.5 text-danger"
@@ -93,11 +107,12 @@ function DeleteRoleModal({ isOpen, onClose, roleId, onSuccess }: DeleteRoleModal
               />
               <p>
                 Are you sure you want to delete the role{" "}
-                <span className="font-semibold text-foreground">{role?.name}</span>?<br />
+                <span className="font-semibold text-foreground">{role?.name}</span>?
+                <br />
                 This action cannot be undone.
               </p>
             </div>
-          )}
+          </div>
         </ModalBody>
 
         <ModalFooter>

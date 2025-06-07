@@ -1,4 +1,4 @@
-import { darkLayout, heroui } from "@heroui/theme";
+import { heroui } from "@heroui/theme";
 
 /** @type {import('tailwindcss').Config} */
 const config = {
@@ -18,7 +18,6 @@ const config = {
   },
   darkMode: "class",
   plugins: [
-    require("@tailwindcss/line-clamp"),
     heroui({
       themes: {
         light: {
@@ -36,6 +35,20 @@ const config = {
               900: "#4d3d11",
               foreground: "#000",
               DEFAULT: "#ffca3a"
+            },
+            secondary: {
+              50: "#dfedfd",
+              100: "#b3d4fa",
+              200: "#86bbf7",
+              300: "#59a1f4",
+              400: "#2d88f1",
+              500: "#006fee",
+              600: "#005cc4",
+              700: "#00489b",
+              800: "#003571",
+              900: "#002147",
+              foreground: "#fff",
+              DEFAULT: "#006fee"
             },
             warning: {
               50: "#fff8e6",
@@ -84,6 +97,20 @@ const config = {
               900: "#fff8e6",
               foreground: "#000",
               DEFAULT: "#ffca3a"
+            },
+            secondary: {
+              50: "#002147",
+              100: "#003571",
+              200: "#00489b",
+              300: "#005cc4",
+              400: "#006fee",
+              500: "#2d88f1",
+              600: "#59a1f4",
+              700: "#86bbf7",
+              800: "#b3d4fa",
+              900: "#dfedfd",
+              foreground: "#fff",
+              DEFAULT: "#006fee"
             },
             warning: {
               50: "#4d3d11",

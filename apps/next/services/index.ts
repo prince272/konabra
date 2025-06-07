@@ -1,11 +1,11 @@
 import axios, { AxiosError, AxiosResponse, isAxiosError } from "axios";
 import PQueue from "p-queue";
+import queryString from "query-string";
 import Cookies from "universal-cookie";
 import { stringifyPath } from "@/utils";
 import { CategoryService } from "./category-service";
 import { AccountWithToken, IdentityService } from "./identity-service";
 import { IncidentService } from "./incident-service";
-import queryString from "query-string";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -25,6 +25,9 @@ if (api.defaults.baseURL) {
 
 const cookies = new Cookies();
 const refreshQueue = new PQueue({ concurrency: 1 });
+
+let isRefreshing = false;
+let requestQueue: ((token: string) => void)[] = [];
 
 // Request interceptor
 api.interceptors.request.use(
@@ -48,14 +51,11 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Only handle 401 errors and avoid infinite retry loops
     if (error.response?.status === 401 && !originalRequest._retry) {
       const currentAccount: AccountWithToken | undefined = cookies.get("current-account");
 
       if (!currentAccount?.refreshToken) {
         console.error("No refresh token available. Redirecting to sign-in.");
-
-        // No refresh token available - clear and redirect
         cookies.remove("current-account", { path: "/" });
 
         if (typeof window !== "undefined") {
@@ -67,63 +67,63 @@ api.interceptors.response.use(
 
       originalRequest._retry = true;
 
-      try {
-        // Execute refresh request in queue to prevent concurrent refreshes
-        const response = (await refreshQueue.add(() =>
-          axios.post<AccountWithToken>(
-            `/account/signin/refresh`,
-            {
-              refreshToken: currentAccount.refreshToken
-            },
-            {
-              baseURL: process.env.NEXT_PUBLIC_SERVER_URL,
-              withCredentials: !isDev,
-              headers: {
-                "Content-Type": "application/json",
-                ...(currentAccount.accessToken
-                  ? { Authorization: `Bearer ${currentAccount.accessToken}` }
-                  : {})
+      return new Promise((resolve, reject) => {
+        requestQueue.push((newToken: string) => {
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          resolve(api(originalRequest));
+        });
+
+        if (!isRefreshing) {
+          isRefreshing = true;
+
+          refreshQueue.add(async () => {
+            try {
+              const response = await axios.post<AccountWithToken>(
+                `/account/signin/refresh`,
+                { refreshToken: currentAccount.refreshToken },
+                {
+                  baseURL: process.env.NEXT_PUBLIC_SERVER_URL,
+                  withCredentials: !isDev,
+                  headers: {
+                    "Content-Type": "application/json",
+                    ...(currentAccount.accessToken
+                      ? { Authorization: `Bearer ${currentAccount.accessToken}` }
+                      : {})
+                  }
+                }
+              );
+
+              const newAccount = response.data;
+
+              cookies.set("current-account", newAccount, { path: "/" });
+              api.defaults.headers.common.Authorization = `Bearer ${newAccount.accessToken}`;
+
+              // Retry all queued requests
+              requestQueue.forEach((cb) => cb(newAccount.accessToken));
+              requestQueue = [];
+            } catch (refreshError) {
+              requestQueue = [];
+              cookies.remove("current-account", { path: "/" });
+
+              if (typeof window !== "undefined") {
+                const returnUrl = window.location.href || "/";
+                window.location.href = stringifyPath(
+                  {
+                    url: "/",
+                    query: { returnUrl },
+                    fragmentIdentifier: "signin"
+                  },
+                  { skipNull: true }
+                );
               }
+
+              reject(refreshError);
+            } finally {
+              isRefreshing = false;
             }
-          )
-        )) as AxiosResponse<AccountWithToken, any>;
-
-        const newAccount = response.data;
-
-        // Update stored tokens
-        cookies.set("current-account", newAccount, { path: "/" });
-
-        // Update authorization headers
-        api.defaults.headers.common.Authorization = `Bearer ${newAccount.accessToken}`;
-        originalRequest.headers.Authorization = `Bearer ${newAccount.accessToken}`;
-
-        // Retry original request
-        return api(originalRequest);
-      } catch (refreshError) {
-        if (
-          isAxiosError(refreshError) &&
-          (refreshError.response?.status === 500 || refreshError.response?.status === 400)
-        ) {
-          console.warn("Redirecting to sign-in due to refresh failure.", refreshError);
-
-          // Refresh failed - clear tokens and redirect
-          cookies.remove("current-account", { path: "/" });
-
-          if (typeof window !== "undefined") {
-            const returnUrl = window.location.href || "/";
-            window.location.href = stringifyPath(
-              {
-                url: "/",
-                query: { returnUrl },
-                fragmentIdentifier: "signin"
-              },
-              { skipNull: true }
-            );
-          }
+          });
         }
-
-        return Promise.reject(refreshError);
-      }
+      });
     }
 
     return Promise.reject(error);
@@ -172,7 +172,6 @@ export function parseProblem(error: unknown): Problem {
   const { data } = response;
 
   if (data && typeof data === "object") {
-    // Use nullish coalescing to default missing fields
     return {
       type: (data.type as string) ?? DEFAULT_PROBLEM.type,
       message: (data.message as string) ?? DEFAULT_PROBLEM.message,

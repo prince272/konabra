@@ -4,9 +4,18 @@ import React, { useCallback, useState } from "react";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, ButtonGroup } from "@heroui/button";
-import { Card, CardBody, CardHeader } from "@heroui/card";
+import { Card, CardBody, CardFooter, CardHeader } from "@heroui/card";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 import { Input } from "@heroui/input";
+import {
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  useDisclosure
+} from "@heroui/modal";
+import { Select, SelectItem } from "@heroui/select";
 import { Tooltip } from "@heroui/tooltip";
 import { Icon } from "@iconify-icon/react";
 import { incidentService, Problem } from "@/services";
@@ -15,6 +24,7 @@ import { useAsyncMemo, useDebouncedCallback } from "@/hooks";
 import { AddEditIncidentModalRouter } from "./add-edit-incident-modal";
 import { DeleteIncidentModalRouter } from "./delete-incident-modal";
 import IncidentsTable from "./incidents-table";
+import { Pagination } from "@heroui/pagination";
 
 type IncidentPageResult = {
   items: Incident[];
@@ -24,7 +34,7 @@ type IncidentPageResult = {
   problem?: Problem;
 };
 
-const SORT_FIELDS = [
+const IncidentSortFields = [
   { label: "Created At", value: "createdAt" },
   { label: "Title", value: "title" },
   { label: "Severity", value: "severity" },
@@ -100,7 +110,7 @@ const IncidentsPage = () => {
   const updateSort = (key: string) => {
     setFilter((prev) => ({
       ...prev,
-      sort: key === "null" ? null : key,
+      sort: key === "default" ? null : key,
       offset: 0,
       refresh: prev.refresh + 1
     }));
@@ -125,7 +135,7 @@ const IncidentsPage = () => {
 
   return (
     <>
-      <div className="flex flex-1 flex-col space-y-3">
+      <div className="flex flex-1 flex-col space-y-3 overflow-y-auto">
         <div className="flex items-center justify-between gap-4">
           <h1 className="text-2xl font-bold">Incidents</h1>
           <Button
@@ -174,18 +184,18 @@ const IncidentsPage = () => {
                         <Icon icon="material-symbols:arrow-drop-down" width="20" height="20" />
                       }
                     >
-                      {SORT_FIELDS.find((f) => f.value === filter.sort)?.label || "Sort"}
+                      {IncidentSortFields.find((f) => f.value === filter.sort)?.label || "Sort"}
                     </Button>
                   </DropdownTrigger>
                   <DropdownMenu
                     aria-label="Sort options"
                     selectionMode="single"
-                    selectedKeys={new Set([filter.sort ?? "null"])}
+                    selectedKeys={new Set([filter.sort ?? "default"])}
                     onAction={(key) => updateSort(key as string)}
                   >
                     <>
-                      <DropdownItem key="null">Any</DropdownItem>
-                      {SORT_FIELDS.map((field) => (
+                      <DropdownItem key="default">Default</DropdownItem>
+                      {IncidentSortFields.map((field) => (
                         <DropdownItem key={field.value}>{field.label}</DropdownItem>
                       ))}
                     </>
@@ -202,13 +212,23 @@ const IncidentsPage = () => {
               errorMessage={page.problem?.message}
               onEdit={(incident) => router.push(`#edit-incident-${incident.id}`)}
               onDelete={(incident) => router.push(`#delete-incident-${incident.id}`)}
-              page={page.pageNumber}
-              pageSize={page.pageSize}
-              totalPages={page.totalPages}
-              onPageChange={changePage}
               onReload={resetPage}
             />
           </CardBody>
+          <CardFooter>
+            <div className="mt-auto flex w-full justify-center">
+              <Pagination
+                isCompact
+                showControls
+                showShadow={false}
+                radius="full"
+                color="primary"
+                page={page.pageNumber}
+                total={page.totalPages}
+                onChange={(newPage) => changePage?.(newPage)}
+              />
+            </div>
+          </CardFooter>
         </Card>
       </div>
       <AddEditIncidentModalRouter onSuccess={resetPage} />

@@ -1166,10 +1166,10 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "severity": {
-                    "$ref": "#/definitions/models.IncidentSeverity"
+                    "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/models.IncidentStatus"
+                    "type": "string"
                 },
                 "title": {
                     "type": "string",
@@ -1288,10 +1288,10 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "severity": {
-                    "$ref": "#/definitions/models.IncidentSeverity"
+                    "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/models.IncidentStatus"
+                    "type": "string"
                 },
                 "title": {
                     "type": "string",

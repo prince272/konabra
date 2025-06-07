@@ -17,8 +17,8 @@ import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/d
 import { cn } from "@heroui/theme";
 import { Tooltip } from "@heroui/tooltip";
 import { Icon } from "@iconify-icon/react";
-import { categoryStore } from "@/states/categories";
 import { useAccountState } from "@/states";
+import { categoryStore } from "@/states/categories";
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -80,8 +80,8 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, path, icon, children, onItem
                 ? "flat"
                 : "light"
               : isActive(path)
-              ? "flat"
-              : "light"
+                ? "flat"
+                : "light"
           }
           isIconOnly
           color={
@@ -90,8 +90,8 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, path, icon, children, onItem
                 ? "primary"
                 : "default"
               : isActive(path)
-              ? "primary"
-              : "default"
+                ? "primary"
+                : "default"
           }
           className="mx-auto mb-2"
           onPress={handleItemClick}
@@ -109,9 +109,13 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, path, icon, children, onItem
     return (
       <div>
         <Button
-          variant={isActive(path) || isChildActive({ title, path, icon, children }) ? "flat" : "light"}
+          variant={
+            isActive(path) || isChildActive({ title, path, icon, children }) ? "flat" : "light"
+          }
           radius="full"
-          color={isActive(path) || isChildActive({ title, path, icon, children }) ? "primary" : "default"}
+          color={
+            isActive(path) || isChildActive({ title, path, icon, children }) ? "primary" : "default"
+          }
           className="mb-2 w-full justify-start"
           startContent={<Icon icon={icon} width="20" height="20" />}
           endContent={
@@ -341,11 +345,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                 onItemClick={handleItemClick}
               />
             </MenuItem>
-            <MenuItem
-              title="Management"
-              path="/users"
-              icon="solar:users-group-two-rounded-broken"
-            >
+            <MenuItem title="Management" path="/users" icon="solar:users-group-two-rounded-broken">
               <MenuItem
                 title="Users"
                 path="/users"

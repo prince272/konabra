@@ -177,6 +177,7 @@ const InputPhone = React.forwardRef<HTMLInputElement, InputPhoneProps>(
         {isModalVisible && (
           <Modal
             isOpen={isModalOpen}
+            isDismissable={false}
             onClose={() => setIsModalOpen(false)}
             size={isSmallScreen ? "full" : "md"}
             scrollBehavior="inside"

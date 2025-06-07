@@ -126,9 +126,9 @@ definitions:
       longitude:
         type: number
       severity:
-        $ref: '#/definitions/models.IncidentSeverity'
+        type: string
       status:
-        $ref: '#/definitions/models.IncidentStatus'
+        type: string
       title:
         maxLength: 256
         type: string
@@ -209,9 +209,9 @@ definitions:
       longitude:
         type: number
       severity:
-        $ref: '#/definitions/models.IncidentSeverity'
+        type: string
       status:
-        $ref: '#/definitions/models.IncidentStatus'
+        type: string
       title:
         maxLength: 256
         type: string

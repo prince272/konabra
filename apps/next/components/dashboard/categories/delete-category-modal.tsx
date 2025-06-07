@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { Button } from "@heroui/button";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { Spinner } from "@heroui/spinner";
+import { cn } from "@heroui/theme";
 import { addToast } from "@heroui/toast";
 import { Icon } from "@iconify-icon/react";
 import { categoryService } from "@/services";
 import { Category } from "@/services/category-service";
 import { categoryStore } from "@/states/categories";
+import { useBreakpoint } from "@/hooks";
 import { useModalRouter } from "@/components/common/modals";
 
 interface DeleteCategoryModalProps {
@@ -18,12 +20,8 @@ interface DeleteCategoryModalProps {
   onSuccess?: (category: Category) => void;
 }
 
-function DeleteCategoryModal({
-  isOpen,
-  onClose,
-  categoryId,
-  onSuccess
-}: DeleteCategoryModalProps) {
+function DeleteCategoryModal({ isOpen, onClose, categoryId, onSuccess }: DeleteCategoryModalProps) {
+  const isSmallScreen = useBreakpoint("sm", "down");
   const [isDeleting, setIsDeleting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState<Category | null>(null);
@@ -61,8 +59,10 @@ function DeleteCategoryModal({
   return (
     <Modal
       isOpen={isOpen}
+      isDismissable={false}
       onClose={onClose}
-      size="sm"
+      size={isSmallScreen ? "full" : "md"}
+      scrollBehavior={"inside"}
       closeButton={
         <Button
           isIconOnly
@@ -73,18 +73,27 @@ function DeleteCategoryModal({
           <Icon icon="material-symbols:close-rounded" width="20" height="20" />
         </Button>
       }
+      classNames={{
+        wrapper: cn(isSmallScreen && "h-full")
+      }}
     >
       <ModalContent>
         <ModalHeader>
           <h2 className="text-xl font-bold">Delete Category</h2>
         </ModalHeader>
         <ModalBody>
-          {loading ? (
-            <div className="flex justify-center items-center py-6">
-              <Spinner size="lg" />
-            </div>
-          ) : (
-            <div className="flex items-start gap-3 text-sm text-foreground-600">
+          <div className="relative">
+            {(loading || isDeleting) && (
+              <div className="absolute inset-0 z-50 flex items-center justify-center bg-content1 bg-opacity-70">
+                <Spinner size="lg" />
+              </div>
+            )}
+
+            <div
+              className={`flex items-start gap-3 text-sm text-foreground-600 ${
+                loading || isDeleting ? "pointer-events-none opacity-50" : ""
+              }`}
+            >
               <Icon
                 icon="solar:trash-bin-trash-broken"
                 className="mt-0.5 text-danger"
@@ -99,7 +108,7 @@ function DeleteCategoryModal({
                 ? This action cannot be undone.
               </p>
             </div>
-          )}
+          </div>
         </ModalBody>
         <ModalFooter>
           <div className="flex w-full justify-end gap-3">

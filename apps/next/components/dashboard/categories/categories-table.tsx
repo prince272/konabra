@@ -1,18 +1,14 @@
 import React from "react";
 import { Button } from "@heroui/button";
-import { Pagination } from "@heroui/pagination";
+import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 import { Spinner } from "@heroui/spinner";
 import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@heroui/table";
 import { cn } from "@heroui/theme";
 import { Icon } from "@iconify-icon/react";
 import { Category } from "@/services/category-service";
-import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 
 interface CategoriesTableProps {
   categories: Category[];
-  page: number;
-  pageSize: number;
-  totalPages: number;
   isLoading?: boolean;
   isError?: boolean;
   errorMessage?: string;
@@ -20,46 +16,25 @@ interface CategoriesTableProps {
   onReload?: () => void;
   onEdit: (category: Category) => void;
   onDelete: (category: Category) => void;
-  onPageChange?: (page: number) => void;
 }
 
 const CategoriesTable: React.FC<CategoriesTableProps> = ({
   categories,
-  page,
-  pageSize,
-  totalPages,
   isLoading = false,
   isError = false,
   errorMessage,
   emptyMessage,
   onReload,
   onEdit,
-  onDelete,
-  onPageChange
+  onDelete
 }) => {
   return (
     <Table
       aria-label="Categories table"
       removeWrapper
+      isHeaderSticky
+      shadow="none"
       className="flex flex-1"
-      classNames={{
-        thead: "sticky top-0 z-10 bg-content1",
-        tfoot: "sticky bottom-0 z-10 bg-content1"
-      }}
-      bottomContent={
-        <div className="mt-auto flex w-full justify-center pt-4">
-          <Pagination
-            isCompact
-            showControls
-            showShadow={false}
-            radius="full"
-            color="primary"
-            page={page}
-            total={totalPages}
-            onChange={(newPage) => onPageChange?.(newPage)}
-          />
-        </div>
-      }
     >
       <TableHeader>
         <TableColumn>NAME</TableColumn>
@@ -76,7 +51,12 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
         emptyContent={
           isError ? (
             <div className="flex h-64 flex-1 flex-col items-center justify-center text-center">
-              <Icon icon="solar:danger-broken" width="64" height="64" className="mb-4 text-foreground-300" />
+              <Icon
+                icon="solar:danger-broken"
+                width="64"
+                height="64"
+                className="mb-4 text-foreground-300"
+              />
               <p className="mb-2 text-foreground-500">An error occurred</p>
               <p className="mb-4 text-sm text-foreground-400">
                 {errorMessage || "Something went wrong. Please try again later."}
@@ -131,8 +111,7 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({
                       radius="full"
                       aria-label="More actions"
                     >
-                   <Icon icon="material-symbols:more-vert" width="20" height="20" />
-
+                      <Icon icon="material-symbols:more-vert" width="20" height="20" />
                     </Button>
                   </DropdownTrigger>
                   <DropdownMenu aria-label="Category actions" variant="flat">

@@ -19,9 +19,10 @@ import {
   CompleteChangeAccountForm,
   CompleteVerifyAccountForm
 } from "@/services/identity-service";
-import { useAccountState } from "@/states";
+import { useAccountState, useApplicationState } from "@/states";
 import { useBreakpoint, useHashState, useInterval, useTimer } from "@/hooks";
 import { useModalRouter } from "@/components/common/modals";
+import { useTheme } from "next-themes";
 
 interface ViewContextType {
   title: string;
@@ -591,8 +592,24 @@ function NotificationsView({ currentView }: BaseViewProps) {
     </View>
   );
 }
-
 function DisplayView({ currentView }: BaseViewProps) {
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [appState, setAppState] = useApplicationState();
+  const isDark = resolvedTheme === "dark";
+
+  // Sync appState with next-themes
+  useEffect(() => {
+    if (theme !== appState.theme) {
+      setAppState({ ...appState, theme: theme! });
+    }
+  }, [theme]);
+
+  const handleToggle = () => {
+    const newTheme = isDark ? "light" : "dark";
+    setTheme(newTheme);
+    setAppState({ ...appState, theme: newTheme });
+  };
+
   return (
     <View id="display" currentView={currentView}>
       <div className="space-y-6">
@@ -601,7 +618,7 @@ function DisplayView({ currentView }: BaseViewProps) {
           <div className="mt-3 space-y-3">
             <div className="flex items-center justify-between">
               <span>Dark Mode</span>
-              <Switch />
+              <Switch isSelected={isDark} onValueChange={handleToggle} size="sm" color="primary" />
             </div>
           </div>
         </div>
@@ -743,6 +760,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     <ViewContext.Provider value={viewInfo}>
       <Modal
         isOpen={isOpen}
+        isDismissable={false}
         onClose={onClose}
         size={isSmallScreen ? "full" : "3xl"}
         scrollBehavior={"inside"}

@@ -5,12 +5,14 @@ import { Button } from "@heroui/button";
 import { Input, Textarea } from "@heroui/input";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { Spinner } from "@heroui/spinner";
+import { cn } from "@heroui/theme";
 import { addToast } from "@heroui/toast";
 import { Icon } from "@iconify-icon/react";
 import { Controller, useForm } from "react-hook-form";
 import { categoryService } from "@/services";
 import { Category, CreateCategoryForm } from "@/services/category-service";
 import { categoryStore } from "@/states/categories";
+import { useBreakpoint } from "@/hooks";
 import { useModalRouter } from "@/components/common/modals";
 
 interface AddEditCategoryModalProps {
@@ -26,6 +28,7 @@ function AddEditCategoryModal({
   categoryId,
   onSuccess
 }: AddEditCategoryModalProps) {
+  const isSmallScreen = useBreakpoint("sm", "down");
   const isEditMode = Boolean(categoryId);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -107,9 +110,10 @@ function AddEditCategoryModal({
   return (
     <Modal
       isOpen={isOpen}
+      isDismissable={false}
       onClose={onClose}
-      size="md"
-      scrollBehavior="inside"
+      size={isSmallScreen ? "full" : "md"}
+      scrollBehavior={"inside"}
       closeButton={
         <Button
           isIconOnly
@@ -120,6 +124,9 @@ function AddEditCategoryModal({
           <Icon icon="material-symbols:close-rounded" width="20" height="20" />
         </Button>
       }
+      classNames={{
+        wrapper: cn(isSmallScreen && "h-full")
+      }}
     >
       <ModalContent>
         <ModalHeader>

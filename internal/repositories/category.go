@@ -124,7 +124,7 @@ func (repository *CategoryRepository) GetPaginatedCategories(filter CategoryPagi
 	}
 
 	// Default sort settings
-	sortField := "\"order\""
+	sortField := "\"created_at\""
 	sortOrder := "ASC"
 
 	// Use camelCase filter.Sort and map to actual DB column
@@ -185,7 +185,7 @@ func (repository *CategoryRepository) GetCategories(filter CategoryFilter) []mod
 	}
 
 	// Default sort settings
-	sortField := "\"order\""
+	sortField := "\"created_at\""
 	sortOrder := "ASC"
 
 	// Map camelCase input to actual DB column

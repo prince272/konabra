@@ -20,14 +20,13 @@ type IncidentService struct {
 }
 
 type CreateIncidentForm struct {
-	CategoryId  string                  `json:"categoryId" validate:"required"`
-	Title       string                  `json:"title" validate:"required,max=256"`
-	Description string                  `json:"description" validate:"max=1024"`
-	Severity    models.IncidentSeverity `json:"severity" validate:"required"`
-	Status      models.IncidentStatus   `json:"status" validate:"required"`
-	Latitude    float64                 `json:"latitude"`
-	Longitude   float64                 `json:"longitude"`
-	Location    string                  `json:"location"`
+	CategoryId  string  `json:"categoryId" validate:"required"`
+	Title       string  `json:"title" validate:"required,max=256"`
+	Description string  `json:"description" validate:"max=1024"`
+	Severity    string  `json:"severity" validate:"required" enum:"low,medium,high"`
+	Latitude    float64 `json:"latitude"`
+	Longitude   float64 `json:"longitude"`
+	Location    string  `json:"location"`
 }
 
 type UpdateIncidentForm struct {
@@ -75,6 +74,7 @@ func (service *IncidentService) CreateIncident(form CreateIncidentForm) (*Incide
 	incident.Id = uuid.New().String()
 	incident.ReportedAt = time.Now()
 	incident.UpdatedAt = incident.ReportedAt
+	incident.Status = models.StatusPending
 
 	if err := service.incidentRepository.CreateIncident(incident); err != nil {
 		service.logger.Error("Failed to create incident", zap.Error(err))

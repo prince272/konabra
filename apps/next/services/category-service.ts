@@ -1,16 +1,6 @@
 import { AxiosInstance } from "axios";
 import { parseProblem, Problem } from ".";
 
-
-export const Severities = {
-  Low: "Low",
-  Medium: "Medium",
-  High: "High",
-  Critical: "Critical",
-} as const;
-
-export type Severity = (typeof Severities)[keyof typeof Severities];
-
 export type CreateCategoryForm = {
   name: string;
   description: string;

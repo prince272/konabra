@@ -1,28 +1,28 @@
 import { AxiosInstance } from "axios";
 import { parseProblem, Problem } from ".";
 
-export const IncidentStatus = {
-  Pending: "pending",
-  Investigating: "investigating",
-  Resolved: "resolved",
-  FalseAlarm: "falseAlarm"
-} as const;
+export const IncidentStatuses = [
+  { value: "pending", label: "Pending" },
+  { value: "investigating", label: "Investigating" },
+  { value: "resolved", label: "Resolved" },
+  { value: "falseAlarm", label: "False Alarm" }
+] as const;
 
-export const IncidentSeverity = {
-  Low: "low",
-  Medium: "medium",
-  High: "high",
-  Critical: "critical"
-} as const;
+export const IncidentSeverities = [
+  { value: "low", label: "Low" },
+  { value: "medium", label: "Medium" },
+  { value: "high", label: "High" }
+] as const;
 
-export type Status = (typeof IncidentStatus)[keyof typeof IncidentStatus];
-export type Severity = (typeof IncidentSeverity)[keyof typeof IncidentSeverity];
+// Extract union types from the value fields
+export type IncidentStatus = (typeof IncidentStatuses)[number]["value"];
+export type IncidentSeverity = (typeof IncidentSeverities)[number]["value"];
 
 export type CreateIncidentForm = {
   categoryId: string;
   title: string;
   description: string;
-  severity: Severity;
+  severity: IncidentSeverity;
 };
 
 export type UpdateIncidentForm = Partial<CreateIncidentForm>;
@@ -31,8 +31,8 @@ export type Incident = {
   id: string;
   title: string;
   description: string;
-  severity: Severity;
-  status: Status;
+  severity: IncidentSeverity;
+  status: IncidentStatus;
   reportedById: string;
   createdAt: string;
   updatedAt: string;
@@ -42,8 +42,8 @@ export type IncidentFilter = {
   sort?: string | null;
   order?: "asc" | "desc" | null;
   search?: string;
-  status?: Status;
-  severity?: Severity;
+  status?: IncidentStatus;
+  severity?: IncidentSeverity;
 };
 
 export type IncidentPaginatedFilter = IncidentFilter & {

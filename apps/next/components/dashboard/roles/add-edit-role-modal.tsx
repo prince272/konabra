@@ -3,20 +3,16 @@
 import { useEffect, useState } from "react";
 import { Button } from "@heroui/button";
 import { Input, Textarea } from "@heroui/input";
-import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader
-} from "@heroui/modal";
+import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { Spinner } from "@heroui/spinner";
+import { cn } from "@heroui/theme";
 import { addToast } from "@heroui/toast";
 import { Icon } from "@iconify-icon/react";
 import { Controller, useForm } from "react-hook-form";
 import { identityService } from "@/services";
-import { Role, CreateRoleForm } from "@/services/identity-service";
+import { CreateRoleForm, Role } from "@/services/identity-service";
 import { roleStore } from "@/states/roles";
+import { useBreakpoint } from "@/hooks";
 import { useModalRouter } from "@/components/common/modals";
 
 interface AddEditRoleModalProps {
@@ -26,12 +22,8 @@ interface AddEditRoleModalProps {
   onSuccess?: (role: Role) => void;
 }
 
-function AddEditRoleModal({
-  isOpen,
-  onClose,
-  roleId,
-  onSuccess
-}: AddEditRoleModalProps) {
+function AddEditRoleModal({ isOpen, onClose, roleId, onSuccess }: AddEditRoleModalProps) {
+  const isSmallScreen = useBreakpoint("sm", "down");
   const isEditMode = Boolean(roleId);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -110,9 +102,10 @@ function AddEditRoleModal({
   return (
     <Modal
       isOpen={isOpen}
+      isDismissable={false}
       onClose={onClose}
-      size="md"
-      scrollBehavior="inside"
+      size={isSmallScreen ? "full" : "md"}
+      scrollBehavior={"inside"}
       closeButton={
         <Button
           isIconOnly
@@ -123,6 +116,9 @@ function AddEditRoleModal({
           <Icon icon="material-symbols:close-rounded" width="20" height="20" />
         </Button>
       }
+      classNames={{
+        wrapper: cn(isSmallScreen && "h-full")
+      }}
     >
       <ModalContent>
         <ModalHeader>
@@ -192,18 +188,12 @@ function AddEditRoleModal({
   );
 }
 
-export function AddEditRoleModalRouter({
-  onSuccess
-}: {
-  onSuccess?: (role: Role) => void;
-}) {
+export function AddEditRoleModalRouter({ onSuccess }: { onSuccess?: (role: Role) => void }) {
   const { closeModal, currentModal, mountedModal } = useModalRouter();
 
-  const isRoleModal =
-    mountedModal === "add-role" || mountedModal?.startsWith("edit-role-");
+  const isRoleModal = mountedModal === "add-role" || mountedModal?.startsWith("edit-role-");
 
-  const isOpen =
-    currentModal === "add-role" || currentModal?.startsWith("edit-role-") || false;
+  const isOpen = currentModal === "add-role" || currentModal?.startsWith("edit-role-") || false;
 
   const roleId = currentModal?.startsWith("edit-role-")
     ? currentModal.replace("edit-role-", "")

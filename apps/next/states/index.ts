@@ -8,6 +8,6 @@ export const useAccountState = () =>
 
 export const useApplicationState = () =>
   useCookieState<{ theme: string; language: string }>("app-state", {
-    theme: "light",
+    theme: "dark",
     language: "en"
   });

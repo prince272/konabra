@@ -107,6 +107,7 @@ export default function SignInModal({
   return (
     <Modal
       isOpen={isOpen}
+      isDismissable={false}
       onClose={onClose}
       size={isSmallScreen ? "full" : "md"}
       scrollBehavior={"inside"}

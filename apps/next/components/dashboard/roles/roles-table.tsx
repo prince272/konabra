@@ -1,30 +1,15 @@
 import React from "react";
 import { Button } from "@heroui/button";
+import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 import { Pagination } from "@heroui/pagination";
 import { Spinner } from "@heroui/spinner";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow
-} from "@heroui/table";
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@heroui/table";
 import { cn } from "@heroui/theme";
 import { Icon } from "@iconify-icon/react";
 import { Role } from "@/services/identity-service";
-import {
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger
-} from "@heroui/dropdown";
 
 interface RolesTableProps {
   roles: Role[];
-  page: number;
-  pageSize: number;
-  totalPages: number;
   isLoading?: boolean;
   isError?: boolean;
   errorMessage?: string;
@@ -32,46 +17,25 @@ interface RolesTableProps {
   onReload?: () => void;
   onEdit: (role: Role) => void;
   onDelete: (role: Role) => void;
-  onPageChange?: (page: number) => void;
 }
 
 const RolesTable: React.FC<RolesTableProps> = ({
   roles,
-  page,
-  pageSize,
-  totalPages,
   isLoading = false,
   isError = false,
   errorMessage,
   emptyMessage,
   onReload,
   onEdit,
-  onDelete,
-  onPageChange
+  onDelete
 }) => {
   return (
     <Table
       aria-label="Roles table"
       removeWrapper
+          isHeaderSticky
+      shadow="none"
       className="flex flex-1"
-      classNames={{
-        thead: "sticky top-0 z-10 bg-content1",
-        tfoot: "sticky bottom-0 z-10 bg-content1"
-      }}
-      bottomContent={
-        <div className="mt-auto flex w-full justify-center pt-4">
-          <Pagination
-            isCompact
-            showControls
-            showShadow={false}
-            radius="full"
-            color="primary"
-            page={page}
-            total={totalPages}
-            onChange={(newPage) => onPageChange?.(newPage)}
-          />
-        </div>
-      }
     >
       <TableHeader>
         <TableColumn>NAME</TableColumn>
@@ -88,7 +52,12 @@ const RolesTable: React.FC<RolesTableProps> = ({
         emptyContent={
           isError ? (
             <div className="flex h-64 flex-1 flex-col items-center justify-center text-center">
-              <Icon icon="solar:danger-broken" width="64" height="64" className="mb-4 text-foreground-300" />
+              <Icon
+                icon="solar:danger-broken"
+                width="64"
+                height="64"
+                className="mb-4 text-foreground-300"
+              />
               <p className="mb-2 text-foreground-500">An error occurred</p>
               <p className="mb-4 text-sm text-foreground-400">
                 {errorMessage || "Something went wrong. Please try again later."}
@@ -150,7 +119,9 @@ const RolesTable: React.FC<RolesTableProps> = ({
                     <DropdownItem
                       key="edit"
                       onClick={() => onEdit(role)}
-                      startContent={<Icon icon="solar:pen-new-square-broken" width="20" height="20" />}
+                      startContent={
+                        <Icon icon="solar:pen-new-square-broken" width="20" height="20" />
+                      }
                     >
                       Edit
                     </DropdownItem>
@@ -159,7 +130,9 @@ const RolesTable: React.FC<RolesTableProps> = ({
                       className="text-danger"
                       color="danger"
                       onClick={() => onDelete(role)}
-                      startContent={<Icon icon="solar:trash-bin-trash-broken" width="20" height="20" />}
+                      startContent={
+                        <Icon icon="solar:trash-bin-trash-broken" width="20" height="20" />
+                      }
                     >
                       Delete
                     </DropdownItem>

@@ -4,7 +4,7 @@ import React, { useCallback, useState } from "react";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, ButtonGroup } from "@heroui/button";
-import { Card, CardBody, CardHeader } from "@heroui/card";
+import { Card, CardBody, CardFooter, CardHeader } from "@heroui/card";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 import { Input } from "@heroui/input";
 import { Tooltip } from "@heroui/tooltip";
@@ -15,6 +15,7 @@ import { useAsyncMemo, useDebouncedCallback } from "@/hooks";
 import { AddEditRoleModalRouter } from "./add-edit-role-modal";
 import { DeleteRoleModalRouter } from "./delete-role-modal";
 import RolesTable from "./roles-table";
+import { Pagination } from "@heroui/pagination";
 
 type RolePageResult = {
   items: Role[];
@@ -24,12 +25,12 @@ type RolePageResult = {
   problem?: Problem;
 };
 
-const SORT_FIELDS = [
+const RoleSortFields = [
   { label: "Name", value: "name" },
   { label: "Created At", value: "createdAt" },
   { label: "Updated At", value: "updatedAt" },
   { label: "Order", value: "order" }
-];
+] as const;
 
 const RolesPage = () => {
   const router = useRouter();
@@ -104,7 +105,7 @@ const RolesPage = () => {
   const updateSort = (key: string) => {
     setFilter((prev) => ({
       ...prev,
-      sort: key === "null" ? null : key,
+      sort: key === "default" ? null : key,
       offset: 0,
       refresh: prev.refresh + 1
     }));
@@ -129,7 +130,7 @@ const RolesPage = () => {
 
   return (
     <>
-      <div className="flex flex-1 flex-col space-y-3">
+      <div className="flex flex-1 flex-col space-y-3 overflow-y-auto">
         <div className="flex items-center justify-between gap-4">
           <h1 className="text-2xl font-bold">Roles</h1>
           <Button
@@ -178,18 +179,18 @@ const RolesPage = () => {
                         <Icon icon="material-symbols:arrow-drop-down" width="20" height="20" />
                       }
                     >
-                      {SORT_FIELDS.find((f) => f.value === filter.sort)?.label || "Sort"}
+                      {RoleSortFields.find((f) => f.value === filter.sort)?.label || "Sort"}
                     </Button>
                   </DropdownTrigger>
                   <DropdownMenu
                     aria-label="Sort options"
                     selectionMode="single"
-                    selectedKeys={new Set([filter.sort ?? "null"])}
+                    selectedKeys={new Set([filter.sort ?? "default"])}
                     onAction={(key) => updateSort(key as string)}
                   >
                     <>
-                      <DropdownItem key="null">Any</DropdownItem>
-                      {SORT_FIELDS.map((field) => (
+                      <DropdownItem key="default">Default</DropdownItem>
+                      {RoleSortFields.map((field) => (
                         <DropdownItem key={field.value}>{field.label}</DropdownItem>
                       ))}
                     </>
@@ -210,13 +211,23 @@ const RolesPage = () => {
               onDelete={(role) => {
                 router.push(`#delete-role-${role.id}`);
               }}
-              page={page.pageNumber}
-              pageSize={page.pageSize}
-              totalPages={page.totalPages}
-              onPageChange={changePage}
               onReload={resetPage}
             />
           </CardBody>
+          <CardFooter>
+            <div className="mt-auto flex w-full justify-center">
+              <Pagination
+                isCompact
+                showControls
+                showShadow={false}
+                radius="full"
+                color="primary"
+                page={page.pageNumber}
+                total={page.totalPages}
+                onChange={(newPage) => changePage?.(newPage)}
+              />
+            </div>
+          </CardFooter>
         </Card>
       </div>
       <AddEditRoleModalRouter onSuccess={resetPage} />

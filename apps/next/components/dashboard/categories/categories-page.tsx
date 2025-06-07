@@ -4,26 +4,19 @@ import React, { useCallback, useState } from "react";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, ButtonGroup } from "@heroui/button";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import {
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger
-} from "@heroui/dropdown";
+import { Card, CardBody, CardFooter, CardHeader } from "@heroui/card";
+import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 import { Input } from "@heroui/input";
-import { Tooltip } from "@heroui/tooltip"; // ✅ Added for tooltip
+import { Tooltip } from "@heroui/tooltip";
 import { Icon } from "@iconify-icon/react";
 import _ from "lodash";
 import { categoryService, Problem } from "@/services";
-import {
-  Category,
-  CategoryPaginatedFilter
-} from "@/services/category-service";
+import { Category, CategoryPaginatedFilter } from "@/services/category-service";
 import { useAsyncMemo, useDebouncedCallback } from "@/hooks";
 import { AddEditCategoryModalRouter } from "./add-edit-category-modal";
 import CategoriesTable from "./categories-table";
 import { DeleteCategoryModalRouter } from "./delete-category-modal";
+import { Pagination } from "@heroui/pagination";
 
 type CategoryPageResult = {
   items: Category[];
@@ -33,12 +26,12 @@ type CategoryPageResult = {
   problem?: Problem;
 };
 
-const SORT_FIELDS = [
+const CategorySortFields = [
   { label: "Name", value: "name" },
   { label: "Created At", value: "createdAt" },
   { label: "Updated At", value: "updatedAt" },
   { label: "Order", value: "order" }
-];
+] as const;
 
 const CategoriesPage = () => {
   const router = useRouter();
@@ -112,7 +105,7 @@ const CategoriesPage = () => {
   const updateSort = (key: string) => {
     setFilter((prev) => ({
       ...prev,
-      sort: key === "null" ? null : key,
+      sort: key === "default" ? null : key,
       offset: 0,
       refresh: prev.refresh + 1
     }));
@@ -137,7 +130,7 @@ const CategoriesPage = () => {
 
   return (
     <>
-      <div className="flex flex-1 flex-col space-y-3">
+      <div className="flex flex-1 flex-col space-y-3 overflow-y-auto">
         <div className="flex items-center justify-between gap-4">
           <h1 className="text-2xl font-bold">Categories</h1>
           <Button
@@ -186,18 +179,18 @@ const CategoriesPage = () => {
                         <Icon icon="material-symbols:arrow-drop-down" width="20" height="20" />
                       }
                     >
-                      {SORT_FIELDS.find((f) => f.value === filter.sort)?.label || "Sort"}
+                      {CategorySortFields.find((f) => f.value === filter.sort)?.label || "Sort"}
                     </Button>
                   </DropdownTrigger>
                   <DropdownMenu
                     aria-label="Sort options"
                     selectionMode="single"
-                    selectedKeys={new Set([filter.sort ?? "null"])}
+                    selectedKeys={new Set([filter.sort ?? "default"])}
                     onAction={(key) => updateSort(key as string)}
                   >
                     <>
-                      <DropdownItem key="null">Any</DropdownItem>
-                      {SORT_FIELDS.map((field) => (
+                      <DropdownItem key="default">Default</DropdownItem>
+                      {CategorySortFields.map((field) => (
                         <DropdownItem key={field.value}>{field.label}</DropdownItem>
                       ))}
                     </>
@@ -218,13 +211,23 @@ const CategoriesPage = () => {
               onDelete={(category) => {
                 router.push(`#delete-category-${category.id}`);
               }}
-              page={page.pageNumber}
-              pageSize={page.pageSize}
-              totalPages={page.totalPages}
-              onPageChange={changePage}
               onReload={resetPage}
             />
           </CardBody>
+          <CardFooter>
+            <div className="mt-auto flex w-full justify-center">
+              <Pagination
+                isCompact
+                showControls
+                showShadow={false}
+                radius="full"
+                color="primary"
+                page={page.pageNumber}
+                total={page.totalPages}
+                onChange={(newPage) => changePage?.(newPage)}
+              />
+            </div>
+          </CardFooter>
         </Card>
       </div>
       <AddEditCategoryModalRouter onSuccess={resetPage} />

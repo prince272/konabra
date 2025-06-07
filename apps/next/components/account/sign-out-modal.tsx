@@ -51,6 +51,7 @@ export default function SignOutModal({
   return (
     <Modal
       isOpen={isOpen}
+      isDismissable={false}
       onClose={onClose}
       size="md"
       scrollBehavior="inside"

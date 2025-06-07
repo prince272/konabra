@@ -30,10 +30,10 @@ export function Providers({ children, cookies, themeProps }: ProvidersProps) {
     <HeroUIProvider navigate={router.push}>
       <NextThemesProvider {...themeProps}>
         <ProgressProvider
-          height="4px"
+          height="2px"
           color="hsl(var(--heroui-primary))"
           options={{ showSpinner: false }}
-          delay ={100}
+          delay={100}
           shallowRouting
         >
           <ToastProvider placement={isSmallScreen ? "bottom-center" : "top-center"} />
