@@ -107,7 +107,7 @@ function DeleteIncidentModal({ isOpen, onClose, incidentId, onSuccess }: DeleteI
               />
               <p>
                 Are you sure you want to delete the incident{" "}
-                <span className="font-semibold text-foreground">{incident?.title}</span>?<br />
+                <span className="font-semibold text-foreground">{incident?.summary}</span>?<br />
                 This action cannot be undone.
               </p>
             </div>
