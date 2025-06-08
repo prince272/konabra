@@ -114,7 +114,7 @@ export default function ContactUsModal({
           <div className="flex flex-col">
             <h3 className="text-lg font-medium">Contact Us</h3>
             <p className="text-sm text-default-500">
-              Fill out the form below, and we'll get back to you soon.
+              Fill out the form below, and we&#39;ll get back to you soon.
             </p>
           </div>
         </ModalHeader>

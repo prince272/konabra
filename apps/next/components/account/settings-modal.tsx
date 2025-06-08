@@ -524,7 +524,7 @@ function AccountDeleteView({ navigateTo, currentView }: BaseViewProps) {
             <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-danger-700">
               <li>This action cannot be undone</li>
               <li>All your data will be permanently deleted</li>
-              <li>You won't be able to recover your account</li>
+              <li>You won&#39;t be able to recover your account</li>
             </ul>
           </div>
         </div>

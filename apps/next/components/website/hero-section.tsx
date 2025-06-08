@@ -5,6 +5,7 @@ import { Button } from "@heroui/button";
 import { Icon } from "@iconify-icon/react";
 import { motion } from "framer-motion";
 import { CanvasMap } from "./canvas-map";
+import NextLink from "next/link";
 
 export const HeroSection = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -130,6 +131,8 @@ export const HeroSection = () => {
                 radius="full"
                 className="font-medium"
                 endContent={<Icon icon="solar:arrow-right-broken" width="20" height="20" />}
+                as={NextLink}
+                href="/dashboard"
               >
                 Web Portal
               </Button>

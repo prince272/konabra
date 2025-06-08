@@ -38,14 +38,14 @@ export const ContactUsSection = () => {
           animate="show"
         >
           <motion.h2 variants={item} className="mb-4 font-montserrat text-4xl font-bold">
-            We'd Love to{" "}
+            We&#39;d Love to{" "}
             <span className="relative inline-block text-primary">
               Hear From You
               <span className="absolute -bottom-2 left-0 h-1 w-full bg-primary/40"></span>
             </span>
           </motion.h2>
           <motion.p variants={item} className="text-muted-foreground mb-8 text-lg">
-            Reach out via email or give us a call. We're here to help!
+            Reach out via email or give us a call. We&#39;re here to help!
           </motion.p>
           <motion.div variants={item} className="flex items-center justify-center gap-2">
             <Button
