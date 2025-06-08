@@ -1138,16 +1138,11 @@
             "required": [
                 "categoryId",
                 "severity",
-                "status",
-                "title"
+                "summary"
             ],
             "properties": {
                 "categoryId": {
                     "type": "string"
-                },
-                "description": {
-                    "type": "string",
-                    "maxLength": 1024
                 },
                 "latitude": {
                     "type": "number"
@@ -1161,10 +1156,7 @@
                 "severity": {
                     "type": "string"
                 },
-                "status": {
-                    "type": "string"
-                },
-                "title": {
+                "summary": {
                     "type": "string",
                     "maxLength": 256
                 }
@@ -1260,16 +1252,11 @@
             "required": [
                 "categoryId",
                 "severity",
-                "status",
-                "title"
+                "summary"
             ],
             "properties": {
                 "categoryId": {
                     "type": "string"
-                },
-                "description": {
-                    "type": "string",
-                    "maxLength": 1024
                 },
                 "latitude": {
                     "type": "number"
@@ -1283,10 +1270,7 @@
                 "severity": {
                     "type": "string"
                 },
-                "status": {
-                    "type": "string"
-                },
-                "title": {
+                "summary": {
                     "type": "string",
                     "maxLength": 256
                 }

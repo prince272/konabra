@@ -7,15 +7,6 @@ import { Button, ButtonGroup } from "@heroui/button";
 import { Card, CardBody, CardFooter, CardHeader } from "@heroui/card";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 import { Input } from "@heroui/input";
-import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  useDisclosure
-} from "@heroui/modal";
-import { Select, SelectItem } from "@heroui/select";
 import { Tooltip } from "@heroui/tooltip";
 import { Icon } from "@iconify-icon/react";
 import { incidentService, Problem } from "@/services";
@@ -36,7 +27,6 @@ type IncidentPageResult = {
 
 const IncidentSortFields = [
   { label: "Created At", value: "createdAt" },
-  { label: "Title", value: "title" },
   { label: "Severity", value: "severity" },
   { label: "Status", value: "status" }
 ];

@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@bprogress/next": "^3.2.12",
+    "@heroui/autocomplete": "^2.3.21",
     "@heroui/avatar": "^2.2.15",
     "@heroui/badge": "^2.2.12",
     "@heroui/button": "2.2.19",

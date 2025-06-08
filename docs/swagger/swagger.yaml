@@ -116,9 +116,6 @@ definitions:
     properties:
       categoryId:
         type: string
-      description:
-        maxLength: 1024
-        type: string
       latitude:
         type: number
       location:
@@ -127,16 +124,13 @@ definitions:
         type: number
       severity:
         type: string
-      status:
-        type: string
-      title:
+      summary:
         maxLength: 256
         type: string
     required:
     - categoryId
     - severity
-    - status
-    - title
+    - summary
     type: object
   services.CreateRoleForm:
     properties:
@@ -199,9 +193,6 @@ definitions:
     properties:
       categoryId:
         type: string
-      description:
-        maxLength: 1024
-        type: string
       latitude:
         type: number
       location:
@@ -210,16 +201,13 @@ definitions:
         type: number
       severity:
         type: string
-      status:
-        type: string
-      title:
+      summary:
         maxLength: 256
         type: string
     required:
     - categoryId
     - severity
-    - status
-    - title
+    - summary
     type: object
   services.UpdateRoleForm:
     properties:

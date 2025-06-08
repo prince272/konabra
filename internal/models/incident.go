@@ -15,9 +15,10 @@ type IncidentActivity struct {
 }
 
 type Incident struct {
-	Id           string `gorm:"primaryKey"`
-	Title        string
-	Description  string
+	CategoryId   string
+	Category     Category `gorm:"foreignKey:CategoryId;"`
+	Id           string   `gorm:"primaryKey"`
+	Summary      string
 	Severity     IncidentSeverity
 	Status       IncidentStatus
 	UpdatedAt    time.Time

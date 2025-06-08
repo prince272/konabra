@@ -12,6 +12,7 @@ import { categoryService, incidentService } from "@/services";
 import { CreateIncidentForm, Incident, IncidentSeverities } from "@/services/incident-service";
 import { useBreakpoint } from "@/hooks";
 import { useModalRouter } from "@/components/common/modals";
+import { InputLocation } from "@/components/common/input-location";
 
 interface AddEditIncidentModalProps {
   isOpen: boolean;
@@ -30,17 +31,17 @@ export function AddEditIncidentModal({
   const isEditMode = Boolean(incidentId);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // State for categories
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
 
   const form = useForm<CreateIncidentForm>({
     defaultValues: {
-      title: "",
-      description: "",
+      summary: "",
       categoryId: "",
-      severity: "low"
+      severity: "low",
+      location: "",
+      longitude: undefined,
+      latitude: undefined
     },
     mode: "onChange"
   });
@@ -67,7 +68,6 @@ export function AddEditIncidentModal({
     loadCategories();
 
     if (!incidentId) {
-      // If no incidentId (add mode), reset form
       form.reset();
       return;
     }
@@ -129,7 +129,7 @@ export function AddEditIncidentModal({
       isDismissable={false}
       onClose={onClose}
       size={isSmallScreen ? "full" : "lg"}
-      scrollBehavior={"inside"}
+      scrollBehavior="inside"
       closeButton={
         <Button
           isIconOnly
@@ -164,29 +164,16 @@ export function AddEditIncidentModal({
               }`}
             >
               <Controller
-                name="title"
-                control={form.control}
-                render={({ field }) => (
-                  <Input
-                    {...field}
-                    label="Title"
-                    placeholder="Enter incident title"
-                    isInvalid={!!form.formState.errors.title}
-                    errorMessage={form.formState.errors.title?.message}
-                  />
-                )}
-              />
-              <Controller
-                name="description"
+                name="summary"
                 control={form.control}
                 render={({ field }) => (
                   <Textarea
                     {...field}
-                    label="Description"
-                    placeholder="Describe the incident"
+                    label="Summary"
+                    placeholder="Summarize the incident"
                     rows={3}
-                    isInvalid={!!form.formState.errors.description}
-                    errorMessage={form.formState.errors.description?.message}
+                    isInvalid={!!form.formState.errors.summary}
+                    errorMessage={form.formState.errors.summary?.message}
                   />
                 )}
               />
@@ -197,16 +184,14 @@ export function AddEditIncidentModal({
                   <Select
                     {...field}
                     label="Category"
-                    selectedKeys={[field.value]}
+                    selectedKeys={new Set([field.value])}
                     onChange={(e) => field.onChange(e.target.value)}
                     isInvalid={!!form.formState.errors.categoryId}
                     aria-label="Category"
                   >
-                    <>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat.id}>{cat.name}</SelectItem>
-                      ))}
-                    </>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.id}>{cat.name}</SelectItem>
+                    ))}
                   </Select>
                 )}
               />
@@ -217,7 +202,7 @@ export function AddEditIncidentModal({
                   <Select
                     {...field}
                     label="Severity"
-                    selectedKeys={[field.value]}
+                    selectedKeys={new Set([field.value])}
                     onChange={(e) => field.onChange(e.target.value)}
                     startContent={
                       <span
@@ -250,6 +235,20 @@ export function AddEditIncidentModal({
                       </SelectItem>
                     ))}
                   </Select>
+                )}
+              />
+              <Controller
+                name="location"
+                control={form.control}
+                render={({ field }) => (
+                  <InputLocation
+                    {...field}
+                    apiKey="pk.115ae85bcf36b5a05296cbc4f2f80c8e"
+                    label="Location"
+                    placeholder="Enter incident location"
+                    isInvalid={!!form.formState.errors.location}
+                    errorMessage={form.formState.errors.location?.message}
+                  />
                 )}
               />
             </form>

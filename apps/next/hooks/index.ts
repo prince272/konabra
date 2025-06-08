@@ -11,3 +11,4 @@ export * from "./use-measure";
 export * from "./use-async-memo";
 export * from "./use-debounced-callback";
 export * from "./use-throttled-callback";
+export * from "./use-locationIq-autocomplete"

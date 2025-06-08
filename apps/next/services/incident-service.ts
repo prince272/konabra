@@ -1,5 +1,6 @@
 import { AxiosInstance } from "axios";
 import { parseProblem, Problem } from ".";
+import { Category } from "./category-service";
 
 export const IncidentStatuses = [
   { value: "pending", label: "Pending" },
@@ -20,22 +21,27 @@ export type IncidentSeverity = (typeof IncidentSeverities)[number]["value"];
 
 export type CreateIncidentForm = {
   categoryId: string;
-  title: string;
-  description: string;
+  summary: string;
   severity: IncidentSeverity;
+  location?: string;
+  longitude?: number;
+  latitude?: number;
 };
 
 export type UpdateIncidentForm = Partial<CreateIncidentForm>;
 
 export type Incident = {
   id: string;
-  title: string;
-  description: string;
+  summary: string;
   severity: IncidentSeverity;
   status: IncidentStatus;
   reportedById: string;
   createdAt: string;
   updatedAt: string;
+  location: string;
+  longitude: number;
+  latitude: number;
+  category: Category;
 };
 
 export type IncidentFilter = {

@@ -20,13 +20,12 @@ type IncidentService struct {
 }
 
 type CreateIncidentForm struct {
-	CategoryId  string  `json:"categoryId" validate:"required"`
-	Title       string  `json:"title" validate:"required,max=256"`
-	Description string  `json:"description" validate:"max=1024"`
-	Severity    string  `json:"severity" validate:"required" enum:"low,medium,high"`
-	Latitude    float64 `json:"latitude"`
-	Longitude   float64 `json:"longitude"`
-	Location    string  `json:"location"`
+	CategoryId string  `json:"categoryId" validate:"required"`
+	Summary    string  `json:"summary" validate:"required,max=256"`
+	Severity   string  `json:"severity" validate:"required" enum:"low,medium,high"`
+	Latitude   float64 `json:"latitude"`
+	Longitude  float64 `json:"longitude"`
+	Location   string  `json:"location"`
 }
 
 type UpdateIncidentForm struct {
@@ -35,8 +34,7 @@ type UpdateIncidentForm struct {
 
 type IncidentModel struct {
 	Id           string                  `json:"id"`
-	Title        string                  `json:"title"`
-	Description  string                  `json:"description"`
+	Summary      string                  `json:"summary"`
 	Severity     models.IncidentSeverity `json:"severity"`
 	Status       models.IncidentStatus   `json:"status"`
 	ReportedAt   time.Time               `json:"reportedAt"`
@@ -45,6 +43,8 @@ type IncidentModel struct {
 	Latitude     float64                 `json:"latitude"`
 	Longitude    float64                 `json:"longitude"`
 	Location     string                  `json:"location"`
+	CategoryId   string                  `json:"categoryId"`
+	Category     CategoryModel           `json:"category"`
 }
 
 type IncidentPaginatedListModel struct {
@@ -60,7 +60,7 @@ func NewIncidentService(incidentRepo *repositories.IncidentRepository, validator
 	}
 }
 
-func (service *IncidentService) CreateIncident(form CreateIncidentForm) (*IncidentModel, *problems.Problem) {
+func (service *IncidentService) CreateIncident(userId string, form CreateIncidentForm) (*IncidentModel, *problems.Problem) {
 	if err := service.validator.ValidateStruct(form); err != nil {
 		return nil, problems.FromError(err)
 	}
@@ -72,6 +72,7 @@ func (service *IncidentService) CreateIncident(form CreateIncidentForm) (*Incide
 	}
 
 	incident.Id = uuid.New().String()
+	incident.ReportedById = userId
 	incident.ReportedAt = time.Now()
 	incident.UpdatedAt = incident.ReportedAt
 	incident.Status = models.StatusPending
@@ -139,6 +140,7 @@ func (service *IncidentService) GetPaginatedIncidents(filter repositories.Incide
 	models := make([]IncidentModel, 0, len(items))
 	for _, item := range items {
 		model := &IncidentModel{}
+
 		if err := copier.Copy(model, item); err != nil {
 			service.logger.Error("Error copying incident to model: ", zap.Error(err))
 			return nil, problems.FromError(err)

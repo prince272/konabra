@@ -1145,16 +1145,11 @@ const docTemplate = `{
             "required": [
                 "categoryId",
                 "severity",
-                "status",
-                "title"
+                "summary"
             ],
             "properties": {
                 "categoryId": {
                     "type": "string"
-                },
-                "description": {
-                    "type": "string",
-                    "maxLength": 1024
                 },
                 "latitude": {
                     "type": "number"
@@ -1168,10 +1163,7 @@ const docTemplate = `{
                 "severity": {
                     "type": "string"
                 },
-                "status": {
-                    "type": "string"
-                },
-                "title": {
+                "summary": {
                     "type": "string",
                     "maxLength": 256
                 }
@@ -1267,16 +1259,11 @@ const docTemplate = `{
             "required": [
                 "categoryId",
                 "severity",
-                "status",
-                "title"
+                "summary"
             ],
             "properties": {
                 "categoryId": {
                     "type": "string"
-                },
-                "description": {
-                    "type": "string",
-                    "maxLength": 1024
                 },
                 "latitude": {
                     "type": "number"
@@ -1290,10 +1277,7 @@ const docTemplate = `{
                 "severity": {
                     "type": "string"
                 },
-                "status": {
-                    "type": "string"
-                },
-                "title": {
+                "summary": {
                     "type": "string",
                     "maxLength": 256
                 }

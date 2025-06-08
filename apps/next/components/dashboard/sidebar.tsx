@@ -133,7 +133,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, path, icon, children, onItem
         <div
           className={cn("overflow-hidden", {
             "transition-max-height duration-500 ease-in-out": isCurrentToggled,
-            "max-h-96": isExpanded,
+            "": isExpanded,
             "max-h-0": !isExpanded
           })}
         >

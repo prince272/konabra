@@ -6,8 +6,8 @@ import { useTimeout } from "./use-timeout";
  * Creates a debounced function that will invoke the input function after the
  * specified delay.
  *
- * @param fn a function that will be debounced
- * @param dependencies An array of dependencies that will trigger re-creation of the debounced function
+ * @param fn a function that will be debounced (should be memoized/stable)
+ * @param dependencies An array of dependencies that will trigger re-creation of the debounced function (should include fn dependencies)
  * @param delay The milliseconds delay before invoking the function
  * @returns A debounced function
  */
@@ -27,6 +27,8 @@ export const useDebouncedCallback = <TCallback extends (...args: any[]) => any>(
         }, delay);
       });
     },
-    [fn, delay, ...dependencies] // Ensure fn and delay are included, and dependencies are spread
+    // Only re-create callback if delay or dependencies change.
+    // fn should be stable or memoized outside to avoid rerenders here.
+    [delay, ...dependencies]
   );
 };

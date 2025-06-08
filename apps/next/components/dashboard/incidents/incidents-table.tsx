@@ -1,11 +1,13 @@
 import React from "react";
 import { Button } from "@heroui/button";
+import { Chip } from "@heroui/chip";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 import { Pagination } from "@heroui/pagination";
 import { Spinner } from "@heroui/spinner";
 import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@heroui/table";
+import { cn } from "@heroui/theme";
 import { Icon } from "@iconify-icon/react";
-import { Incident } from "@/services/incident-service";
+import { Incident, IncidentSeverities } from "@/services/incident-service";
 
 interface IncidentsTableProps {
   incidents: Incident[];
@@ -26,18 +28,19 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
   emptyMessage,
   onReload,
   onEdit,
-  onDelete,
+  onDelete
 }) => {
   return (
     <Table
       aria-label="Incidents table"
       removeWrapper
-          isHeaderSticky
+      isHeaderSticky
       shadow="none"
       className="flex flex-1"
     >
       <TableHeader>
-        <TableColumn>TITLE</TableColumn>
+        <TableColumn>CATEGORY</TableColumn>
+        <TableColumn>SUMMARY</TableColumn>
         <TableColumn>SEVERITY</TableColumn>
         <TableColumn>STATUS</TableColumn>
         <TableColumn className="text-right">ACTIONS</TableColumn>
@@ -92,9 +95,40 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
       >
         {(isError ? [] : incidents).map((incident) => (
           <TableRow key={incident.id}>
-            <TableCell className="text-nowrap">{incident.title}</TableCell>
-            <TableCell>{incident.severity}</TableCell>
-            <TableCell className="capitalize">{incident.status}</TableCell>
+            <TableCell className="text-nowrap">{incident.category?.name}</TableCell>
+            <TableCell className="text-nowrap">{incident.summary}</TableCell>
+            <TableCell>
+              <div className="flex items-center gap-2">
+                <div
+                  className={cn(
+                    "h-2 w-2 rounded-full",
+                    {
+                      low: "bg-secondary",
+                      medium: "bg-warning",
+                      high: "bg-danger"
+                    }[incident.severity]
+                  )}
+                ></div>
+                {IncidentSeverities.find((severity) => severity.value == incident.severity)?.label}
+              </div>
+            </TableCell>
+            <TableCell>
+              <Chip
+                color={
+                  (
+                    {
+                      pending: "secondary",
+                      investigating: "warning",
+                      resolved: "success",
+                      falseAlarm: "default"
+                    } as const
+                  )[incident.status]
+                }
+                variant="flat"
+              >
+                {incident.status}
+              </Chip>
+            </TableCell>
             <TableCell>
               <div className="flex justify-end">
                 <Dropdown>

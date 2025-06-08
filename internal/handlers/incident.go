@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prince272/konabra/internal/constants"
 	"github.com/prince272/konabra/internal/helpers"
 	"github.com/prince272/konabra/internal/problems"
 	"github.com/prince272/konabra/internal/repositories"
@@ -68,7 +69,10 @@ func (handler *IncidentHandler) CreateIncident(context *gin.Context) (any, *prob
 		return nil, problems.FromError(err)
 	}
 
-	return handler.incidentService.CreateIncident(form)
+	claims := context.MustGet(constants.ContextClaimsKey).(map[string]any)
+	userId := claims["sub"].(string)
+
+	return handler.incidentService.CreateIncident(userId, form)
 }
 
 // UpdateIncident updates an existing incident

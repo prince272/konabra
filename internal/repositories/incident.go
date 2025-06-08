@@ -72,10 +72,11 @@ func (repository *IncidentRepository) GetIncidentById(id string) *models.Inciden
 
 func (repository *IncidentRepository) GetPaginatedIncidents(filter IncidentPaginatedFilter) (items []models.Incident, count int64) {
 	query := repository.defaultDB.Model(&models.Incident{}).
-		Preload("ReportedBy")
+		Preload("ReportedBy").
+		Preload("Category")
 
 	if filter.Search != "" {
-		query = query.Where("LOWER(title) LIKE LOWER(?)", "%"+filter.Search+"%")
+		query = query.Where("LOWER(summary) LIKE LOWER(?)", "%"+filter.Search+"%")
 	}
 
 	if filter.Severity != "" {
@@ -99,7 +100,6 @@ func (repository *IncidentRepository) GetPaginatedIncidents(filter IncidentPagin
 	}
 
 	allowedSortFields := map[string]string{
-		"title":      "title",
 		"reportedAt": "reported_at",
 		"updatedAt":  "updated_at",
 		"severity":   "severity",
