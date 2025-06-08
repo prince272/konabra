@@ -592,22 +592,20 @@ function NotificationsView({ currentView }: BaseViewProps) {
     </View>
   );
 }
-function DisplayView({ currentView }: BaseViewProps) {
-  const { theme, setTheme, resolvedTheme } = useTheme();
-  const [appState, setAppState] = useApplicationState();
-  const isDark = resolvedTheme === "dark";
 
-  // Sync appState with next-themes
-  useEffect(() => {
-    if (theme !== appState.theme) {
-      setAppState({ ...appState, theme: theme! });
-    }
-  }, [theme]);
+function DisplayView({ currentView }: BaseViewProps) {
+  const [appState, setAppState] = useApplicationState();
+  const isDark = appState.theme === "dark";
 
   const handleToggle = () => {
     const newTheme = isDark ? "light" : "dark";
-    setTheme(newTheme);
-    setAppState({ ...appState, theme: newTheme });
+    setAppState(prev => ({ ...prev, theme: newTheme }));
+
+    if (newTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
   };
 
   return (
@@ -618,7 +616,11 @@ function DisplayView({ currentView }: BaseViewProps) {
           <div className="mt-3 space-y-3">
             <div className="flex items-center justify-between">
               <span>Dark Mode</span>
-              <Switch isSelected={isDark} onValueChange={handleToggle} size="sm" color="primary" />
+              <Switch 
+                isSelected={isDark}
+                onValueChange={handleToggle}
+                color="primary"
+              />
             </div>
           </div>
         </div>

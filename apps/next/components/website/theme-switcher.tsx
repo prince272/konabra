@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Switch } from "@heroui/switch";
 import { Tooltip } from "@heroui/tooltip";
 import { Icon } from "@iconify-icon/react";
@@ -8,20 +8,39 @@ import { useTheme } from "next-themes";
 import { useApplicationState } from "@/states";
 
 export const ThemeSwitcher = () => {
-  const { theme, setTheme, resolvedTheme } = useTheme();
   const [appState, setAppState] = useApplicationState();
-  const isDark = resolvedTheme === "dark";
+  const isDark = appState.theme === "dark";
 
+  // Initialize theme based on system preference or saved state
   useEffect(() => {
-    if (theme !== appState.theme) {
-      setAppState({ ...appState, theme: theme! });
+    // If no theme is set in appState, check system preference
+    if (!appState.theme) {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const initialTheme = prefersDark ? "dark" : "light";
+      setAppState((prev) => ({ ...prev, theme: initialTheme }));
+
+      if (prefersDark) {
+        document.documentElement.classList.add("dark");
+      }
+    } else {
+      // Apply the theme from appState
+      if (appState.theme === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
     }
-  }, [theme]);
+  }, [appState.theme, setAppState]);
 
   const handleToggle = () => {
     const newTheme = isDark ? "light" : "dark";
-    setTheme(newTheme);
-    setAppState({ ...appState, theme: newTheme });
+    setAppState((prev) => ({ ...prev, theme: newTheme }));
+
+    if (newTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
   };
 
   return (
