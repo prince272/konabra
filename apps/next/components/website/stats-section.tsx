@@ -7,7 +7,6 @@ import { motion } from "framer-motion";
 import CountUp from "react-countup";
 import { InView } from "react-intersection-observer";
 
-// Memoized CountUp component to prevent re-renders on hover state changes
 const MemoizedCountUp = memo(
   ({
     value,
@@ -34,6 +33,8 @@ const MemoizedCountUp = memo(
     />
   )
 );
+
+MemoizedCountUp.displayName = "MemoizedCountUp";
 
 export const StatsSection = () => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
