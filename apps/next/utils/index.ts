@@ -34,3 +34,20 @@ export function stringifyPath(object: UrlObject, options?: StringifyOptions): st
 
   return queryString.stringifyUrl(object, options);
 }
+
+export function toRelativeUrl(fullUrl: string): string {
+  try {
+    const url = new URL(fullUrl);
+    return url.pathname + url.search + url.hash;
+  } catch {
+    const protoIndex = fullUrl.indexOf("://");
+    if (protoIndex !== -1) {
+      const startPath = fullUrl.indexOf("/", protoIndex + 3);
+      if (startPath !== -1) {
+        return fullUrl.substring(startPath);
+      }
+      return "/";
+    }
+    return fullUrl.startsWith("/") ? fullUrl : `/${fullUrl}`;
+  }
+}

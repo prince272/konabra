@@ -1,5 +1,7 @@
-import React, { forwardRef, useEffect, useState, useMemo } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 import { Autocomplete, AutocompleteItem, AutocompleteProps } from "@heroui/autocomplete";
+import { Button } from "@heroui/button";
+import { Icon } from "@iconify-icon/react";
 import { Key } from "@react-types/shared";
 import { useLocationIQAutocomplete } from "@/hooks";
 import type { Location as LocationIQLocation } from "@/hooks/use-locationIq-autocomplete";
@@ -23,26 +25,11 @@ const InputLocation = forwardRef<HTMLInputElement, InputLocationProps>(
     ref
   ) => {
     const [selectedKey, setSelectedKey] = useState<Key | null>(null);
-    const { results, loading, error, setQuery } = useLocationIQAutocomplete({
+    const { results, loading, error, getCurrentLocation } = useLocationIQAutocomplete({
       apiKey,
+      query: controlledValue?.toString() || "",
       debounceTime
     });
-
-    // Generate keys and map to locations for current results
-    const keyToLocationMap = useMemo(() => {
-      const map = new Map<Key, LocationIQLocation>();
-      results.forEach((location, index) => {
-        const key = `loc-${index}`; // Unique key per result, no place_id used
-        map.set(key, location);
-      });
-      return map;
-    }, [results]);
-
-    useEffect(() => {
-      if (controlledValue !== undefined) {
-        setQuery(controlledValue.toString());
-      }
-    }, [controlledValue, setQuery]);
 
     const handleInputChange = (value: string) => {
       const syntheticEvent = {
@@ -51,11 +38,9 @@ const InputLocation = forwardRef<HTMLInputElement, InputLocationProps>(
         }
       } as React.ChangeEvent<HTMLInputElement>;
       parentOnChange?.(syntheticEvent);
-      setQuery(value);
-
       if (
         selectedKey &&
-        value !== keyToLocationMap.get(selectedKey)?.display_place
+        value !== results[parseInt((selectedKey as string).split("-").pop() || "0")]?.display_place
       ) {
         setSelectedKey(null);
         onLocationChange?.(null);
@@ -64,9 +49,9 @@ const InputLocation = forwardRef<HTMLInputElement, InputLocationProps>(
 
     const handleSelectionChange = (key: Key | null) => {
       setSelectedKey(key);
-      const location = key ? keyToLocationMap.get(key) ?? null : null;
-      onLocationChange?.(location);
-
+      const index = key ? parseInt((key as string).split("-").pop() || "0") : -1;
+      const location = index >= 0 ? results[index] : null;
+      onLocationChange?.(location || null);
       if (location) {
         const syntheticEvent = {
           target: {
@@ -90,10 +75,29 @@ const InputLocation = forwardRef<HTMLInputElement, InputLocationProps>(
         listboxProps={{
           emptyContent: loading ? "Loading..." : "No locations found"
         }}
+        startContent={
+          <Button
+            radius="full"
+            size="sm"
+            variant="flat"
+            color="primary"
+            onPress={async () => {
+              const currentLocation = await getCurrentLocation();
+              if (currentLocation) {
+                handleInputChange(currentLocation.display_name);
+              }
+            }}
+            isLoading={loading}
+            isDisabled={loading}
+            isIconOnly
+          >
+            <Icon icon="solar:map-point-add-broken" width="20" height="20" />
+          </Button>
+        }
         {...props}
       >
         {results.map((location, index) => {
-          const key = `loc-${index}`;
+          const key = `${location.place_id}-${index}`;
           return (
             <AutocompleteItem key={key} textValue={location.display_place}>
               <div className="flex flex-col">

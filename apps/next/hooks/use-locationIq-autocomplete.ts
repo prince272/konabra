@@ -41,32 +41,34 @@ export interface AutocompleteOptions {
 
 interface UseLocationIQAutocompleteProps {
   apiKey: string;
+  query: string;
   debounceTime?: number;
   options?: AutocompleteOptions;
 }
 
 interface AutocompleteState {
-  query: string;
   results: Location[];
   loading: boolean;
   error: string | null;
 }
 
 const BASE_URL = "https://api.locationiq.com/v1/autocomplete";
+const REVERSE_GEOCODE_URL = "https://api.locationiq.com/v1/reverse";
 const MIN_QUERY_LENGTH = 3;
 
 /**
- * Hook to get location autocomplete suggestions using LocationIQ API.
+ * Hook to get location autocomplete suggestions and current location using LocationIQ API.
+ * Query state is managed externally and passed as a prop.
  */
 export const useLocationIQAutocomplete = ({
   apiKey,
+  query,
   debounceTime = 500,
   options = {}
 }: UseLocationIQAutocompleteProps): AutocompleteState & {
-  setQuery: (query: string) => void;
+  getCurrentLocation: () => Promise<Location | null>;
 } => {
   const [state, setState] = useState<AutocompleteState>({
-    query: "",
     results: [],
     loading: false,
     error: null
@@ -87,6 +89,19 @@ export const useLocationIQAutocomplete = ({
     [apiKey, options]
   );
 
+  const buildReverseGeocodeParams = useCallback(
+    (lat: number, lon: number): string => {
+      const params = new URLSearchParams({
+        key: apiKey,
+        lat: lat.toString(),
+        lon: lon.toString(),
+        format: "json"
+      });
+      return params.toString();
+    },
+    [apiKey]
+  );
+
   const fetchSuggestions = useCallback(
     async (trimmedQuery: string) => {
       // Cancel any in-flight requests
@@ -98,10 +113,9 @@ export const useLocationIQAutocomplete = ({
       setState((prev) => ({ ...prev, loading: true, error: null }));
 
       try {
-        const response = await fetch(
-          `${BASE_URL}?${buildQueryParams(trimmedQuery)}`,
-          { signal: controller.signal }
-        );
+        const response = await fetch(`${BASE_URL}?${buildQueryParams(trimmedQuery)}`, {
+          signal: controller.signal
+        });
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -134,30 +148,79 @@ export const useLocationIQAutocomplete = ({
     [buildQueryParams]
   );
 
+  const getCurrentLocation = useCallback(async (): Promise<Location | null> => {
+    if (!navigator.geolocation) {
+      setState((prev) => ({
+        ...prev,
+        error: "Geolocation is not supported by this browser"
+      }));
+      return null;
+    }
+
+    try {
+      setState((prev) => ({ ...prev, loading: true, error: null }));
+
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
+
+      const { latitude, longitude } = position.coords;
+
+      // Cancel any in-flight requests
+      abortControllerRef.current?.abort();
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
+      const response = await fetch(
+        `${REVERSE_GEOCODE_URL}?${buildReverseGeocodeParams(latitude, longitude)}`,
+        { signal: controller.signal }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to fetch current location");
+      }
+
+      const data: Location = await response.json();
+      setState((prev) => ({
+        ...prev,
+        results: [data],
+        loading: false
+      }));
+      cachedResultsRef.current = [data];
+      return data;
+    } catch (err) {
+      setState((prev) => ({
+        ...prev,
+        error: err instanceof Error ? err.message : "Failed to get current location",
+        loading: false
+      }));
+      return null;
+    }
+  }, [buildReverseGeocodeParams]);
+
   const debouncedFetch = useDebouncedCallback(fetchSuggestions, [], debounceTime);
 
-  const setQuery = useCallback(
-    (query: string) => {
-      const trimmed = query.trim();
-      setState((prev) => ({ ...prev, query }));
+  // Effect to handle query changes
+  useEffect(() => {
+    const trimmed = query.trim();
 
-      if (trimmed.length >= MIN_QUERY_LENGTH) {
-        debouncedFetch(trimmed);
-      } else {
-        setState((prev) => ({
-          ...prev,
-          results: trimmed.length > 0 ? cachedResultsRef.current : []
-        }));
-      }
-    },
-    [debouncedFetch]
-  );
+    if (trimmed.length >= MIN_QUERY_LENGTH) {
+      debouncedFetch(trimmed);
+    } else {
+      setState((prev) => ({
+        ...prev,
+        results: trimmed.length > 0 ? cachedResultsRef.current : []
+      }));
+    }
+  }, [query, debouncedFetch]);
 
+  // Cleanup effect for aborting requests
   useEffect(() => {
     return () => {
       abortControllerRef.current?.abort();
     };
   }, []);
 
-  return useMemo(() => ({ ...state, setQuery }), [state, setQuery]);
+  return useMemo(() => ({ ...state, getCurrentLocation }), [state, getCurrentLocation]);
 };

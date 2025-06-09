@@ -248,6 +248,12 @@ export function AddEditIncidentModal({
                     placeholder="Enter incident location"
                     isInvalid={!!form.formState.errors.location}
                     errorMessage={form.formState.errors.location?.message}
+                    onLocationChange={(location) => {
+                      if (location) {
+                        form.setValue("longitude", Number(location.lon) || 0);
+                        form.setValue("latitude", Number(location.lat) || 0);
+                      }
+                    }}
                   />
                 )}
               />

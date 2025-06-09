@@ -17,11 +17,17 @@ then
     exit 1
 fi
 
+clean() {
+  echo -e "🧹 Cleaning bin directory..."
+  rm -rf "$BIN_DIR"
+  echo -e "✅ Cleaned."
+}
+
 build() {
+  clean  # Clean before building
+
   echo -e "🔄 Generating Swagger docs..."
-
   swag init -g ./cmd/api/main.go -o ./docs/swagger
-
   echo -e "✅ Swagger docs generated."
 
   echo -e "🔨 Building the project..."
@@ -42,12 +48,6 @@ build() {
       echo -e "⚠️ Skipped missing file: $src"
     fi
   done
-}
-
-clean() {
-  echo -e "🧹 Cleaning bin directory..."
-  rm -rf "$BIN_DIR"
-  echo -e "✅ Cleaned."
 }
 
 case "$1" in

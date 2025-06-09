@@ -42,6 +42,7 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
         <TableColumn>CATEGORY</TableColumn>
         <TableColumn>SUMMARY</TableColumn>
         <TableColumn>SEVERITY</TableColumn>
+        <TableColumn>LOCATION</TableColumn>
         <TableColumn>STATUS</TableColumn>
         <TableColumn className="text-right">ACTIONS</TableColumn>
       </TableHeader>
@@ -111,6 +112,16 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
                 ></div>
                 {IncidentSeverities.find((severity) => severity.value == incident.severity)?.label}
               </div>
+            </TableCell>
+            <TableCell className="text-nowrap">
+              {incident.location ? (
+                <div className="flex items-center gap-2">
+                  <Icon icon="solar:map-point-broken" width="20" height="20" />
+                  {incident.location}
+                </div>
+              ) : (
+                "N/A"
+              )}
             </TableCell>
             <TableCell>
               <Chip

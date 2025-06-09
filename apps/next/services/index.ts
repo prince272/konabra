@@ -1,8 +1,8 @@
-import axios, { AxiosError, AxiosResponse, isAxiosError } from "axios";
+import axios, { AxiosError, AxiosResponse, HttpStatusCode, isAxiosError } from "axios";
 import PQueue from "p-queue";
 import queryString from "query-string";
 import Cookies from "universal-cookie";
-import { stringifyPath } from "@/utils";
+import { stringifyPath, toRelativeUrl } from "@/utils";
 import { CategoryService } from "./category-service";
 import { AccountWithToken, IdentityService } from "./identity-service";
 import { IncidentService } from "./incident-service";
@@ -51,7 +51,7 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === HttpStatusCode.Unauthorized && !originalRequest._retry) {
       const currentAccount: AccountWithToken | undefined = cookies.get("current-account");
 
       if (!currentAccount?.refreshToken) {
@@ -103,10 +103,12 @@ api.interceptors.response.use(
               requestQueue = [];
             } catch (refreshError) {
               requestQueue = [];
-              cookies.remove("current-account", { path: "/" });
+              //cookies.remove("current-account", { path: "/" });
 
-              if (typeof window !== "undefined") {
-                const returnUrl = window.location.href || "/";
+              const status = (refreshError as AxiosError)?.response?.status;
+
+              if ((status === HttpStatusCode.BadRequest || status === HttpStatusCode.Unauthorized) && typeof window !== "undefined") {
+                const returnUrl = toRelativeUrl(window.location.href || "/");
                 window.location.href = stringifyPath(
                   {
                     url: "/",
