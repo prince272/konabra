@@ -24,7 +24,9 @@ export interface Location {
     postcode?: string;
     country?: string;
     country_code?: string;
+    suburb?: string;
   };
+  friendly_name: string; // Added friendly_name field
 }
 
 export interface AutocompleteOptions {
@@ -136,6 +138,43 @@ export const useLocationIQAutocomplete = (
     [apiKey, mergedOptions.acceptLanguage, mergedOptions.normalizecity]
   );
 
+  // Function to generate a friendly name from address components
+  const generateFriendlyName = useCallback((address: Location["address"]): string => {
+    const parts: string[] = [];
+
+    // Priority 1: Use 'name' if available (e.g., business, landmark)
+    if (address.name) {
+      parts.push(address.name);
+    }
+    // Priority 2: Combine house_number and road for specific addresses
+    else if (address.house_number && address.road) {
+      parts.push(`${address.house_number} ${address.road}`);
+    }
+    // Priority 3: Fallback to road
+    else if (address.road) {
+      parts.push(address.road);
+    }
+    // Priority 4: Fallback to suburb
+    else if (address.suburb) {
+      parts.push(address.suburb);
+    }
+
+    // Add city or state for context, if available
+    if (address.city) {
+      parts.push(address.city);
+    } else if (address.state) {
+      parts.push(address.state);
+    }
+
+    // Fallback to country if no better components are available
+    if (parts.length === 0 && address.country) {
+      parts.push(address.country);
+    }
+
+    // If no components are available, use a default
+    return parts.length > 0 ? parts.join(", ") : "Unnamed Location";
+  }, []);
+
   const fetchSuggestions = useCallback(
     async (trimmedQuery: string) => {
       abortControllerRef.current?.abort();
@@ -185,10 +224,15 @@ export const useLocationIQAutocomplete = (
         }
 
         const data: Location[] = await response.json();
+        // Add friendly_name to each location
+        const locationsWithFriendlyName = data.map((location) => ({
+          ...location,
+          friendly_name: generateFriendlyName(location.address)
+        }));
 
         if (currentRequestId === requestIdRef.current) {
-          setState((prev) => ({ ...prev, locations: data, isLoading: false }));
-          cachedLocationsRef.current = data;
+          setState((prev) => ({ ...prev, locations: locationsWithFriendlyName, isLoading: false }));
+          cachedLocationsRef.current = locationsWithFriendlyName;
         }
       } catch (err) {
         if (
@@ -205,7 +249,7 @@ export const useLocationIQAutocomplete = (
         }
       }
     },
-    [baseUrl, buildAutoCompleteParams]
+    [baseUrl, buildAutoCompleteParams, generateFriendlyName]
   );
 
   const getCurrentLocation = useCallback(async (): Promise<Location | null> => {
@@ -271,13 +315,19 @@ export const useLocationIQAutocomplete = (
       }
 
       const data: Location = await response.json();
+      // Add friendly_name to the location
+      const locationWithFriendlyName = {
+        ...data,
+        friendly_name: generateFriendlyName(data.address)
+      };
+
       setState((prev) => ({
         ...prev,
         isLoading: false,
-        locations: [data]
+        locations: [locationWithFriendlyName]
       }));
-      cachedLocationsRef.current = [data];
-      return data;
+      cachedLocationsRef.current = [locationWithFriendlyName];
+      return locationWithFriendlyName;
     } catch (err) {
       setState((prev) => ({
         ...prev,
@@ -286,7 +336,7 @@ export const useLocationIQAutocomplete = (
       }));
       return null;
     }
-  }, [baseUrl, buildReverseGeocodeParams]);
+  }, [baseUrl, buildReverseGeocodeParams, generateFriendlyName]);
 
   const debouncedFetch = useDebouncedCallback(
     fetchSuggestions,

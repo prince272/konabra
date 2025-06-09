@@ -165,7 +165,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
   const [currentAccount] = useAccountState();
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
   const [currentToggledMenu, setCurrentToggledMenu] = useState<string | null>(null);
-  const [categories, setCategories] = useState(categoryStore.get());
 
   const toggleMenu = (menuTitle: string) => {
     if (collapsed) return;
@@ -209,15 +208,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
 
       Object.keys(prev).forEach((menuKey) => {
         if (prev[menuKey]) {
-          // We need to find if this menu is active or has active children.
-          // For your case, menus correspond to top-level menu titles in lowercase.
-
-          // Instead of scanning your static menu here, we can do a heuristic by pathname:
-          // Keep expanded if pathname starts with /menuKey
-          // Or else collapse.
-
-          // To do a more precise check, you'd need a reference to the menu structure.
-
           if (pathname.toLowerCase().startsWith(`/${menuKey}`)) {
             newExpanded[menuKey] = true;
           } else {
@@ -259,16 +249,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
     router.push(path);
   };
 
-  useEffect(() => {
-    const unsubscribe = categoryStore.subscribe((newCategories) => {
-      setCategories(newCategories);
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-16 items-center px-4">
@@ -302,17 +282,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
               path="/incidents"
               icon="solar:danger-circle-broken"
               onItemClick={handleItemClick}
-            >
-              {categories.map((category) => (
-                <MenuItem
-                  key={category.id}
-                  title={category.name}
-                  path={`/incidents/${category.slug}`}
-                  icon="solar:tag-broken"
-                  onItemClick={handleItemClick}
-                />
-              ))}
-            </MenuItem>
+            />
             <MenuItem
               title="Categories"
               path="/categories"
