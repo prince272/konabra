@@ -40,6 +40,7 @@ type IncidentModel struct {
 	ReportedAt   time.Time               `json:"reportedAt"`
 	ResolvedAt   *time.Time              `json:"resolvedAt"`
 	ReportedById string                  `json:"reportedById"`
+	ReportedBy   AccountModel            `json:"reportedBy"`
 	Latitude     float64                 `json:"latitude"`
 	Longitude    float64                 `json:"longitude"`
 	Location     string                  `json:"location"`
@@ -145,6 +146,12 @@ func (service *IncidentService) GetPaginatedIncidents(filter repositories.Incide
 			service.logger.Error("Error copying incident to model: ", zap.Error(err))
 			return nil, problems.FromError(err)
 		}
+
+		if err := copier.Copy(&model.ReportedBy, item.ReportedBy); err != nil {
+			service.logger.Error("Error copying reported by to model: ", zap.Error(err))
+			return nil, problems.FromError(err)
+		}
+
 		models = append(models, *model)
 	}
 

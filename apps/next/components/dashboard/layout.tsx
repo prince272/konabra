@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Button } from "@heroui/button";
 import { Drawer, DrawerBody, DrawerContent, DrawerHeader } from "@heroui/drawer";
 import { Navbar, NavbarContent, NavbarItem } from "@heroui/navbar";
@@ -13,6 +13,7 @@ import { useAccountState } from "@/states";
 import { categoryStore } from "@/states/categories";
 import { useBreakpoint, useHashState } from "@/hooks";
 import { Sidebar } from "./sidebar";
+import { useRouter } from "@bprogress/next";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;

@@ -1,6 +1,7 @@
 import { AxiosInstance } from "axios";
 import { parseProblem, Problem } from ".";
 import { Category } from "./category-service";
+import { Account } from "./identity-service";
 
 export const IncidentStatuses = [
   { value: "pending", label: "Pending" },
@@ -36,12 +37,13 @@ export type Incident = {
   severity: IncidentSeverity;
   status: IncidentStatus;
   reportedById: string;
-  createdAt: string;
+  reportedAt: string;
   updatedAt: string;
   location: string;
   longitude: number;
   latitude: number;
   category: Category;
+  reportedBy: Account
 };
 
 export type IncidentFilter = {

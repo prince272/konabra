@@ -1,8 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
-import { AppProgressProvider as ProgressProvider } from "@bprogress/next";
+import { AppProgressProvider as ProgressProvider, useRouter } from "@bprogress/next";
 import { HeroUIProvider } from "@heroui/system";
 import { ToastProvider } from "@heroui/toast";
 import type { ThemeProviderProps } from "next-themes";
@@ -22,26 +21,36 @@ declare module "@react-types/shared" {
   }
 }
 
-export function Providers({ children, cookies, themeProps }: ProvidersProps) {
+function InnerProviders({
+  children,
+  cookies,
+  themeProps,
+}: ProvidersProps) {
   const router = useRouter();
   const isSmallScreen = useBreakpoint("sm", "down");
 
   return (
     <HeroUIProvider navigate={router.push}>
       <NextThemesProvider {...themeProps}>
-        <ProgressProvider
-          height="2px"
-          color="hsl(var(--heroui-primary))"
-          options={{ showSpinner: false }}
-          delay={100}
-          shallowRouting
-        >
-          <ToastProvider placement={isSmallScreen ? "bottom-center" : "top-center"} />
-          <CookiesProvider value={cookies}>
-            <ModalQueueProvider>{children}</ModalQueueProvider>
-          </CookiesProvider>
-        </ProgressProvider>
+        <ToastProvider placement={isSmallScreen ? "bottom-center" : "top-center"} />
+        <CookiesProvider value={cookies}>
+          <ModalQueueProvider>{children}</ModalQueueProvider>
+        </CookiesProvider>
       </NextThemesProvider>
     </HeroUIProvider>
+  );
+}
+
+export function Providers(props: ProvidersProps) {
+  return (
+    <ProgressProvider
+      height="2px"
+      color="hsl(var(--heroui-primary))"
+      options={{ showSpinner: false }}
+      delay={100}
+      shallowRouting
+    >
+      <InnerProviders {...props} />
+    </ProgressProvider>
   );
 }

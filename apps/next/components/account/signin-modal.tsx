@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import NextLink from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@heroui/button";
 import { Divider } from "@heroui/divider";
 import { Input } from "@heroui/input";
@@ -19,6 +19,7 @@ import { useAccountState } from "@/states";
 import { useBreakpoint } from "@/hooks";
 import { useModalRouter } from "@/components/common/modals";
 import { InputPhone } from "../common/input-phone";
+import { useRouter } from "@bprogress/next";
 
 export default function SignInModal({
   isOpen,

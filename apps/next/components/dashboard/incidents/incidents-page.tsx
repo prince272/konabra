@@ -2,7 +2,6 @@
 
 import React, { useCallback, useState } from "react";
 import NextLink from "next/link";
-import { useRouter } from "next/navigation";
 import { Button, ButtonGroup } from "@heroui/button";
 import { Card, CardBody, CardFooter, CardHeader } from "@heroui/card";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
@@ -16,6 +15,7 @@ import { AddEditIncidentModalRouter } from "./add-edit-incident-modal";
 import { DeleteIncidentModalRouter } from "./delete-incident-modal";
 import IncidentsTable from "./incidents-table";
 import { Pagination } from "@heroui/pagination";
+import { useRouter } from "@bprogress/next";
 
 type IncidentPageResult = {
   items: Incident[];

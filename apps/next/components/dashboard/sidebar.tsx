@@ -10,7 +10,7 @@ import {
   useState
 } from "react";
 import NextLink from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Avatar } from "@heroui/avatar";
 import { Button } from "@heroui/button";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
@@ -19,6 +19,7 @@ import { Tooltip } from "@heroui/tooltip";
 import { Icon } from "@iconify-icon/react";
 import { useAccountState } from "@/states";
 import { categoryStore } from "@/states/categories";
+import { useRouter } from "@bprogress/next";
 
 interface SidebarProps {
   collapsed?: boolean;

@@ -10,7 +10,8 @@ import { addToast } from "@heroui/toast";
 import { Icon } from "@iconify-icon/react";
 import { formatDistanceToNow } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
-import { cloneDeep } from "lodash";
+import { cloneDeep, upperFirst } from "lodash";
+import { useTheme } from "next-themes";
 import { Controller, useForm } from "react-hook-form";
 import { formatInternationalNumber } from "@/utils";
 import { identityService } from "@/services";
@@ -22,7 +23,7 @@ import {
 import { useAccountState, useApplicationState } from "@/states";
 import { useBreakpoint, useHashState, useInterval, useTimer } from "@/hooks";
 import { useModalRouter } from "@/components/common/modals";
-import { useTheme } from "next-themes";
+import { Remount } from "../common/remount";
 
 interface ViewContextType {
   title: string;
@@ -52,12 +53,6 @@ interface BaseViewProps {
 
 function AccountView({ navigateTo, currentView }: BaseViewProps) {
   const [currentAccount] = useAccountState();
-  const lastPasswordChangedTick = useInterval(1000, () => {});
-  const lastPasswordChangedAgo = useMemo(() => {
-    return currentAccount?.lastPasswordChangedAt
-      ? formatDistanceToNow(new Date(currentAccount.lastPasswordChangedAt), { addSuffix: true })
-      : "";
-  }, [currentAccount, lastPasswordChangedTick]);
 
   return (
     <View id="account" currentView={currentView}>
@@ -160,7 +155,18 @@ function AccountView({ navigateTo, currentView }: BaseViewProps) {
           </div>
           <div className="mt-3 flex items-center justify-between gap-2">
             <div className="text-sm font-medium">
-              <span className="text-default-500">Last changed: {lastPasswordChangedAgo}</span>
+              <span className="text-default-500">
+                Last changed:{" "}
+                <Remount interval={1000}>
+                  {() => {
+                    return currentAccount?.lastPasswordChangedAt
+                      ? formatDistanceToNow(new Date(currentAccount.lastPasswordChangedAt), {
+                          addSuffix: true
+                        })
+                      : "N/A";
+                  }}
+                </Remount>
+              </span>
             </div>
             <Button
               radius="full"
@@ -599,7 +605,7 @@ function DisplayView({ currentView }: BaseViewProps) {
 
   const handleToggle = () => {
     const newTheme = isDark ? "light" : "dark";
-    setAppState(prev => ({ ...prev, theme: newTheme }));
+    setAppState((prev) => ({ ...prev, theme: newTheme }));
 
     if (newTheme === "dark") {
       document.documentElement.classList.add("dark");
@@ -616,11 +622,7 @@ function DisplayView({ currentView }: BaseViewProps) {
           <div className="mt-3 space-y-3">
             <div className="flex items-center justify-between">
               <span>Dark Mode</span>
-              <Switch 
-                isSelected={isDark}
-                onValueChange={handleToggle}
-                color="primary"
-              />
+              <Switch isSelected={isDark} onValueChange={handleToggle} color="primary" />
             </div>
           </div>
         </div>

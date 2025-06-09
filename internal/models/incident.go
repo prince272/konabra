@@ -9,28 +9,28 @@ import (
 type IncidentActivity struct {
 	Id         string `gorm:"primaryKey"`
 	IncidentId string
-	Incident   Incident
+	Incident   *Incident
 	Message    string
 	CreatedAt  time.Time
 }
 
 type Incident struct {
 	CategoryId   string
-	Category     Category `gorm:"foreignKey:CategoryId;"`
-	Id           string   `gorm:"primaryKey"`
+	Category     *Category `gorm:"foreignKey:CategoryId;"`
+	Id           string    `gorm:"primaryKey"`
 	Summary      string
 	Severity     IncidentSeverity
 	Status       IncidentStatus
 	UpdatedAt    time.Time
 	ReportedAt   time.Time
-	ReportedBy   User
+	ReportedBy   *User
 	ReportedById string
 	ResolvedAt   *time.Time
 	DeletedAt    gorm.DeletedAt `gorm:"column:deleted_at;index"`
 	Latitude     float64
 	Longitude    float64
 	Location     string
-	Activities   []IncidentActivity `gorm:"foreignKey:IncidentId;"`
+	Activities   []*IncidentActivity `gorm:"foreignKey:IncidentId;"`
 }
 
 type IncidentStatus string

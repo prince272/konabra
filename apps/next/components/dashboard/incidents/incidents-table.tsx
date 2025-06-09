@@ -7,7 +7,10 @@ import { Spinner } from "@heroui/spinner";
 import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@heroui/table";
 import { cn } from "@heroui/theme";
 import { Icon } from "@iconify-icon/react";
+import { formatDistanceToNow } from "date-fns";
+import { upperFirst } from "lodash";
 import { Incident, IncidentSeverities } from "@/services/incident-service";
+import { Remount } from "@/components/common/remount";
 
 interface IncidentsTableProps {
   incidents: Incident[];
@@ -40,8 +43,9 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
     >
       <TableHeader>
         <TableColumn>CATEGORY</TableColumn>
-        <TableColumn>SUMMARY</TableColumn>
+        <TableColumn>TIME</TableColumn>
         <TableColumn>SEVERITY</TableColumn>
+        <TableColumn>REPORTER</TableColumn>
         <TableColumn>LOCATION</TableColumn>
         <TableColumn>STATUS</TableColumn>
         <TableColumn className="text-right">ACTIONS</TableColumn>
@@ -97,7 +101,20 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
         {(isError ? [] : incidents).map((incident) => (
           <TableRow key={incident.id}>
             <TableCell className="text-nowrap">{incident.category?.name}</TableCell>
-            <TableCell className="text-nowrap">{incident.summary}</TableCell>
+            <TableCell className="text-nowrap">
+              <div className="flex items-center gap-2">
+                <Icon icon="solar:clock-circle-broken" width="20" height="20" />
+                <Remount interval={1000}>
+                  {() => {
+                    return incident.reportedAt
+                      ? upperFirst(
+                          formatDistanceToNow(new Date(incident.reportedAt), { addSuffix: true })
+                        )
+                      : "N/A";
+                  }}
+                </Remount>
+              </div>
+            </TableCell>
             <TableCell>
               <div className="flex items-center gap-2">
                 <div
@@ -112,6 +129,16 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
                 ></div>
                 {IncidentSeverities.find((severity) => severity.value == incident.severity)?.label}
               </div>
+            </TableCell>
+            <TableCell className="text-nowrap">
+              {incident.reportedBy ? (
+                <div className="flex items-center gap-2">
+                  <Icon icon="solar:user-broken" width="20" height="20" />
+                  {incident.reportedBy.fullName}
+                </div>
+              ) : (
+                "N/A"
+              )}
             </TableCell>
             <TableCell className="text-nowrap">
               {incident.location ? (

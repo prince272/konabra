@@ -2,7 +2,6 @@
 
 import React, { useCallback, useState } from "react";
 import NextLink from "next/link";
-import { useRouter } from "next/navigation";
 import { Button, ButtonGroup } from "@heroui/button";
 import { Card, CardBody, CardFooter, CardHeader } from "@heroui/card";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
@@ -17,6 +16,7 @@ import { AddEditCategoryModalRouter } from "./add-edit-category-modal";
 import CategoriesTable from "./categories-table";
 import { DeleteCategoryModalRouter } from "./delete-category-modal";
 import { Pagination } from "@heroui/pagination";
+import { useRouter } from "@bprogress/next";
 
 type CategoryPageResult = {
   items: Category[];
