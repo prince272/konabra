@@ -11,8 +11,8 @@ import { Controller, useForm } from "react-hook-form";
 import { categoryService, incidentService } from "@/services";
 import { CreateIncidentForm, Incident, IncidentSeverities } from "@/services/incident-service";
 import { useBreakpoint } from "@/hooks";
-import { useModalRouter } from "@/components/common/modals";
 import { InputLocation } from "@/components/common/input-location";
+import { useModalRouter } from "@/components/common/modals";
 
 interface AddEditIncidentModalProps {
   isOpen: boolean;
@@ -243,7 +243,6 @@ export function AddEditIncidentModal({
                 render={({ field }) => (
                   <InputLocation
                     {...field}
-                    apiKey="pk.115ae85bcf36b5a05296cbc4f2f80c8e"
                     label="Location"
                     placeholder="Enter incident location"
                     isInvalid={!!form.formState.errors.location}

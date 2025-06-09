@@ -28,65 +28,91 @@ export interface Location {
 }
 
 export interface AutocompleteOptions {
+  debounceTime?: number;
   countrycodes?: string;
   limit?: number;
   tag?: string;
-  normalizecity?: number;
   acceptLanguage?: string;
   viewbox?: string;
   bounded?: number;
   dedupe?: number;
   importancesort?: number;
-}
-
-interface UseLocationIQAutocompleteProps {
-  apiKey: string;
-  query: string;
-  debounceTime?: number;
-  options?: AutocompleteOptions;
+  normalizecity?: number;
+  json_callback?: string;
+  region?: string;
+  minQueryLength?: number;
 }
 
 interface AutocompleteState {
-  results: Location[];
-  loading: boolean;
-  error: string | null;
+  locations: Location[];
+  isLoading: boolean;
+  errorMessage: string | null;
 }
 
-const BASE_URL = "https://api.locationiq.com/v1/autocomplete";
-const REVERSE_GEOCODE_URL = "https://api.locationiq.com/v1/reverse";
-const MIN_QUERY_LENGTH = 3;
-
-/**
- * Hook to get location autocomplete suggestions and current location using LocationIQ API.
- * Query state is managed externally and passed as a prop.
- */
-export const useLocationIQAutocomplete = ({
-  apiKey,
-  query,
-  debounceTime = 500,
-  options = {}
-}: UseLocationIQAutocompleteProps): AutocompleteState & {
+export const useLocationIQAutocomplete = (
+  apiKey: string,
+  options: AutocompleteOptions = {}
+): AutocompleteState & {
+  setQuery: (query: string) => void;
   getCurrentLocation: () => Promise<Location | null>;
 } => {
+  const [query, setQuery] = useState<string>("");
   const [state, setState] = useState<AutocompleteState>({
-    results: [],
-    loading: false,
-    error: null
+    locations: [],
+    isLoading: false,
+    errorMessage: null
   });
 
+  const defaultOptions: AutocompleteOptions = {
+    debounceTime: 500,
+    region: "us1",
+    minQueryLength: 3,
+    limit: 10,
+    dedupe: 1
+  };
+
+  const mergedOptions = useMemo(
+    () => ({
+      ...defaultOptions,
+      ...options
+    }),
+    [options]
+  );
+
   const abortControllerRef = useRef<AbortController | null>(null);
-  const cachedResultsRef = useRef<Location[]>([]);
+  const cachedLocationsRef = useRef<Location[]>([]);
   const requestIdRef = useRef(0);
 
-  const buildQueryParams = useCallback(
+  const baseUrl = useMemo(
+    () => `https://${mergedOptions.region}.locationiq.com/v1`,
+    [mergedOptions.region]
+  );
+
+  const buildAutoCompleteParams = useCallback(
     (query: string): string => {
       const params = new URLSearchParams({ key: apiKey, q: query });
-      Object.entries(options).forEach(([key, value]) => {
-        if (value != null) params.set(key, String(value));
+      const validateLimit = (limit: unknown): string => {
+        const num = Number(limit);
+        if (isNaN(num) || num < 1 || num > 20) {
+          console.warn(
+            `Invalid limit value (${limit}). Must be a number between 1 and 20. Using default 10.`
+          );
+          return "10";
+        }
+        return num.toString();
+      };
+
+      const excludeKeys = new Set(["debounceTime", "region", "minQueryLength"]);
+      Object.entries(mergedOptions).forEach(([key, value]) => {
+        if (value != null && !excludeKeys.has(key)) {
+          const paramValue = key === "limit" ? validateLimit(value) : String(value);
+          params.set(key, paramValue);
+        }
       });
+
       return params.toString();
     },
-    [apiKey, options]
+    [apiKey, mergedOptions]
   );
 
   const buildReverseGeocodeParams = useCallback(
@@ -97,40 +123,74 @@ export const useLocationIQAutocomplete = ({
         lon: lon.toString(),
         format: "json"
       });
+
+      if (mergedOptions.acceptLanguage) {
+        params.set("accept-language", mergedOptions.acceptLanguage);
+      }
+      if (mergedOptions.normalizecity !== undefined) {
+        params.set("normalizecity", String(mergedOptions.normalizecity));
+      }
+
       return params.toString();
     },
-    [apiKey]
+    [apiKey, mergedOptions.acceptLanguage, mergedOptions.normalizecity]
   );
 
   const fetchSuggestions = useCallback(
     async (trimmedQuery: string) => {
-      // Cancel any in-flight requests
       abortControllerRef.current?.abort();
       const controller = new AbortController();
       abortControllerRef.current = controller;
 
       const currentRequestId = ++requestIdRef.current;
-      setState((prev) => ({ ...prev, loading: true, error: null }));
+      setState((prev) => ({ ...prev, isLoading: true, errorMessage: null }));
 
       try {
-        const response = await fetch(`${BASE_URL}?${buildQueryParams(trimmedQuery)}`, {
-          signal: controller.signal
-        });
+        const response = await fetch(
+          `${baseUrl}/autocomplete?${buildAutoCompleteParams(trimmedQuery)}`,
+          {
+            signal: controller.signal
+          }
+        );
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to fetch autocomplete results");
+          let errorMessage = "Failed to fetch autocomplete locations";
+          switch (response.status) {
+            case 400:
+              errorMessage = "Invalid request parameters";
+              break;
+            case 401:
+              errorMessage = "Invalid API key";
+              break;
+            case 403:
+              errorMessage = "Access restricted";
+              break;
+            case 404:
+              errorMessage = "No locations found";
+              break;
+            case 429:
+              errorMessage = "Rate limit exceeded";
+              break;
+            case 500:
+              errorMessage = "Internal server error";
+              break;
+          }
+
+          try {
+            const errorData = await response.json();
+            throw new Error(errorData.error || errorMessage);
+          } catch {
+            throw new Error(errorMessage);
+          }
         }
 
         const data: Location[] = await response.json();
 
-        // Only update state if this is the latest request
         if (currentRequestId === requestIdRef.current) {
-          setState((prev) => ({ ...prev, results: data, loading: false }));
-          cachedResultsRef.current = data;
+          setState((prev) => ({ ...prev, locations: data, isLoading: false }));
+          cachedLocationsRef.current = data;
         }
       } catch (err) {
-        // Only handle non-abort errors for the latest request
         if (
           currentRequestId === requestIdRef.current &&
           err instanceof Error &&
@@ -138,89 +198,127 @@ export const useLocationIQAutocomplete = ({
         ) {
           setState((prev) => ({
             ...prev,
-            error: err.message,
-            results: [],
-            loading: false
+            errorMessage: err.message,
+            locations: [],
+            isLoading: false
           }));
         }
       }
     },
-    [buildQueryParams]
+    [baseUrl, buildAutoCompleteParams]
   );
 
   const getCurrentLocation = useCallback(async (): Promise<Location | null> => {
     if (!navigator.geolocation) {
       setState((prev) => ({
         ...prev,
-        error: "Geolocation is not supported by this browser"
+        errorMessage: "Geolocation is not supported by this browser"
       }));
       return null;
     }
 
     try {
-      setState((prev) => ({ ...prev, loading: true, error: null }));
+      setState((prev) => ({ ...prev, isLoading: true, errorMessage: null }));
 
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject);
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          timeout: 10000,
+          maximumAge: 60000,
+          enableHighAccuracy: true
+        });
       });
 
       const { latitude, longitude } = position.coords;
 
-      // Cancel any in-flight requests
       abortControllerRef.current?.abort();
       const controller = new AbortController();
       abortControllerRef.current = controller;
 
       const response = await fetch(
-        `${REVERSE_GEOCODE_URL}?${buildReverseGeocodeParams(latitude, longitude)}`,
+        `${baseUrl}/reverse?${buildReverseGeocodeParams(latitude, longitude)}`,
         { signal: controller.signal }
       );
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to fetch current location");
+        let errorMessage = "Failed to fetch current location";
+        switch (response.status) {
+          case 400:
+            errorMessage = "Invalid coordinates";
+            break;
+          case 401:
+            errorMessage = "Invalid API key";
+            break;
+          case 403:
+            errorMessage = "Access restricted";
+            break;
+          case 404:
+            errorMessage = "No location found for these coordinates";
+            break;
+          case 429:
+            errorMessage = "Rate limit exceeded";
+            break;
+          case 500:
+            errorMessage = "Internal server error";
+            break;
+        }
+
+        try {
+          const errorData = await response.json();
+          throw new Error(errorData.error || errorMessage);
+        } catch {
+          throw new Error(errorMessage);
+        }
       }
 
       const data: Location = await response.json();
       setState((prev) => ({
         ...prev,
-        results: [data],
-        loading: false
+        isLoading: false,
+        locations: [data]
       }));
-      cachedResultsRef.current = [data];
+      cachedLocationsRef.current = [data];
       return data;
     } catch (err) {
       setState((prev) => ({
         ...prev,
-        error: err instanceof Error ? err.message : "Failed to get current location",
-        loading: false
+        errorMessage: err instanceof Error ? err.message : "Failed to fetch current location",
+        isLoading: false
       }));
       return null;
     }
-  }, [buildReverseGeocodeParams]);
+  }, [baseUrl, buildReverseGeocodeParams]);
 
-  const debouncedFetch = useDebouncedCallback(fetchSuggestions, [], debounceTime);
+  const debouncedFetch = useDebouncedCallback(
+    fetchSuggestions,
+    [],
+    mergedOptions.debounceTime || 500
+  );
 
-  // Effect to handle query changes
   useEffect(() => {
     const trimmed = query.trim();
 
-    if (trimmed.length >= MIN_QUERY_LENGTH) {
+    if (trimmed.length >= (mergedOptions.minQueryLength || 3)) {
       debouncedFetch(trimmed);
     } else {
       setState((prev) => ({
         ...prev,
-        results: trimmed.length > 0 ? cachedResultsRef.current : []
+        locations: trimmed.length > 0 ? cachedLocationsRef.current : []
       }));
     }
-  }, [query, debouncedFetch]);
+  }, [query, debouncedFetch, mergedOptions.minQueryLength]);
 
-  // Cleanup effect for aborting requests
   useEffect(() => {
     return () => {
       abortControllerRef.current?.abort();
     };
   }, []);
 
-  return useMemo(() => ({ ...state, getCurrentLocation }), [state, getCurrentLocation]);
+  return useMemo(
+    () => ({
+      ...state,
+      setQuery,
+      getCurrentLocation
+    }),
+    [state, setQuery, getCurrentLocation]
+  );
 };
