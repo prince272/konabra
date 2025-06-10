@@ -46,7 +46,6 @@ func NewIdentityHandler(router *gin.Engine, jwtHelper *helpers.JwtHelper, identi
 		rolesGroup.GET("/:id", jwtHelper.RequireAuth(), handler.handleWithData(handler.GetRoleById))
 		rolesGroup.DELETE("/:id", jwtHelper.RequireAuth(), handler.handle(handler.DeleteRole))
 		rolesGroup.GET("", jwtHelper.RequireAuth(), handler.handleWithData(handler.GetPaginatedRoles))
-		rolesGroup.GET("/all", jwtHelper.RequireAuth(), handler.handleWithData(handler.GetRoles))
 	}
 
 	return handler
@@ -364,23 +363,6 @@ func (handler *IdentityHandler) GetPaginatedRoles(context *gin.Context) (any, *p
 	}
 
 	return handler.identityService.GetPaginatedRoles(filter)
-}
-
-// GetRoles retrieves all roles
-// @Summary Get all roles
-// @Tags Roles
-// @Accept json
-// @Produce json
-// @Param filter query repositories.RoleFilter false "Role filter"
-// @Security BearerAuth
-// @Router /roles/all [get]
-func (handler *IdentityHandler) GetRoles(context *gin.Context) (any, *problems.Problem) {
-	var filter repositories.RoleFilter
-	if err := context.ShouldBindQuery(&filter); err != nil {
-		return nil, problems.FromError(err)
-	}
-
-	return handler.identityService.GetRoles(filter)
 }
 
 // GetRoleById retrieves a role by Id

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useRouter } from "@bprogress/next";
 import { Button } from "@heroui/button";
 import { Drawer, DrawerBody, DrawerContent, DrawerHeader } from "@heroui/drawer";
 import { Navbar, NavbarContent, NavbarItem } from "@heroui/navbar";
@@ -13,7 +14,6 @@ import { useAccountState } from "@/states";
 import { categoryStore } from "@/states/categories";
 import { useBreakpoint, useHashState } from "@/hooks";
 import { Sidebar } from "./sidebar";
-import { useRouter } from "@bprogress/next";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -63,13 +63,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
 
   useEffect(() => {
     categoryStore.load(async () => {
-      const [categories, problem] = await categoryService.getCategories();
+      const [categories, problem] = await categoryService.getPaginatedCategories({ limit: 100 });
       if (problem) {
         console.error("Failed to load categories:", problem);
         return [];
       }
 
-      return categories;
+      return categories.items;
     });
   }, []);
 

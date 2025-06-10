@@ -28,6 +28,7 @@ func NewIncidentHandler(router *gin.Engine, incidentService *services.IncidentSe
 		incidentGroup.POST("", handler.handleWithData(handler.CreateIncident))
 		incidentGroup.PUT("/:id", handler.handleWithData(handler.UpdateIncident))
 		incidentGroup.DELETE("/:id", handler.handle(handler.DeleteIncident))
+		incidentGroup.GET("/statistics", handler.handleWithData(handler.GetIncidentsStatistics))
 	}
 
 	return handler
@@ -147,4 +148,21 @@ func (handler *IncidentHandler) GetIncidentById(context *gin.Context) (any, *pro
 	}
 
 	return handler.incidentService.GetIncidentById(id)
+}
+
+// GetIncidentsStatistics retrieves incidents statistics
+// @Summary Get incidents statistics
+// @Tags Incidents
+// @Accept json
+// @Produce json
+// @Param filter query repositories.IncidentFilter false "Incident filter"
+// @Security BearerAuth
+// @Router /incidents/analysis [get]
+func (handler *IncidentHandler) GetIncidentsStatistics(context *gin.Context) (any, *problems.Problem) {
+	var filter repositories.IncidentFilter
+	if err := context.ShouldBindQuery(&filter); err != nil {
+		return nil, problems.FromError(err)
+	}
+
+	return handler.incidentService.GetIncidentsStatistics(filter)
 }

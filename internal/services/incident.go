@@ -177,3 +177,15 @@ func (service *IncidentService) GetIncidentById(id string) (*IncidentModel, *pro
 
 	return model, nil
 }
+
+func (service *IncidentService) GetIncidentsStatistics(filter repositories.IncidentFilter) (*repositories.IncidentStatistics, *problems.Problem) {
+	if err := service.validator.ValidateStruct(filter); err != nil {
+		return nil, problems.FromError(err)
+	}
+	stats, err := service.incidentRepository.GetIncidentsStatistics(filter)
+	if err != nil {
+		service.logger.Error("Failed to get incidents statistics", zap.Error(err))
+		return nil, problems.FromError(err)
+	}
+	return stats, nil
+}

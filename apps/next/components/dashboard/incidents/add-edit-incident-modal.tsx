@@ -54,7 +54,7 @@ export function AddEditIncidentModal({
 
     const loadCategories = async () => {
       setCategoriesLoading(true);
-      const [cats, err] = await categoryService.getCategories();
+      const [cats, err] = await categoryService.getPaginatedCategories({ limit: 1000 });
       setCategoriesLoading(false);
 
       if (err) {
@@ -62,7 +62,7 @@ export function AddEditIncidentModal({
         return;
       }
 
-      setCategories(cats);
+      setCategories(cats.items);
     };
 
     loadCategories();

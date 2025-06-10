@@ -53,7 +53,7 @@ func NewJwtHelper(options JwtOptions, database *gorm.DB, logger *zap.Logger) *Jw
 func (helper *JwtHelper) CreateToken(subject string, claims map[string]any) (*JwtTokenModel, error) {
 	creationTime := time.Now()
 
-	accessTokenExpiresAt := creationTime.Add(1 * time.Minute) // 15 minutes
+	accessTokenExpiresAt := creationTime.Add(15 * time.Minute) // 15 minutes
 	accessToken, err := helper.GenerateToken(subject, creationTime, accessTokenExpiresAt, "access", claims)
 	if err != nil {
 		return nil, err

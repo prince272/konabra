@@ -557,29 +557,6 @@ paths:
       summary: Update an existing category
       tags:
       - Categories
-  /categories/all:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: '"asc" or "desc"'
-        in: query
-        name: order
-        type: string
-      - in: query
-        name: search
-        type: string
-      - in: query
-        name: sort
-        type: string
-      produces:
-      - application/json
-      responses: {}
-      security:
-      - BearerAuth: []
-      summary: Get all categories
-      tags:
-      - Categories
   /incidents:
     get:
       consumes:
@@ -717,6 +694,54 @@ paths:
       summary: Update an existing incident
       tags:
       - Incidents
+  /incidents/analysis:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - in: query
+        name: endDate
+        type: string
+      - in: query
+        name: search
+        type: string
+      - enum:
+        - low
+        - medium
+        - high
+        - critical
+        in: query
+        name: severity
+        type: string
+        x-enum-varnames:
+        - SeverityLow
+        - SeverityMedium
+        - SeverityHigh
+        - SeverityCritical
+      - in: query
+        name: startDate
+        type: string
+      - enum:
+        - pending
+        - investigating
+        - resolved
+        - falseAlarm
+        in: query
+        name: status
+        type: string
+        x-enum-varnames:
+        - StatusPending
+        - StatusInvestigating
+        - StatusResolved
+        - StatusFalseAlarm
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get incidents statistics
+      tags:
+      - Incidents
   /roles:
     get:
       consumes:
@@ -820,29 +845,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Update an existing role
-      tags:
-      - Roles
-  /roles/all:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: '"asc" or "desc"'
-        in: query
-        name: order
-        type: string
-      - in: query
-        name: search
-        type: string
-      - in: query
-        name: sort
-        type: string
-      produces:
-      - application/json
-      responses: {}
-      security:
-      - BearerAuth: []
-      summary: Get all roles
       tags:
       - Roles
 securityDefinitions:

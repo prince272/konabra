@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jinzhu/copier"
 	"github.com/prince272/konabra/internal/builds"
 	"github.com/prince272/konabra/internal/models"
 	"go.uber.org/zap"
@@ -17,20 +18,38 @@ type IncidentRepository struct {
 	logger    *zap.Logger
 }
 
+type IncidentSort struct {
+	Sort  string `json:"sort" form:"sort"`
+	Order string `json:"order" form:"order"` // asc or desc
+}
+
 type IncidentFilter struct {
-	Sort      string                  `json:"sort" form:"sort"`
-	Order     string                  `json:"order" form:"order"` // asc or desc
 	Search    string                  `json:"search" form:"search"`
 	Severity  models.IncidentSeverity `json:"severity" form:"severity"`
 	Status    models.IncidentStatus   `json:"status" form:"status"`
-	StartDate string                  `json:"startDate" form:"startDate"`
-	EndDate   string                  `json:"endDate" form:"endDate"`
+	StartDate time.Time               `json:"startDate" form:"startDate" time_format:"2006-01-02T15:04:05Z07:00"`
+	EndDate   time.Time               `json:"endDate" form:"endDate" time_format:"2006-01-02T15:04:05Z07:00"`
+}
+
+func (source *IncidentFilter) Clone() IncidentFilter {
+	clone := IncidentFilter{}
+	if err := copier.Copy(&clone, source); err != nil {
+		panic(fmt.Errorf("failed to clone IncidentFilter: %w", err))
+	}
+	return clone
 }
 
 type IncidentPaginatedFilter struct {
 	IncidentFilter
+	IncidentSort
 	Offset int `json:"offset" form:"offset"`
 	Limit  int `json:"limit" form:"limit"`
+}
+
+type IncidentStatistics struct {
+	TotalIncidents      Trend `json:"totalIncidents"`
+	ResolvedIncidents   Trend `json:"resolvedIncidents"`
+	UnresolvedIncidents Trend `json:"unresolvedIncidents"`
 }
 
 func NewIncidentRepository(defaultDB *builds.DefaultDB, logger *zap.Logger) *IncidentRepository {
@@ -87,16 +106,12 @@ func (repository *IncidentRepository) GetPaginatedIncidents(filter IncidentPagin
 		query = query.Where("status = ?", filter.Status)
 	}
 
-	if filter.StartDate != "" {
-		if start, err := time.Parse("2006-01-02", filter.StartDate); err == nil {
-			query = query.Where("reported_at >= ?", start)
-		}
+	if !filter.StartDate.IsZero() {
+		query = query.Where("reported_at >= ?", filter.StartDate)
 	}
 
-	if filter.EndDate != "" {
-		if end, err := time.Parse("2006-01-02", filter.EndDate); err == nil {
-			query = query.Where("reported_at <= ?", end)
-		}
+	if !filter.EndDate.IsZero() {
+		query = query.Where("reported_at <= ?", filter.EndDate)
 	}
 
 	allowedSortFields := map[string]string{
@@ -141,4 +156,81 @@ func (repository *IncidentRepository) GetPaginatedIncidents(filter IncidentPagin
 	}
 
 	return items, count
+}
+
+func (repository *IncidentRepository) CountIncidents(filter IncidentFilter) (int64, error) {
+	query := repository.defaultDB.Model(&models.Incident{})
+
+	if filter.Search != "" {
+		query = query.Where("LOWER(summary) LIKE LOWER(?)", "%"+filter.Search+"%")
+	}
+
+	if filter.Severity != "" {
+		query = query.Where("severity = ?", filter.Severity)
+	}
+
+	if filter.Status != "" {
+		query = query.Where("status = ?", filter.Status)
+	}
+
+	if !filter.StartDate.IsZero() {
+		query = query.Where("reported_at >= ?", filter.StartDate)
+	}
+
+	if !filter.EndDate.IsZero() {
+		query = query.Where("reported_at <= ?", filter.EndDate)
+	}
+
+	var count int64
+	if result := query.Count(&count); result.Error != nil {
+		return 0, fmt.Errorf("failed to count incidents: %w", result.Error)
+	}
+
+	return count, nil
+}
+
+func (repository *IncidentRepository) GetIncidentsStatistics(filter IncidentFilter) (*IncidentStatistics, error) {
+	totalIncidents := CalculateTrend(filter.StartDate, filter.EndDate, func(startDate, endDate time.Time) int64 {
+		countFilter := filter.Clone()
+		countFilter.StartDate = startDate
+		countFilter.EndDate = endDate
+		count, err := repository.CountIncidents(countFilter)
+		if err != nil {
+			repository.logger.Error("failed to count incidents", zap.Error(err))
+			return 0
+		}
+		return count
+	})
+
+	resolvedIncidents := CalculateTrend(filter.StartDate, filter.EndDate, func(startDate, endDate time.Time) int64 {
+		countFilter := filter.Clone()
+		countFilter.StartDate = startDate
+		countFilter.EndDate = endDate
+		countFilter.Status = models.StatusResolved
+		count, err := repository.CountIncidents(countFilter)
+		if err != nil {
+			repository.logger.Error("failed to count resolved incidents", zap.Error(err))
+			return 0
+		}
+		return count
+	})
+
+	unresolvedIncidents := CalculateTrend(filter.StartDate, filter.EndDate, func(startDate, endDate time.Time) int64 {
+		countFilter := filter.Clone()
+		countFilter.StartDate = startDate
+		countFilter.EndDate = endDate
+		countFilter.Status = models.StatusPending
+		count, err := repository.CountIncidents(countFilter)
+		if err != nil {
+			repository.logger.Error("failed to count unresolved incidents", zap.Error(err))
+			return 0
+		}
+		return count
+	})
+
+	return &IncidentStatistics{
+		TotalIncidents:      totalIncidents,
+		ResolvedIncidents:   resolvedIncidents,
+		UnresolvedIncidents: unresolvedIncidents,
+	}, nil
 }

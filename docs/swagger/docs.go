@@ -431,44 +431,6 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/categories/all": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Categories"
-                ],
-                "summary": "Get all categories",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "\"asc\" or \"desc\"",
-                        "name": "order",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "search",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "sort",
-                        "in": "query"
-                    }
-                ],
-                "responses": {}
-            }
-        },
         "/categories/{id}": {
             "get": {
                 "security": [
@@ -682,6 +644,77 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/incidents/analysis": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Incidents"
+                ],
+                "summary": "Get incidents statistics",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "endDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "low",
+                            "medium",
+                            "high",
+                            "critical"
+                        ],
+                        "type": "string",
+                        "x-enum-varnames": [
+                            "SeverityLow",
+                            "SeverityMedium",
+                            "SeverityHigh",
+                            "SeverityCritical"
+                        ],
+                        "name": "severity",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "startDate",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "pending",
+                            "investigating",
+                            "resolved",
+                            "falseAlarm"
+                        ],
+                        "type": "string",
+                        "x-enum-varnames": [
+                            "StatusPending",
+                            "StatusInvestigating",
+                            "StatusResolved",
+                            "StatusFalseAlarm"
+                        ],
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/incidents/{id}": {
             "get": {
                 "security": [
@@ -846,44 +879,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/services.CreateRoleForm"
                         }
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/roles/all": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Roles"
-                ],
-                "summary": "Get all roles",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "\"asc\" or \"desc\"",
-                        "name": "order",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "search",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "sort",
-                        "in": "query"
                     }
                 ],
                 "responses": {}

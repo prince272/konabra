@@ -1,3 +1,4 @@
+import { CalendarDate } from "@internationalized/date";
 import { CountryCode, parsePhoneNumberFromString } from "libphonenumber-js";
 import queryString, { StringifyOptions, UrlObject } from "query-string";
 
@@ -50,4 +51,19 @@ export function toRelativeUrl(fullUrl: string): string {
     }
     return fullUrl.startsWith("/") ? fullUrl : `/${fullUrl}`;
   }
+}
+
+export function calendarDateToISOString(date: CalendarDate, isEndOfDay = false): string {
+  const dateObj = new Date(
+    Date.UTC(
+      date.year,
+      date.month - 1,
+      date.day,
+      isEndOfDay ? 23 : 0,
+      isEndOfDay ? 59 : 0,
+      isEndOfDay ? 59 : 0,
+      isEndOfDay ? 999 : 0
+    )
+  );
+  return dateObj.toISOString();
 }

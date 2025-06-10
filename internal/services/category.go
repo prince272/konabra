@@ -165,23 +165,6 @@ func (service *CategoryService) GetPaginatedCategories(filter repositories.Categ
 	}, nil
 }
 
-func (service *CategoryService) GetCategories(filter repositories.CategoryFilter) (*CategoryListModel, *problems.Problem) {
-	items := service.categoryRepository.GetCategories(filter)
-
-	models := make([]CategoryModel, 0, len(items))
-	for _, item := range items {
-		model := &CategoryModel{}
-		if err := copier.Copy(model, item); err != nil {
-			service.logger.Error("Error copying category to model: ", zap.Error(err))
-			return nil, problems.FromError(err)
-		}
-		models = append(models, *model)
-	}
-
-	listModel := CategoryListModel(models)
-	return &listModel, nil
-}
-
 func (service *CategoryService) GetCategoryById(id string) (*CategoryModel, *problems.Problem) {
 	category := service.categoryRepository.GetCategoryById(id)
 

@@ -254,17 +254,6 @@ export class IdentityService {
     }
   }
 
-  public async getRoles(filter?: RoleFilter): Promise<readonly [Role[], Problem?]> {
-    try {
-      const response = await this.api.get("/roles/all", {
-        params: filter
-      });
-      return [response.data, undefined] as const;
-    } catch (error) {
-      return [undefined!, parseProblem(error)] as const;
-    }
-  }
-
   public async getRoleById(id: string): Promise<readonly [Role, Problem?]> {
     try {
       const response = await this.api.get(`/roles/${id}`);

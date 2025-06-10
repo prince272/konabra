@@ -43,20 +43,44 @@ export type Incident = {
   longitude: number;
   latitude: number;
   category: Category;
-  reportedBy: Account
+  reportedBy: Account;
+};
+
+export type IncidentSort = {
+  sort?: string | null;
+  order?: "asc" | "desc" | null;
 };
 
 export type IncidentFilter = {
-  sort?: string | null;
-  order?: "asc" | "desc" | null;
   search?: string;
   status?: IncidentStatus;
   severity?: IncidentSeverity;
+  startDate?: string;
+  endDate?: string;
 };
 
-export type IncidentPaginatedFilter = IncidentFilter & {
-  offset: number;
-  limit: number;
+export type IncidentPaginatedFilter = IncidentFilter &
+  IncidentSort & {
+    offset: number;
+    limit: number;
+  };
+
+export type IncidentTrend = {
+  oldStart: Date;
+  oldEnd: Date;
+  newStart: Date;
+  newEnd: Date;
+  oldCount: number;
+  newCount: number;
+  percentChange: number; // Percentage change from old to new count
+  isIncrease: boolean; // True if new count is greater than old count
+  isDecrease: boolean; // True if new count is less than old count
+};
+
+export type IncidentStatistics = {
+  totalIncidents: IncidentTrend;
+  resolvedIncidents: IncidentTrend;
+  unresolvedIncidents: IncidentTrend;
 };
 
 export class IncidentService {
@@ -106,6 +130,15 @@ export class IncidentService {
   ): Promise<readonly [{ items: Incident[]; count: number }, Problem?]> {
     try {
       const response = await this.api.get("/incidents", { params: filter });
+      return [response.data, undefined];
+    } catch (error) {
+      return [undefined!, parseProblem(error)];
+    }
+  }
+
+  public async getIncidentsStatistics(filter: IncidentFilter): Promise<readonly [IncidentStatistics, Problem?]> {
+    try {
+      const response = await this.api.get("/incidents/statistics", { params: filter });
       return [response.data, undefined];
     } catch (error) {
       return [undefined!, parseProblem(error)];

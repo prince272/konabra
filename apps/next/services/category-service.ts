@@ -70,17 +70,8 @@ export class CategoryService {
     }
   }
 
-  public async getCategories(filter?: CategoryFilter): Promise<readonly [Category[], Problem?]> {
-    try {
-      const response = await this.api.get("/categories/all", { params: filter });
-      return [response.data, undefined];
-    } catch (error) {
-      return [undefined!, parseProblem(error)];
-    }
-  }
-
   public async getPaginatedCategories(
-    filter?: CategoryPaginatedFilter
+    filter?: Partial<CategoryPaginatedFilter>
   ): Promise<readonly [{ items: Category[]; count: number }, Problem?]> {
     try {
       const response = await this.api.get("/categories", { params: filter });
