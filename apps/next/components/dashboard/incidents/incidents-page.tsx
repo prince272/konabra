@@ -2,20 +2,20 @@
 
 import React, { useCallback, useState } from "react";
 import NextLink from "next/link";
+import { useRouter } from "@bprogress/next";
 import { Button, ButtonGroup } from "@heroui/button";
 import { Card, CardBody, CardFooter, CardHeader } from "@heroui/card";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 import { Input } from "@heroui/input";
+import { Pagination } from "@heroui/pagination";
 import { Tooltip } from "@heroui/tooltip";
-import { Icon } from "@iconify-icon/react";
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, PlusCircle, Search } from "lucide-react";
 import { incidentService, Problem } from "@/services";
 import { Incident, IncidentPaginatedFilter } from "@/services/incident-service";
 import { useAsyncMemo, useDebouncedCallback } from "@/hooks";
 import { AddEditIncidentModalRouter } from "./add-edit-incident-modal";
 import { DeleteIncidentModalRouter } from "./delete-incident-modal";
 import IncidentsTable from "./incidents-table";
-import { Pagination } from "@heroui/pagination";
-import { useRouter } from "@bprogress/next";
 
 type IncidentPageResult = {
   items: Incident[];
@@ -131,7 +131,7 @@ const IncidentsPage = () => {
           <Button
             color="primary"
             radius="full"
-            startContent={<Icon icon="solar:add-circle-broken" width="20" height="20" />}
+            startContent={<PlusCircle size={20} />}
             as={NextLink}
             href="#add-incident"
           >
@@ -150,7 +150,7 @@ const IncidentsPage = () => {
                     updateDebouncedSearch(value);
                   }}
                   onClear={clearSearch}
-                  startContent={<Icon icon="solar:magnifer-broken" width="20" height="20" />}
+                  startContent={<Search size={20} />}
                   size="sm"
                   isClearable
                 />
@@ -158,22 +158,12 @@ const IncidentsPage = () => {
               <ButtonGroup size="sm" variant="flat">
                 <Tooltip content={`Sort ${filter.order === "asc" ? "descending" : "ascending"}`}>
                   <Button isIconOnly onPress={toggleOrder}>
-                    {filter.order === "asc" ? (
-                      <Icon icon="solar:sort-from-top-to-bottom-broken" width="20" height="20" />
-                    ) : (
-                      <Icon icon="solar:sort-from-bottom-to-top-broken" width="20" height="20" />
-                    )}
+                    {filter.order === "asc" ? <ArrowDown size={20} /> : <ArrowUp size={20} />}
                   </Button>
                 </Tooltip>
                 <Dropdown>
                   <DropdownTrigger>
-                    <Button
-                      variant="flat"
-                      size="sm"
-                      endContent={
-                        <Icon icon="material-symbols:arrow-drop-down" width="20" height="20" />
-                      }
-                    >
+                    <Button variant="flat" size="sm" endContent={<ChevronDown size={20} />}>
                       {IncidentSortFields.find((f) => f.value === filter.sort)?.label || "Sort"}
                     </Button>
                   </DropdownTrigger>

@@ -136,7 +136,9 @@ export class IncidentService {
     }
   }
 
-  public async getIncidentsStatistics(filter: IncidentFilter): Promise<readonly [IncidentStatistics, Problem?]> {
+  public async getIncidentsStatistics(
+    filter: IncidentFilter
+  ): Promise<readonly [IncidentStatistics, Problem?]> {
     try {
       const response = await this.api.get("/incidents/statistics", { params: filter });
       return [response.data, undefined];

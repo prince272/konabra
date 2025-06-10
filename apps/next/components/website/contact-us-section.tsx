@@ -3,8 +3,8 @@
 import React from "react";
 import NextLink from "next/link";
 import { Button } from "@heroui/button";
-import { Icon } from "@iconify-icon/react";
 import { motion } from "framer-motion";
+import { Mail } from "lucide-react";
 
 export const ContactUsSection = () => {
   const container = {
@@ -38,14 +38,14 @@ export const ContactUsSection = () => {
           animate="show"
         >
           <motion.h2 variants={item} className="mb-4 font-montserrat text-4xl font-bold">
-            We&#39;d Love to{" "}
+            We&apos;d Love to{" "}
             <span className="relative inline-block text-primary">
               Hear From You
               <span className="absolute -bottom-2 left-0 h-1 w-full bg-primary/40"></span>
             </span>
           </motion.h2>
           <motion.p variants={item} className="text-muted-foreground mb-8 text-lg">
-            Reach out via email or give us a call. We&#39;re here to help!
+            Reach out via email or give us a call. We&apos;re here to help!
           </motion.p>
           <motion.div variants={item} className="flex items-center justify-center gap-2">
             <Button
@@ -56,7 +56,7 @@ export const ContactUsSection = () => {
               as={NextLink}
               href="#contact-us"
             >
-              <Icon icon="solar:mailbox-broken" width="20" height="20" />
+              <Mail size={20} />
               Contact Us
             </Button>
           </motion.div>

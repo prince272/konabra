@@ -11,15 +11,32 @@ import {
 } from "react";
 import NextLink from "next/link";
 import { usePathname } from "next/navigation";
+import { useRouter } from "@bprogress/next";
 import { Avatar } from "@heroui/avatar";
 import { Button } from "@heroui/button";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 import { cn } from "@heroui/theme";
 import { Tooltip } from "@heroui/tooltip";
-import { Icon } from "@iconify-icon/react";
+import {
+  AlertCircle,
+  BarChart2,
+  ChevronRight,
+  FileText,
+  Flame,
+  HelpCircle,
+  Home,
+  LogOut,
+  Map,
+  MapPin,
+  Settings,
+  Shield,
+  Tag,
+  TrafficCone,
+  User,
+  Users
+} from "lucide-react";
 import { useAccountState } from "@/states";
 import { categoryStore } from "@/states/categories";
-import { useRouter } from "@bprogress/next";
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -28,7 +45,7 @@ interface SidebarProps {
 interface MenuItemProps {
   title: string;
   path: string;
-  icon: string;
+  icon: React.ComponentType<any>;
   children?: ReactNode;
   onItemClick?: (path: string) => void;
 }
@@ -52,7 +69,13 @@ const useMenuContext = () => {
   return context;
 };
 
-const MenuItem: React.FC<MenuItemProps> = ({ title, path, icon, children, onItemClick }) => {
+const MenuItem: React.FC<MenuItemProps> = ({
+  title,
+  path,
+  icon: IconComponent,
+  children,
+  onItemClick
+}) => {
   const { collapsed, expandedMenus, currentToggledMenu, toggleMenu, isActive, isChildActive } =
     useMenuContext();
 
@@ -77,7 +100,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, path, icon, children, onItem
           href={!hasChildren ? path : undefined}
           variant={
             hasChildren
-              ? isChildActive({ title, path, icon, children })
+              ? isChildActive({ title, path, icon: IconComponent, children })
                 ? "flat"
                 : "light"
               : isActive(path)
@@ -87,7 +110,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, path, icon, children, onItem
           isIconOnly
           color={
             hasChildren
-              ? isChildActive({ title, path, icon, children })
+              ? isChildActive({ title, path, icon: IconComponent, children })
                 ? "primary"
                 : "default"
               : isActive(path)
@@ -97,7 +120,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, path, icon, children, onItem
           className="mx-auto mb-2"
           onPress={handleItemClick}
         >
-          <Icon icon={icon} width="20" height="20" />
+          <IconComponent size={20} />
         </Button>
       </Tooltip>
     );
@@ -105,25 +128,28 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, path, icon, children, onItem
 
   if (hasChildren) {
     const isExpanded =
-      expandedMenus[title.toLowerCase()] ?? isChildActive({ title, path, icon, children });
+      expandedMenus[title.toLowerCase()] ??
+      isChildActive({ title, path, icon: IconComponent, children });
     const isCurrentToggled = currentToggledMenu === title.toLowerCase();
     return (
       <div>
         <Button
           variant={
-            isActive(path) || isChildActive({ title, path, icon, children }) ? "flat" : "light"
+            isActive(path) || isChildActive({ title, path, icon: IconComponent, children })
+              ? "flat"
+              : "light"
           }
           radius="full"
           color={
-            isActive(path) || isChildActive({ title, path, icon, children }) ? "primary" : "default"
+            isActive(path) || isChildActive({ title, path, icon: IconComponent, children })
+              ? "primary"
+              : "default"
           }
           className="mb-2 w-full justify-start"
-          startContent={<Icon icon={icon} width="20" height="20" />}
+          startContent={<IconComponent size={20} />}
           endContent={
-            <Icon
-              icon="solar:alt-arrow-right-linear"
-              width="20"
-              height="20"
+            <ChevronRight
+              size={20}
               className={cn("ml-auto transition-transform", { "rotate-90": isExpanded })}
             />
           }
@@ -152,7 +178,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ title, path, icon, children, onItem
       variant={isActive(path) ? "flat" : "light"}
       color={isActive(path) ? "primary" : "default"}
       className="mb-2 w-full justify-start"
-      startContent={<Icon icon={icon} width="20" height="20" />}
+      startContent={<IconComponent size={20} />}
       onPress={handleItemClick}
     >
       {title}
@@ -259,7 +285,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
             "gap-2": !collapsed
           })}
         >
-          <Icon icon="solar:traffic-linear" className="text-2xl text-primary" />
+          <TrafficCone size={24} className="text-primary" />
           {!collapsed && <span className="text-xl font-bold">Konabra</span>}
         </div>
       </div>
@@ -275,65 +301,50 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
             <MenuItem
               title="Dashboard"
               path="/dashboard"
-              icon="solar:home-2-broken"
+              icon={Home}
               onItemClick={handleItemClick}
             />
             <MenuItem
               title="Incidents"
               path="/incidents"
-              icon="solar:danger-circle-broken"
+              icon={AlertCircle}
               onItemClick={handleItemClick}
             />
             <MenuItem
               title="Categories"
               path="/categories"
-              icon="solar:tag-broken"
+              icon={Tag}
               onItemClick={handleItemClick}
             />
-            <MenuItem
-              title="Map View"
-              path="/map-view"
-              icon="solar:map-point-wave-broken"
-              onItemClick={handleItemClick}
-            />
-            <MenuItem title="Analytics" path="/analytics" icon="solar:chart-broken">
+            <MenuItem title="Map View" path="/map-view" icon={Map} onItemClick={handleItemClick} />
+            <MenuItem title="Analytics" path="/analytics" icon={BarChart2}>
               <MenuItem
                 title="Overview"
                 path="/analytics"
-                icon="solar:pie-chart-2-broken"
+                icon={BarChart2}
                 onItemClick={handleItemClick}
               />
               <MenuItem
                 title="Hotspots"
                 path="/hotspots"
-                icon="solar:fire-broken"
+                icon={Flame}
                 onItemClick={handleItemClick}
               />
               <MenuItem
                 title="Reports"
                 path="/reports"
-                icon="solar:document-broken"
+                icon={FileText}
                 onItemClick={handleItemClick}
               />
             </MenuItem>
-            <MenuItem title="Management" path="/users" icon="solar:users-group-two-rounded-broken">
-              <MenuItem
-                title="Users"
-                path="/users"
-                icon="solar:user-broken"
-                onItemClick={handleItemClick}
-              />
-              <MenuItem
-                title="Roles"
-                path="/roles"
-                icon="solar:shield-user-broken"
-                onItemClick={handleItemClick}
-              />
+            <MenuItem title="Management" path="/users" icon={Users}>
+              <MenuItem title="Users" path="/users" icon={User} onItemClick={handleItemClick} />
+              <MenuItem title="Roles" path="/roles" icon={Shield} onItemClick={handleItemClick} />
             </MenuItem>
             <MenuItem
               title="Help & Support"
               path="/help"
-              icon="solar:info-circle-broken"
+              icon={HelpCircle}
               onItemClick={handleItemClick}
             />
           </MenuContext.Provider>
@@ -359,7 +370,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                   key="settings"
                   as={NextLink}
                   href="#settings"
-                  startContent={<Icon icon="solar:settings-linear" width="20" height="20" />}
+                  startContent={<Settings size={20} />}
                 >
                   Settings
                 </DropdownItem>
@@ -367,7 +378,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                   key="signout"
                   as={NextLink}
                   href="#signout"
-                  startContent={<Icon icon="solar:logout-2-linear" width="20" height="20" />}
+                  startContent={<LogOut size={20} />}
                   color="primary"
                 >
                   Sign Out
@@ -395,7 +406,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                 key="settings"
                 as={NextLink}
                 href="#settings"
-                startContent={<Icon icon="solar:settings-linear" width="20" height="20" />}
+                startContent={<Settings size={20} />}
               >
                 Settings
               </DropdownItem>
@@ -403,7 +414,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                 key="signout"
                 as={NextLink}
                 href="#signout"
-                startContent={<Icon icon="solar:logout-2-linear" width="20" height="20" />}
+                startContent={<LogOut size={20} />}
                 color="primary"
               >
                 Sign Out

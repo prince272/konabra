@@ -3,8 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Switch } from "@heroui/switch";
 import { Tooltip } from "@heroui/tooltip";
-import { Icon } from "@iconify-icon/react";
-import { useTheme } from "next-themes";
+import { Moon, Sun } from "lucide-react";
 import { useApplicationState } from "@/states";
 
 export const ThemeSwitcher = () => {
@@ -40,18 +39,14 @@ export const ThemeSwitcher = () => {
       document.documentElement.classList.add("dark");
     } else {
       document.documentElement.classList.remove("dark");
+      document.documentElement.classList.add("light");
     }
   };
 
   return (
-    <Tooltip content={`Switch to ${isDark ? "light" : "dark"} mode`} placement="bottom">
+    <Tooltip title={`Switch to ${isDark ? "light" : "dark"} mode`} placement="bottom">
       <div className="flex items-center gap-2">
-        <Icon
-          icon="solar:sun-2-broken"
-          className={`text-default-500 ${!isDark && "text-primary"}`}
-          width="20"
-          height="20"
-        />
+        <Sun size={20} className={`text-default-500 ${!isDark && "text-primary"}`} />
         <Switch
           isSelected={isDark}
           onValueChange={handleToggle}
@@ -59,12 +54,7 @@ export const ThemeSwitcher = () => {
           color="primary"
           className="mx-1"
         />
-        <Icon
-          icon="solar:moon-broken"
-          className={`text-default-500 ${isDark && "text-primary"}`}
-          width="20"
-          height="20"
-        />
+        <Moon size={20} className={`text-default-500 ${isDark && "text-primary"}`} />
       </div>
     </Tooltip>
   );

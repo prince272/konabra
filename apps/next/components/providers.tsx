@@ -21,11 +21,7 @@ declare module "@react-types/shared" {
   }
 }
 
-function InnerProviders({
-  children,
-  cookies,
-  themeProps,
-}: ProvidersProps) {
+function InnerProviders({ children, cookies, themeProps }: ProvidersProps) {
   const router = useRouter();
   const isSmallScreen = useBreakpoint("sm", "down");
 

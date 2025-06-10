@@ -7,7 +7,7 @@ import { Checkbox } from "@heroui/checkbox";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { cn } from "@heroui/theme";
 import { addToast } from "@heroui/toast";
-import { Icon } from "@iconify-icon/react";
+import { LogOut, X } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import { identityService } from "@/services";
 import { SignOutForm } from "@/services/identity-service";
@@ -62,7 +62,7 @@ export default function SignOutModal({
           onPress={onClose}
           className="rounded-full text-foreground-500"
         >
-          <Icon icon="material-symbols:close-rounded" width="20" height="20" />
+          <X size={20} />
         </Button>
       }
     >
@@ -104,7 +104,7 @@ export default function SignOutModal({
             isLoading={form.formState.isSubmitting}
             form="sign-out-form"
             type="submit"
-            startContent={<Icon icon="solar:logout-2-broken" width="20" height="20" />}
+            startContent={<LogOut size={20} />}
             className="w-full"
           >
             Sign Out

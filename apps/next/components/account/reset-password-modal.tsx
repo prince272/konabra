@@ -7,9 +7,9 @@ import { InputOtp } from "@heroui/input-otp";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { cn } from "@heroui/theme";
 import { addToast } from "@heroui/toast";
-import { Icon } from "@iconify-icon/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cloneDeep } from "lodash";
+import { ArrowLeft, X } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import { identityService } from "@/services";
 import { CompleteResetPasswordForm } from "@/services/identity-service";
@@ -90,7 +90,6 @@ export default function ResetPasswordModal({
 
         if (problem) {
           const errors = Object.entries(problem.errors || {});
-
           if (errors.length > 0) {
             errors.forEach(([name, message]) => {
               form.setError(name as keyof CompleteResetPasswordForm, {
@@ -99,16 +98,10 @@ export default function ResetPasswordModal({
               });
             });
           } else {
-            addToast({
-              title: problem.message,
-              color: "danger"
-            });
+            addToast({ title: problem.message, color: "danger" });
           }
         } else {
-          addToast({
-            title: "Verification code sent successfully.",
-            color: "success"
-          });
+          addToast({ title: "Verification code sent successfully.", color: "success" });
           resetResendTimer();
           startResendTimer();
           handleNext();
@@ -124,17 +117,10 @@ export default function ResetPasswordModal({
     setIsResending(true);
     try {
       const problem = await identityService.resetPassword(form.getValues());
-
       if (problem) {
-        addToast({
-          title: problem.message,
-          color: "danger"
-        });
+        addToast({ title: problem.message, color: "danger" });
       } else {
-        addToast({
-          title: "Verification code resent successfully.",
-          color: "success"
-        });
+        addToast({ title: "Verification code resent successfully.", color: "success" });
         resetResendTimer();
         startResendTimer();
       }
@@ -148,14 +134,10 @@ export default function ResetPasswordModal({
       setIsLoading(true);
       try {
         const validateOnly = step != 3;
-        const problem = await identityService.completeResetPassword({
-          ...formData,
-          validateOnly
-        });
+        const problem = await identityService.completeResetPassword({ ...formData, validateOnly });
 
         if (problem) {
           const errors = Object.entries(problem.errors || {});
-
           if (errors.length > 0) {
             const errorFields = new Set(errors.map(([field]) => field));
             const stepsWithErrors = steps
@@ -169,11 +151,9 @@ export default function ResetPasswordModal({
             const firstErrorStep = stepsWithErrors[0];
             if (firstErrorStep) {
               handleStep(firstErrorStep);
-
               const stepErrors = errors.filter(([field]) =>
                 (steps[firstErrorStep - 1] || []).includes(field)
               );
-
               if (step >= firstErrorStep) {
                 stepErrors.forEach(([field, message]) => {
                   form.setError(field as keyof CompleteResetPasswordForm, {
@@ -184,19 +164,13 @@ export default function ResetPasswordModal({
               }
             }
           } else {
-            addToast({
-              title: problem.message,
-              color: "danger"
-            });
+            addToast({ title: problem.message, color: "danger" });
           }
         } else {
           if (validateOnly) {
             handleNext();
           } else {
-            addToast({
-              title: "Password reset successfully.",
-              color: "success"
-            });
+            addToast({ title: "Password reset successfully.", color: "success" });
             onClose?.();
           }
         }
@@ -213,7 +187,7 @@ export default function ResetPasswordModal({
       isDismissable={false}
       onClose={onClose}
       size={isSmallScreen ? "full" : "md"}
-      scrollBehavior={"inside"}
+      scrollBehavior="inside"
       closeButton={
         <Button
           isIconOnly
@@ -221,24 +195,22 @@ export default function ResetPasswordModal({
           onPress={onClose}
           className="rounded-full text-foreground-500"
         >
-          <Icon icon="material-symbols:close-rounded" width="20" height="20" />
+          <X size={20} />
         </Button>
       }
-      classNames={{
-        wrapper: cn(isSmallScreen && "h-full")
-      }}
+      classNames={{ wrapper: cn(isSmallScreen && "h-full") }}
     >
       <ModalContent className={cn(!isSmallScreen && "min-h-[512px]")}>
         <ModalHeader className="flex flex-col gap-3 pt-6">
           <div className="absolute start-1 top-1 flex items-center justify-between">
-            {(step == 2 || step == 3) && (
+            {(step === 2 || step === 3) && (
               <Button
                 isIconOnly
                 variant="light"
                 onPress={handlePrev}
                 className="rounded-full text-foreground-500"
               >
-                <Icon icon="material-symbols:arrow-back-rounded" width="20" height="20" />
+                <ArrowLeft size={20} />
               </Button>
             )}
           </div>
@@ -272,7 +244,7 @@ export default function ResetPasswordModal({
               exit="exit"
               className="h-full"
             >
-              {step == 1 && (
+              {step === 1 && (
                 <div className="space-y-6 py-4">
                   <div className="flex flex-col">
                     <h3 className="text-lg font-medium">Reset Password</h3>
@@ -297,7 +269,7 @@ export default function ResetPasswordModal({
                 </div>
               )}
 
-              {step == 2 && (
+              {step === 2 && (
                 <div className="space-y-6 py-4">
                   <div className="flex flex-col">
                     <h3 className="text-lg font-medium">Verify Your Identity</h3>
@@ -342,7 +314,7 @@ export default function ResetPasswordModal({
                 </div>
               )}
 
-              {step == 3 && (
+              {step === 3 && (
                 <div className="space-y-6 py-4">
                   <div className="flex flex-col">
                     <h3 className="text-lg font-medium">Create New Password</h3>
@@ -386,28 +358,17 @@ export default function ResetPasswordModal({
         </ModalBody>
 
         <ModalFooter className="flex-col gap-3 px-6 pb-6 pt-2">
-          {step == 1 && (
-            <Button
-              radius="full"
-              color="primary"
-              isDisabled={isLoading}
-              isLoading={isLoading}
-              onPress={() => handleSendVerificationCode()}
-            >
-              Continue
-            </Button>
-          )}
-          {(step == 2 || step == 3) && (
-            <Button
-              radius="full"
-              color="primary"
-              isDisabled={isLoading}
-              isLoading={isLoading}
-              onPress={() => handleResetPasswordSubmit()}
-            >
-              Continue
-            </Button>
-          )}
+          <Button
+            radius="full"
+            color="primary"
+            isDisabled={isLoading}
+            isLoading={isLoading}
+            onPress={
+              step === 1 ? () => handleSendVerificationCode() : () => handleResetPasswordSubmit()
+            }
+          >
+            Continue
+          </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
@@ -419,8 +380,8 @@ export function ResetPasswordModalRouter() {
 
   return (
     <>
-      {mountedModal == "reset-password" ? (
-        <ResetPasswordModal isOpen={currentModal == "reset-password"} onClose={closeModal} />
+      {mountedModal === "reset-password" ? (
+        <ResetPasswordModal isOpen={currentModal === "reset-password"} onClose={closeModal} />
       ) : null}
     </>
   );

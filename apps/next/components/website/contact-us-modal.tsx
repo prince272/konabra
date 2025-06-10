@@ -6,8 +6,8 @@ import { Input, Textarea } from "@heroui/input";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { cn } from "@heroui/theme";
 import { addToast } from "@heroui/toast";
-import { Icon } from "@iconify-icon/react";
 import { AnimatePresence, motion } from "framer-motion";
+import { X } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import { useBreakpoint } from "@/hooks";
 import { useModalRouter } from "@/components/common/modals";
@@ -102,7 +102,7 @@ export default function ContactUsModal({
           onPress={onClose}
           className="rounded-full text-foreground-500"
         >
-          <Icon icon="material-symbols:close-rounded" width="20" height="20" />
+          <X size={20} />
         </Button>
       }
       classNames={{
@@ -114,7 +114,7 @@ export default function ContactUsModal({
           <div className="flex flex-col">
             <h3 className="text-lg font-medium">Contact Us</h3>
             <p className="text-sm text-default-500">
-              Fill out the form below, and we&#39;ll get back to you soon.
+              Fill out the form below, and we&apos;ll get back to you soon.
             </p>
           </div>
         </ModalHeader>

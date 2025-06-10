@@ -6,7 +6,7 @@ import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@herou
 import { Spinner } from "@heroui/spinner";
 import { cn } from "@heroui/theme";
 import { addToast } from "@heroui/toast";
-import { Icon } from "@iconify-icon/react";
+import { Trash2, X } from "lucide-react";
 import { incidentService } from "@/services";
 import { Incident } from "@/services/incident-service";
 import { useBreakpoint } from "@/hooks";
@@ -75,7 +75,7 @@ function DeleteIncidentModal({ isOpen, onClose, incidentId, onSuccess }: DeleteI
           onPress={onClose}
           className="rounded-full text-foreground-500"
         >
-          <Icon icon="material-symbols:close-rounded" width="20" height="20" />
+          <X size={20} />
         </Button>
       }
       classNames={{
@@ -99,12 +99,7 @@ function DeleteIncidentModal({ isOpen, onClose, incidentId, onSuccess }: DeleteI
                 loading || isDeleting ? "pointer-events-none opacity-50" : ""
               }`}
             >
-              <Icon
-                icon="solar:trash-bin-trash-broken"
-                className="mt-0.5 text-danger"
-                width="42"
-                height="42"
-              />
+              <Trash2 size={42} className="mt-0.5 text-danger" />
               <p>
                 Are you sure you want to delete the incident{" "}
                 <span className="font-semibold text-foreground">{incident?.summary}</span>?<br />

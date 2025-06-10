@@ -14,7 +14,20 @@ import {
   NavbarMenuItem,
   NavbarMenuToggle
 } from "@heroui/navbar";
-import { Icon } from "@iconify-icon/react";
+import {
+  BarChart2,
+  Home,
+  Info,
+  LayoutDashboard,
+  ListPlus,
+  LogOut,
+  MapPin,
+  Menu,
+  MessageCircle,
+  Settings,
+  Sun,
+  User
+} from "lucide-react";
 import { useAccountState } from "@/states";
 import { ThemeSwitcher } from "./theme-switcher";
 
@@ -74,7 +87,7 @@ export const Navbar = () => {
         <NavbarBrand>
           <div className="flex items-center gap-2">
             <div className="rounded-full bg-gradient-to-r from-primary to-primary-600 p-1">
-              <Icon icon="solar:map-point-bold" width="20" height="20" className="text-success" />
+              <MapPin size={20} className="text-success" />
             </div>
             <p className="font-montserrat text-xl font-bold text-inherit">Konabra</p>
           </div>
@@ -116,7 +129,7 @@ export const Navbar = () => {
                   key="dashboard"
                   as={NextLink}
                   href="/dashboard"
-                  startContent={<Icon icon="solar:spedometer-max-broken" width="20" height="20" />}
+                  startContent={<LayoutDashboard size={20} />}
                 >
                   Dashboard
                 </DropdownItem>
@@ -124,7 +137,7 @@ export const Navbar = () => {
                   key="settings"
                   as={NextLink}
                   href="#settings"
-                  startContent={<Icon icon="solar:settings-broken" width="20" height="20" />}
+                  startContent={<Settings size={20} />}
                 >
                   Settings
                 </DropdownItem>
@@ -132,7 +145,7 @@ export const Navbar = () => {
                   key="signout"
                   as={NextLink}
                   href="#signout"
-                  startContent={<Icon icon="solar:logout-2-broken" width="20" height="20" />}
+                  startContent={<LogOut size={20} />}
                   color="primary"
                 >
                   Sign Out
@@ -147,6 +160,7 @@ export const Navbar = () => {
               variant="solid"
               className="px-4"
               href="#signin"
+              startContent={<User size={20} />}
             >
               Sign In
             </Button>
@@ -184,23 +198,13 @@ export const Navbar = () => {
                 size="lg"
               >
                 <div className="flex items-center gap-3 px-4">
-                  <Icon
-                    icon="solar:settings-broken"
-                    className="text-primary"
-                    width="20"
-                    height="20"
-                  />
+                  <Settings size={20} className="text-primary" />
                   Settings
                 </div>
               </Link>
               <Link color="primary" className="w-full py-3" as={NextLink} href="#signout" size="lg">
                 <div className="flex items-center gap-3 px-4">
-                  <Icon
-                    icon="solar:logout-2-broken"
-                    className="text-primary"
-                    width="20"
-                    height="20"
-                  />
+                  <LogOut size={20} className="text-primary" />
                   Sign Out
                 </div>
               </Link>
@@ -208,7 +212,7 @@ export const Navbar = () => {
           ) : (
             <Link color="foreground" className="w-full py-3" href="#signin" size="lg">
               <div className="flex items-center gap-3 px-4">
-                <Icon icon="solar:login-3-bold" className="text-primary" width="20" height="20" />
+                <User size={20} className="text-primary" />
                 Sign In
               </div>
             </Link>
@@ -216,7 +220,7 @@ export const Navbar = () => {
         </NavbarMenuItem>
         <NavbarMenuItem>
           <div className="flex items-center gap-3 px-4 py-3">
-            <Icon icon="solar:sun-bold-duotone" className="text-primary" width="20" height="20" />
+            <Sun size={20} className="text-primary" />
             <span>Theme</span>
             <div className="ml-auto">
               <ThemeSwitcher />
@@ -232,18 +236,18 @@ export const Navbar = () => {
 function getMenuIcon(name: string) {
   switch (name) {
     case "Home":
-      return <Icon icon="solar:home-bold" className="text-primary" width="20" height="20" />;
+      return <Home size={20} className="text-primary" />;
     case "Features":
-      return <Icon icon="solar:widget-bold" className="text-primary" width="20" height="20" />;
-    case "How It Works":
-      return <Icon icon="solar:info-circle-bold" className="text-primary" width="20" height="20" />;
+      return <ListPlus size={20} className="text-primary" />;
     case "Impact":
-      return <Icon icon="solar:chart-bold" className="text-primary" width="20" height="20" />;
-    case "Testimonials":
-      return (
-        <Icon icon="solar:chat-round-dots-bold" className="text-primary" width="20" height="20" />
-      );
+      return <BarChart2 size={20} className="text-primary" />;
+    case "Alerts":
+      return <Info size={20} className="text-primary" />;
+    case "Incidents":
+      return <MapPin size={20} className="text-primary" />;
+    case "Contact":
+      return <MessageCircle size={20} className="text-primary" />;
     default:
-      return <Icon icon="solar:menu-dots-bold" className="text-primary" width="20" height="20" />;
+      return <Menu size={20} className="text-primary" />;
   }
 }

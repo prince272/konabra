@@ -50,7 +50,7 @@ export const StatCard: React.FC<StatCardProps> = ({
       <CardBody>
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
-            <Skeleton isLoaded={!isLoading} className="flex mb-1 h-4 w-32 rounded">
+            <Skeleton isLoaded={!isLoading} className="mb-1 flex h-4 w-32 rounded">
               <p className="truncate text-sm text-default-500">{title}</p>
             </Skeleton>
 
@@ -59,7 +59,7 @@ export const StatCard: React.FC<StatCardProps> = ({
             </Skeleton>
 
             <Skeleton isLoaded={!isLoading} className="mt-2 h-4 w-36 rounded">
-              <div className="flex items-center min-h-4">
+              <div className="flex min-h-4 items-center">
                 {change?.isIncrease || change?.isDecrease ? (
                   <>
                     {change.isIncrease ? (

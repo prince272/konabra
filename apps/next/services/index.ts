@@ -107,7 +107,10 @@ api.interceptors.response.use(
 
               const status = (refreshError as AxiosError)?.response?.status;
 
-              if ((status === HttpStatusCode.BadRequest || status === HttpStatusCode.Unauthorized) && typeof window !== "undefined") {
+              if (
+                (status === HttpStatusCode.BadRequest || status === HttpStatusCode.Unauthorized) &&
+                typeof window !== "undefined"
+              ) {
                 const returnUrl = toRelativeUrl(window.location.href || "/");
                 window.location.href = stringifyPath(
                   {

@@ -2,8 +2,8 @@ import React, { forwardRef, useEffect, useState } from "react";
 import { Autocomplete, AutocompleteItem, AutocompleteProps } from "@heroui/autocomplete";
 import { Button } from "@heroui/button";
 import { Tooltip } from "@heroui/tooltip";
-import { Icon } from "@iconify-icon/react";
 import { Key } from "@react-types/shared";
+import { MapPin } from "lucide-react";
 import { useLocationIQAutocomplete } from "@/hooks";
 import type { Location as LocationIQLocation } from "@/hooks/use-locationIq-autocomplete";
 
@@ -102,7 +102,7 @@ const InputLocation = forwardRef<HTMLInputElement, InputLocationProps>(
               isDisabled={isLoading}
               isIconOnly
             >
-              <Icon icon="solar:map-point-bold" width="20" height="20" />
+              <MapPin size={20} />
             </Button>
           </Tooltip>
         }

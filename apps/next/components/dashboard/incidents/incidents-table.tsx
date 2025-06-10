@@ -6,9 +6,19 @@ import { Pagination } from "@heroui/pagination";
 import { Spinner } from "@heroui/spinner";
 import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@heroui/table";
 import { cn } from "@heroui/theme";
-import { Icon } from "@iconify-icon/react";
 import { formatDistanceToNow } from "date-fns";
 import { upperFirst } from "lodash";
+import {
+  AlertTriangle,
+  Clock,
+  Edit,
+  Folder,
+  MapPin,
+  MoreVertical,
+  RefreshCw,
+  Trash2,
+  User
+} from "lucide-react";
 import { Incident, IncidentSeverities } from "@/services/incident-service";
 import { Remount } from "@/components/common/remount";
 
@@ -60,12 +70,7 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
         emptyContent={
           isError ? (
             <div className="flex h-64 flex-1 flex-col items-center justify-center text-center">
-              <Icon
-                icon="solar:danger-broken"
-                width="64"
-                height="64"
-                className="mb-4 text-foreground-300"
-              />
+              <AlertTriangle size={64} className="mb-4 text-foreground-300" />
               <p className="mb-2 text-foreground-500">An error occurred</p>
               <p className="mb-4 text-sm text-foreground-400">
                 {errorMessage || "Something went wrong. Please try again later."}
@@ -76,7 +81,7 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
                   variant="solid"
                   radius="full"
                   onPress={onReload}
-                  startContent={<Icon icon="solar:refresh-broken" width="20" height="20" />}
+                  startContent={<RefreshCw size={20} />}
                 >
                   Reload
                 </Button>
@@ -84,12 +89,7 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
             </div>
           ) : (
             <div className="flex h-64 flex-1 flex-col items-center justify-center text-center">
-              <Icon
-                icon="solar:folder-with-files-broken"
-                width="64"
-                height="64"
-                className="mb-4 text-foreground-300"
-              />
+              <Folder size={64} className="mb-4 text-foreground-300" />
               <p className="mb-2 text-foreground-500">No incidents found</p>
               <p className="text-sm text-foreground-400">
                 {emptyMessage || "No matching results. Please try a different filter or search."}
@@ -103,7 +103,7 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
             <TableCell className="text-nowrap">{incident.category?.name}</TableCell>
             <TableCell className="text-nowrap">
               <div className="flex items-center gap-2">
-                <Icon icon="solar:clock-circle-broken" width="20" height="20" />
+                <Clock size={20} />
                 <Remount interval={1000}>
                   {() => {
                     return incident.reportedAt
@@ -133,7 +133,7 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
             <TableCell className="text-nowrap">
               {incident.reportedBy ? (
                 <div className="flex items-center gap-2">
-                  <Icon icon="solar:user-broken" width="20" height="20" />
+                  <User size={20} />
                   {incident.reportedBy.fullName}
                 </div>
               ) : (
@@ -143,7 +143,7 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
             <TableCell className="text-nowrap">
               {incident.location ? (
                 <div className="flex items-center gap-2">
-                  <Icon icon="solar:map-point-broken" width="20" height="20" />
+                  <MapPin size={20} />
                   {incident.location}
                 </div>
               ) : (
@@ -178,16 +178,14 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
                       radius="full"
                       aria-label="More actions"
                     >
-                      <Icon icon="material-symbols:more-vert" width="20" height="20" />
+                      <MoreVertical size={20} />
                     </Button>
                   </DropdownTrigger>
                   <DropdownMenu aria-label="Incident actions" variant="flat">
                     <DropdownItem
                       key="edit"
                       onClick={() => onEdit(incident)}
-                      startContent={
-                        <Icon icon="solar:pen-new-square-broken" width="20" height="20" />
-                      }
+                      startContent={<Edit size={20} />}
                     >
                       Edit
                     </DropdownItem>
@@ -196,9 +194,7 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
                       className="text-danger"
                       color="danger"
                       onClick={() => onDelete(incident)}
-                      startContent={
-                        <Icon icon="solar:trash-bin-trash-broken" width="20" height="20" />
-                      }
+                      startContent={<Trash2 size={20} />}
                     >
                       Delete
                     </DropdownItem>

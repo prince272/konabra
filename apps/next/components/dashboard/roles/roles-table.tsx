@@ -5,7 +5,14 @@ import { Pagination } from "@heroui/pagination";
 import { Spinner } from "@heroui/spinner";
 import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@heroui/table";
 import { cn } from "@heroui/theme";
-import { Icon } from "@iconify-icon/react";
+import {
+  AlertTriangle,
+  MoreVertical,
+  PenSquare,
+  RefreshCcw,
+  ShieldCheck,
+  Trash2
+} from "lucide-react";
 import { Role } from "@/services/identity-service";
 
 interface RolesTableProps {
@@ -33,7 +40,7 @@ const RolesTable: React.FC<RolesTableProps> = ({
     <Table
       aria-label="Roles table"
       removeWrapper
-          isHeaderSticky
+      isHeaderSticky
       shadow="none"
       className="flex flex-1"
     >
@@ -52,12 +59,7 @@ const RolesTable: React.FC<RolesTableProps> = ({
         emptyContent={
           isError ? (
             <div className="flex h-64 flex-1 flex-col items-center justify-center text-center">
-              <Icon
-                icon="solar:danger-broken"
-                width="64"
-                height="64"
-                className="mb-4 text-foreground-300"
-              />
+              <AlertTriangle size={64} className="mb-4 text-foreground-300" />
               <p className="mb-2 text-foreground-500">An error occurred</p>
               <p className="mb-4 text-sm text-foreground-400">
                 {errorMessage || "Something went wrong. Please try again later."}
@@ -68,7 +70,7 @@ const RolesTable: React.FC<RolesTableProps> = ({
                   variant="solid"
                   radius="full"
                   onPress={onReload}
-                  startContent={<Icon icon="solar:refresh-broken" width="20" height="20" />}
+                  startContent={<RefreshCcw size={20} />}
                 >
                   Reload
                 </Button>
@@ -76,10 +78,7 @@ const RolesTable: React.FC<RolesTableProps> = ({
             </div>
           ) : (
             <div className="flex h-64 flex-1 flex-col items-center justify-center text-center">
-              <Icon
-                icon="solar:shield-check-broken"
-                className="mb-4 text-6xl text-foreground-300"
-              />
+              <ShieldCheck size={64} className="mb-4 text-foreground-300" />
               <p className="mb-2 text-foreground-500">No roles found</p>
               <p className="text-sm text-foreground-400">
                 {emptyMessage || "No matching results. Please try a different keyword."}
@@ -112,16 +111,14 @@ const RolesTable: React.FC<RolesTableProps> = ({
                       radius="full"
                       aria-label="More actions"
                     >
-                      <Icon icon="material-symbols:more-vert" width="20" height="20" />
+                      <MoreVertical size={20} />
                     </Button>
                   </DropdownTrigger>
                   <DropdownMenu aria-label="Role actions" variant="flat">
                     <DropdownItem
                       key="edit"
                       onClick={() => onEdit(role)}
-                      startContent={
-                        <Icon icon="solar:pen-new-square-broken" width="20" height="20" />
-                      }
+                      startContent={<PenSquare size={20} />}
                     >
                       Edit
                     </DropdownItem>
@@ -130,9 +127,7 @@ const RolesTable: React.FC<RolesTableProps> = ({
                       className="text-danger"
                       color="danger"
                       onClick={() => onDelete(role)}
-                      startContent={
-                        <Icon icon="solar:trash-bin-trash-broken" width="20" height="20" />
-                      }
+                      startContent={<Trash2 size={20} />}
                     >
                       Delete
                     </DropdownItem>

@@ -1,6 +1,14 @@
 import React from "react";
 import { Link } from "@heroui/link";
-import { Icon } from "@iconify-icon/react";
+import {
+  Facebook,
+  FileText,
+  Instagram,
+  Linkedin,
+  MapPin,
+  ShieldCheck,
+  Twitter
+} from "lucide-react";
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -36,10 +44,10 @@ export const Footer = () => {
   ];
 
   const socialLinks = [
-    { icon: "logos:facebook", href: "#" },
-    { icon: "logos:twitter", href: "#" },
-    { icon: "logos:instagram-icon", href: "#" },
-    { icon: "logos:linkedin-icon", href: "#" }
+    { icon: Facebook, href: "#" },
+    { icon: Twitter, href: "#" },
+    { icon: Instagram, href: "#" },
+    { icon: Linkedin, href: "#" }
   ];
 
   return (
@@ -49,7 +57,7 @@ export const Footer = () => {
           <div className="lg:col-span-2">
             <div className="mb-6 flex items-center gap-2">
               <div className="rounded-full bg-gradient-to-r from-warning to-warning-600 p-2">
-                <Icon icon="solar:map-point-bold" width="20" height="20" className="text-success" />
+                <MapPin size={20} className="text-success" />
               </div>
               <p className="font-montserrat text-xl font-bold text-inherit">Konabra</p>
             </div>
@@ -58,16 +66,19 @@ export const Footer = () => {
               similar regions.
             </p>
             <div className="flex gap-6">
-              {socialLinks.map((link, index) => (
-                <Link
-                  key={index}
-                  href={link.href}
-                  isExternal
-                  className="rounded-full bg-primary p-2 transition-transform hover:scale-110"
-                >
-                  <Icon icon={link.icon} width="20" height="20" />
-                </Link>
-              ))}
+              {socialLinks.map((link, index) => {
+                const IconComponent = link.icon;
+                return (
+                  <Link
+                    key={index}
+                    href={link.href}
+                    isExternal
+                    className="rounded-full bg-primary p-2 transition-transform hover:scale-110"
+                  >
+                    <IconComponent size={20} />
+                  </Link>
+                );
+              })}
             </div>
           </div>
 
@@ -105,7 +116,7 @@ export const Footer = () => {
               color="foreground"
               className="flex items-center gap-1 text-sm text-foreground-500 transition-colors hover:text-warning"
             >
-              <Icon icon="solar:shield-check-broken" width="20" height="20" />
+              <ShieldCheck size={20} />
               Privacy Policy
             </Link>
             <Link
@@ -113,7 +124,7 @@ export const Footer = () => {
               color="foreground"
               className="flex items-center gap-1 text-sm text-foreground-500 transition-colors hover:text-warning"
             >
-              <Icon icon="solar:document-broken" width="20" height="20" />
+              <FileText size={20} />
               Terms of Service
             </Link>
           </div>

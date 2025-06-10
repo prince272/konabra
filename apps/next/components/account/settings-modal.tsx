@@ -7,10 +7,26 @@ import { Modal, ModalBody, ModalContent, ModalHeader } from "@heroui/modal";
 import { Switch } from "@heroui/switch";
 import { cn } from "@heroui/theme";
 import { addToast } from "@heroui/toast";
-import { Icon } from "@iconify-icon/react";
 import { formatDistanceToNow } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import { cloneDeep, upperFirst } from "lodash";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  AudioLines,
+  Bell,
+  Folder,
+  Key,
+  Lock,
+  Menu,
+  Monitor,
+  Moon,
+  Phone,
+  Settings,
+  Trash2,
+  User,
+  X
+} from "lucide-react";
 import { useTheme } from "next-themes";
 import { Controller, useForm } from "react-hook-form";
 import { formatInternationalNumber } from "@/utils";
@@ -32,7 +48,7 @@ interface ViewContextType {
 
 const ViewContext = createContext<ViewContextType>({
   title: "Settings",
-  icon: "solar:settings-broken"
+  icon: "settings"
 });
 
 interface ViewProps {
@@ -61,7 +77,7 @@ function AccountView({ navigateTo, currentView }: BaseViewProps) {
         <div className="rounded-xl bg-default-100 p-4 shadow-sm">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2">
-              <Icon icon="solar:user-broken" width="20" height="20" />
+              <User size={20} />
               <h4 className="font-medium">Email Address</h4>
             </div>
           </div>
@@ -104,7 +120,7 @@ function AccountView({ navigateTo, currentView }: BaseViewProps) {
         <div className="rounded-xl bg-default-100 p-4 shadow-sm">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2">
-              <Icon icon="solar:phone-broken" width="20" height="20" />
+              <Phone size={20} />
               <h4 className="font-medium">Phone Number</h4>
             </div>
           </div>
@@ -149,7 +165,7 @@ function AccountView({ navigateTo, currentView }: BaseViewProps) {
         <div className="rounded-xl bg-default-100 p-4 shadow-sm">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2">
-              <Icon icon="solar:key-broken" width="20" height="20" />
+              <Key size={20} />
               <h4 className="font-medium">Password</h4>
             </div>
           </div>
@@ -184,12 +200,7 @@ function AccountView({ navigateTo, currentView }: BaseViewProps) {
         <div className="space-y-6">
           <div className="rounded-xl bg-danger-50 p-4 shadow-sm">
             <div className="flex items-center gap-2">
-              <Icon
-                icon="solar:trash-bin-trash-broken"
-                width="20"
-                height="20"
-                className="text-danger"
-              />
+              <Trash2 size={20} className="text-danger" />
               <h4 className="font-medium text-danger">Delete Account</h4>
             </div>
             <p className="mt-2 text-sm text-danger-600">
@@ -200,7 +211,7 @@ function AccountView({ navigateTo, currentView }: BaseViewProps) {
               variant="solid"
               color="danger"
               fullWidth
-              startContent={<Icon icon="solar:trash-bin-broken" width="20" height="20" />}
+              startContent={<Trash2 size={20} />}
               onPress={() => navigateTo("account:delete")}
               className="mt-3 font-medium"
             >
@@ -519,12 +530,7 @@ function AccountDeleteView({ navigateTo, currentView }: BaseViewProps) {
       />
       <div className="mt-6 rounded-lg bg-danger-50 p-4">
         <div className="flex items-start gap-3">
-          <Icon
-            icon="solar:danger-triangle-broken"
-            className="mt-0.5 text-danger-600"
-            width="20"
-            height="20"
-          />
+          <AlertTriangle size={20} className="mt-0.5 text-danger-600" />
           <div>
             <h4 className="font-medium text-danger-800">Before you proceed</h4>
             <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-danger-700">
@@ -545,7 +551,7 @@ function AccountDeleteView({ navigateTo, currentView }: BaseViewProps) {
           onPress={() => onSubmit()}
           isLoading={isDeleting}
           isDisabled={!formState.isValid || isDeleting}
-          startContent={<Icon icon="solar:trash-bin-trash-broken" width="20" height="20" />}
+          startContent={<Trash2 size={20} />}
         >
           Delete Account Permanently
         </Button>
@@ -560,7 +566,7 @@ function NotificationsView({ currentView }: BaseViewProps) {
       <div className="space-y-6">
         <div className="rounded-xl bg-default-100 p-4 shadow-sm">
           <div className="flex items-center gap-2">
-            <Icon icon="solar:bell-bing-broken" width="20" height="20" />
+            <Bell size={20} />
             <h4 className="font-medium">General Notifications</h4>
           </div>
           <div className="mt-3 space-y-3">
@@ -580,7 +586,7 @@ function NotificationsView({ currentView }: BaseViewProps) {
         </div>
         <div className="rounded-xl bg-default-100 p-4 shadow-sm">
           <div className="flex items-center gap-2">
-            <Icon icon="solar:moon-broken" width="20" height="20" />
+            <Moon size={20} />
             <h4 className="font-medium">Do Not Disturb</h4>
           </div>
           <div className="mt-3 space-y-3">
@@ -695,35 +701,35 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [isMenuSelected, setIsMenuSelected] = useState<boolean>(false);
   const [viewInfo, setViewInfo] = useState<{ title: string; icon: string }>({
     title: "Settings",
-    icon: "solar:settings-broken"
+    icon: "settings"
   });
 
   const isSmallScreen = useBreakpoint("sm", "down");
 
   const menuItems = [
-    { id: "account", label: "Account", icon: "solar:user-broken" },
-    { id: "notifications", label: "Notifications", icon: "solar:bell-bing-broken" },
-    { id: "display", label: "Display", icon: "solar:monitor-broken" },
-    { id: "sound", label: "Sound", icon: "solar:soundwave-broken" },
-    { id: "storage", label: "Storage", icon: "solar:folder-broken" },
-    { id: "privacy", label: "Privacy", icon: "solar:lock-broken" }
+    { id: "account", label: "Account", icon: "user" },
+    { id: "notifications", label: "Notifications", icon: "bell" },
+    { id: "display", label: "Display", icon: "monitor" },
+    { id: "sound", label: "Sound", icon: "soundwave" },
+    { id: "storage", label: "Storage", icon: "folder" },
+    { id: "privacy", label: "Privacy", icon: "lock" }
   ];
 
   const viewInfoMap: Record<string, { title: string; icon: string }> = {
-    "": { title: "Settings", icon: "solar:settings-broken" },
-    account: { title: "Account", icon: "solar:user-broken" },
-    notifications: { title: "Notifications", icon: "solar:bell-bing-broken" },
-    display: { title: "Display", icon: "solar:monitor-broken" },
-    sound: { title: "Sound", icon: "solar:soundwave-broken" },
-    storage: { title: "Storage", icon: "solar:folder-broken" },
-    privacy: { title: "Privacy", icon: "solar:lock-broken" }
+    "": { title: "Settings", icon: "settings" },
+    account: { title: "Account", icon: "user" },
+    notifications: { title: "Notifications", icon: "bell" },
+    display: { title: "Display", icon: "monitor" },
+    sound: { title: "Sound", icon: "soundwave" },
+    storage: { title: "Storage", icon: "folder" },
+    privacy: { title: "Privacy", icon: "lock" }
   };
 
   useEffect(() => {
     const mainViewId = currentView.split(":")[0] || "";
     const info = viewInfoMap[mainViewId] || {
       title: "Settings",
-      icon: "solar:settings-broken"
+      icon: "settings"
     };
     setViewInfo(info);
   }, [currentView]);
@@ -775,7 +781,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             onPress={onClose}
             className="rounded-full text-foreground-500"
           >
-            <Icon icon="material-symbols:close-rounded" width="20" height="20" />
+            <X size={20} />
           </Button>
         }
         classNames={{
@@ -787,19 +793,25 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             <div className="flex min-h-10 items-center gap-2">
               {isSmallScreen && isMenuSelected && currentView.split(":").length === 1 ? (
                 <Button isIconOnly variant="light" onPress={backToMenu}>
-                  <Icon icon="material-symbols:arrow-back" width="20" height="20" />
+                  <ArrowLeft size={20} />
                 </Button>
               ) : currentView.includes(":") ? (
                 <Button isIconOnly variant="light" onPress={backToParent}>
-                  <Icon icon="material-symbols:arrow-back" width="20" height="20" />
+                  <ArrowLeft size={20} />
                 </Button>
               ) : isSmallScreen && !showSidebar ? (
                 <Button isIconOnly variant="light" onPress={() => setShowSidebar(true)}>
-                  <Icon icon="material-symbols:menu" width="20" height="20" />
+                  <Menu size={20} />
                 </Button>
               ) : (
                 <Button isIconOnly variant="light">
-                  <Icon icon={viewInfo.icon} width="20" height="20" />
+                  {viewInfo.icon === "settings" && <Settings size={20} />}
+                  {viewInfo.icon === "user" && <User size={20} />}
+                  {viewInfo.icon === "bell" && <Bell size={20} />}
+                  {viewInfo.icon === "monitor" && <Monitor size={20} />}
+                  {viewInfo.icon === "soundwave" && <AudioLines size={20} />}
+                  {viewInfo.icon === "folder" && <Folder size={20} />}
+                  {viewInfo.icon === "lock" && <Lock size={20} />}
                 </Button>
               )}
               <h2 className="text-xl font-bold">{viewInfo.title}</h2>
@@ -832,7 +844,21 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                       size={isSmallScreen ? "lg" : "md"}
                       fullWidth
                       className="justify-start"
-                      startContent={<Icon icon={item.icon} width="20" height="20" />}
+                      startContent={
+                        item.icon === "user" ? (
+                          <User size={20} />
+                        ) : item.icon === "bell" ? (
+                          <Bell size={20} />
+                        ) : item.icon === "monitor" ? (
+                          <Monitor size={20} />
+                        ) : item.icon === "soundwave" ? (
+                          <AudioLines size={20} />
+                        ) : item.icon === "folder" ? (
+                          <Folder size={20} />
+                        ) : item.icon === "lock" ? (
+                          <Lock size={20} />
+                        ) : null
+                      }
                       onPress={() => navigateTo(item.id)}
                     >
                       {item.label}

@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { Button } from "@heroui/button";
 import { Input, Textarea } from "@heroui/input";
@@ -6,7 +8,7 @@ import { Select, SelectItem } from "@heroui/select";
 import { Spinner } from "@heroui/spinner";
 import { cn } from "@heroui/theme";
 import { addToast } from "@heroui/toast";
-import { Icon } from "@iconify-icon/react";
+import { X } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import { categoryService, incidentService } from "@/services";
 import { CreateIncidentForm, Incident, IncidentSeverities } from "@/services/incident-service";
@@ -87,7 +89,7 @@ export function AddEditIncidentModal({
     };
 
     loadIncident();
-  }, [isOpen, incidentId, form.reset, onClose]);
+  }, [isOpen, incidentId, form, onClose]);
 
   const handleFormSubmit = form.handleSubmit(async (data) => {
     setIsSubmitting(true);
@@ -137,7 +139,7 @@ export function AddEditIncidentModal({
           onPress={onClose}
           className="rounded-full text-foreground-500"
         >
-          <Icon icon="material-symbols:close-rounded" width="20" height="20" />
+          <X size={20} />
         </Button>
       }
       classNames={{

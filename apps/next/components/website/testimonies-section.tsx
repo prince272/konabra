@@ -4,7 +4,7 @@ import React, { useRef, useState } from "react";
 import { Avatar } from "@heroui/avatar";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
-import { Icon } from "@iconify-icon/react";
+import { ArrowLeft, ArrowRight, MessageCircle } from "lucide-react";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import { Swiper, SwiperRef, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -151,7 +151,7 @@ export const TestimonialsSection = () => {
                     <div
                       className={`${testimonial.color} ${testimonial.bgColor} mb-6 flex h-12 w-12 items-center justify-center rounded-lg`}
                     >
-                      <Icon icon="solar:chat-round-dots-broken" width="20" height="20" />
+                      <MessageCircle size={20} />
                     </div>
                     <p className="mb-6 line-clamp-5">{testimonial.content}</p>
                     <div className="mt-auto flex items-center gap-4">
@@ -177,7 +177,7 @@ export const TestimonialsSection = () => {
               aria-label="Previous testimonial"
               onPress={() => swiperRef.current?.swiper.slidePrev()}
             >
-              <Icon icon="solar:arrow-left-broken" width="20" height="20" />
+              <ArrowLeft size={20} />
             </Button>
             <Button
               isIconOnly
@@ -186,7 +186,7 @@ export const TestimonialsSection = () => {
               aria-label="Next testimonial"
               onPress={() => swiperRef.current?.swiper.slideNext()}
             >
-              <Icon icon="solar:arrow-right-broken" width="20" height="20" />
+              <ArrowRight size={20} />
             </Button>
           </div>
         </div>

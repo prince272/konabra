@@ -2,8 +2,8 @@
 
 import React, { memo, useState } from "react";
 import { Chip } from "@heroui/chip";
-import { Icon } from "@iconify-icon/react";
 import { motion } from "framer-motion";
+import { Building, Clock, FilePlus, Users } from "lucide-react";
 import CountUp from "react-countup";
 import { InView } from "react-intersection-observer";
 
@@ -44,7 +44,7 @@ export const StatsSection = () => {
       value: 10000,
       displayValue: "10K+",
       label: "Active Users",
-      icon: "solar:users-group-rounded-broken",
+      icon: Users,
       description: "Community members contributing to safer roads",
       color: "text-primary",
       bgColor: "bg-primary/15 dark:bg-primary/20",
@@ -55,7 +55,7 @@ export const StatsSection = () => {
       value: 5000,
       displayValue: "5K+",
       label: "Daily Reports",
-      icon: "solar:document-add-broken",
+      icon: FilePlus,
       description: "Road incidents reported through our platform daily",
       color: "text-success-500",
       bgColor: "bg-success-500/15 dark:bg-success-500/20",
@@ -66,7 +66,7 @@ export const StatsSection = () => {
       value: 200,
       displayValue: "200+",
       label: "Communities Covered",
-      icon: "solar:buildings-3-broken",
+      icon: Building,
       description: "Towns and neighborhoods across Ghana benefiting from Konabra",
       color: "text-primary",
       bgColor: "bg-primary/15 dark:bg-primary/20",
@@ -77,7 +77,7 @@ export const StatsSection = () => {
       value: 30,
       displayValue: "30%",
       label: "Faster Response",
-      icon: "solar:clock-circle-broken",
+      icon: Clock,
       description: "Reduction in emergency response time to reported incidents",
       color: "text-success-500",
       bgColor: "bg-success-500/15 dark:bg-success-500/20",
@@ -157,7 +157,7 @@ export const StatsSection = () => {
                       <div
                         className={`${stat.color} ${stat.bgColor} mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl`}
                       >
-                        <Icon icon={stat.icon} width="28" height="28" />
+                        <stat.icon size={28} />
                       </div>
                       <h3 className="mb-3 font-montserrat text-3xl font-bold sm:text-4xl">
                         {inView ? (

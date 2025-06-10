@@ -6,7 +6,6 @@ import { Input } from "@heroui/input";
 import { Listbox, ListboxItem } from "@heroui/listbox";
 import { Modal, ModalBody, ModalContent, ModalHeader } from "@heroui/modal";
 import { cn } from "@heroui/theme";
-import { Icon } from "@iconify-icon/react";
 import countries from "i18n-iso-countries";
 import {
   CountryCode,
@@ -14,6 +13,7 @@ import {
   getCountryCallingCode,
   parsePhoneNumberFromString
 } from "libphonenumber-js";
+import { X } from "lucide-react";
 import { maybePhoneNumber } from "@/utils";
 import { useBreakpoint, useMeasure } from "@/hooks";
 
@@ -39,7 +39,12 @@ const InputPhone = React.forwardRef<HTMLInputElement, InputPhoneProps>(
     const allCountries: Country[] = useMemo(() => {
       return getCountries()
         .map((code) => {
-          const name = countries.getName(code, "en") || code;
+          const name = countries.getName(code, "en");
+
+          if (!name) {
+            return null; // Skip invalid country codes
+          }
+
           let callingCode = "";
           try {
             callingCode = `+${getCountryCallingCode(code)}`;
@@ -132,10 +137,12 @@ const InputPhone = React.forwardRef<HTMLInputElement, InputPhoneProps>(
         onPress={() => !isDisabled && setIsModalOpen(true)}
         disabled={isDisabled}
         startContent={
-          <Icon
-            icon={`circle-flags:${selectedCountry.code.toLowerCase()}`}
-            width="20"
-            height="20"
+          <img
+            src={`https://flagcdn.com/w20/${selectedCountry.code.toLowerCase()}.png`}
+            alt={`${selectedCountry.name} flag`}
+            width={20}
+            height={15}
+            className="rounded-sm"
           />
         }
       >
@@ -189,7 +196,7 @@ const InputPhone = React.forwardRef<HTMLInputElement, InputPhoneProps>(
                 className="rounded-full text-foreground-500"
                 isDisabled={isDisabled}
               >
-                <Icon icon="material-symbols:close-rounded" width="20" height="20" />
+                <X size={20} />
               </Button>
             }
             classNames={{ wrapper: cn(isSmallScreen && "h-full") }}
@@ -230,10 +237,12 @@ const InputPhone = React.forwardRef<HTMLInputElement, InputPhoneProps>(
                       <ListboxItem
                         key={country.code}
                         startContent={
-                          <Icon
-                            icon={`flag:${country.code.toLowerCase()}-4x3`}
+                          <img
+                            src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`}
+                            alt={`${country.name} flag`}
                             width={26}
                             height={20}
+                            className="rounded-sm"
                           />
                         }
                         endContent={<span>{country.callingCode}</span>}

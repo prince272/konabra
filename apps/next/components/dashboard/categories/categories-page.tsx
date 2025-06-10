@@ -2,21 +2,21 @@
 
 import React, { useCallback, useState } from "react";
 import NextLink from "next/link";
+import { useRouter } from "@bprogress/next";
 import { Button, ButtonGroup } from "@heroui/button";
 import { Card, CardBody, CardFooter, CardHeader } from "@heroui/card";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 import { Input } from "@heroui/input";
+import { Pagination } from "@heroui/pagination";
 import { Tooltip } from "@heroui/tooltip";
-import { Icon } from "@iconify-icon/react";
 import _ from "lodash";
+import { ChevronDown, PlusCircle, Search, SortAsc, SortDesc } from "lucide-react";
 import { categoryService, Problem } from "@/services";
 import { Category, CategoryPaginatedFilter } from "@/services/category-service";
 import { useAsyncMemo, useDebouncedCallback } from "@/hooks";
 import { AddEditCategoryModalRouter } from "./add-edit-category-modal";
 import CategoriesTable from "./categories-table";
 import { DeleteCategoryModalRouter } from "./delete-category-modal";
-import { Pagination } from "@heroui/pagination";
-import { useRouter } from "@bprogress/next";
 
 type CategoryPageResult = {
   items: Category[];
@@ -136,7 +136,7 @@ const CategoriesPage = () => {
           <Button
             color="primary"
             radius="full"
-            startContent={<Icon icon="solar:add-circle-broken" width="20" height="20" />}
+            startContent={<PlusCircle size={20} />}
             as={NextLink}
             href="#add-category"
           >
@@ -155,7 +155,7 @@ const CategoriesPage = () => {
                     updateDebouncedSearch(value);
                   }}
                   onClear={clearSearch}
-                  startContent={<Icon icon="solar:magnifer-broken" />}
+                  startContent={<Search size={20} />}
                   size="sm"
                   isClearable
                 />
@@ -163,22 +163,12 @@ const CategoriesPage = () => {
               <ButtonGroup size="sm" variant="flat">
                 <Tooltip content={`Sort ${filter.order === "asc" ? "descending" : "ascending"}`}>
                   <Button isIconOnly onPress={() => toggleOrder()}>
-                    {filter.order === "asc" ? (
-                      <Icon icon="solar:sort-from-top-to-bottom-broken" width="20" height="20" />
-                    ) : (
-                      <Icon icon="solar:sort-from-bottom-to-top-broken" width="20" height="20" />
-                    )}
+                    {filter.order === "asc" ? <SortAsc size={20} /> : <SortDesc size={20} />}
                   </Button>
                 </Tooltip>
                 <Dropdown>
                   <DropdownTrigger>
-                    <Button
-                      variant="flat"
-                      size="sm"
-                      endContent={
-                        <Icon icon="material-symbols:arrow-drop-down" width="20" height="20" />
-                      }
-                    >
+                    <Button variant="flat" size="sm" endContent={<ChevronDown size={20} />}>
                       {CategorySortFields.find((f) => f.value === filter.sort)?.label || "Sort"}
                     </Button>
                   </DropdownTrigger>

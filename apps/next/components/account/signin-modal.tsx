@@ -3,15 +3,16 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import NextLink from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "@bprogress/next";
 import { Button } from "@heroui/button";
 import { Divider } from "@heroui/divider";
 import { Input } from "@heroui/input";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { cn } from "@heroui/theme";
 import { addToast } from "@heroui/toast";
-import { Icon } from "@iconify-icon/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cloneDeep } from "lodash";
+import { ArrowLeft, User, X } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import { identityService } from "@/services";
 import { SignInForm } from "@/services/identity-service";
@@ -19,7 +20,6 @@ import { useAccountState } from "@/states";
 import { useBreakpoint } from "@/hooks";
 import { useModalRouter } from "@/components/common/modals";
 import { InputPhone } from "../common/input-phone";
-import { useRouter } from "@bprogress/next";
 
 export default function SignInModal({
   isOpen,
@@ -119,7 +119,7 @@ export default function SignInModal({
           onPress={onClose}
           className="rounded-full text-foreground-500"
         >
-          <Icon icon="material-symbols:close-rounded" width="20" height="20" />
+          <X size={20} />
         </Button>
       }
       classNames={{
@@ -137,7 +137,7 @@ export default function SignInModal({
                 onPress={handlePrev}
                 className="rounded-full text-foreground-500"
               >
-                <Icon icon="material-symbols:arrow-back-rounded" width="20" height="20" />
+                <ArrowLeft size={20} />
               </Button>
             )}
           </div>
@@ -184,7 +184,7 @@ export default function SignInModal({
                     color="primary"
                     radius="full"
                     fullWidth
-                    startContent={<Icon icon="solar:user-broken" width="20" height="20" />}
+                    startContent={<User size={20} />}
                     onPress={handleNext}
                   >
                     Sign in with Email or Phone
@@ -199,14 +199,14 @@ export default function SignInModal({
                       className="dark dark:light"
                       variant="solid"
                       radius="full"
-                      startContent={<Icon icon="flat-color-icons:google" width="20" height="20" />}
+                      // startContent={<Google size={20} />}
                     >
                       Continue with Google
                     </Button>
                     <Button
                       variant="flat"
                       radius="full"
-                      startContent={<Icon icon="logos:facebook" width="20" height="20" />}
+                      //startContent={<Facebook size={20} />}
                     >
                       Continue with Facebook
                     </Button>

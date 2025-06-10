@@ -3,8 +3,8 @@
 import React from "react";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
-import { Icon } from "@iconify-icon/react";
 import { motion } from "framer-motion";
+import { AlertTriangle, ArrowRight, Bell, Clock, Map, MapPin } from "lucide-react";
 import { Globe } from "./globe";
 
 export const AlertsSection = () => {
@@ -42,12 +42,7 @@ export const AlertsSection = () => {
                 viewport={{ once: true }}
               >
                 <div className="rounded-full bg-warning/20 p-2 dark:bg-warning/10">
-                  <Icon
-                    icon="solar:danger-triangle-broken"
-                    className="text-warning"
-                    width="20"
-                    height="20"
-                  />
+                  <AlertTriangle size={20} className="text-warning" />
                 </div>
                 <div>
                   <h4 className="text-sm font-semibold">Accident Alert</h4>
@@ -65,12 +60,7 @@ export const AlertsSection = () => {
                 viewport={{ once: true }}
               >
                 <div className="rounded-full bg-success-500/20 p-2 dark:bg-success-500/10">
-                  <Icon
-                    icon="solar:point-on-map-broken"
-                    className="text-success-500"
-                    width="20"
-                    height="20"
-                  />
+                  <MapPin size={20} className="text-success-500" />
                 </div>
                 <div>
                   <h4 className="text-sm font-semibold">Traffic Update</h4>
@@ -92,7 +82,7 @@ export const AlertsSection = () => {
                 viewport={{ once: true, margin: "-100px" }}
               >
                 <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary/25 text-primary dark:bg-primary/15 dark:ring-1 dark:ring-primary/30">
-                  <Icon icon="solar:bell-broken" width="20" height="20" />
+                  <Bell size={20} />
                 </div>
                 <div>
                   <h3 className="mb-2 font-montserrat text-xl font-semibold">
@@ -113,7 +103,7 @@ export const AlertsSection = () => {
                 viewport={{ once: true, margin: "-100px" }}
               >
                 <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-success-500/25 text-success-500 dark:bg-success-500/15 dark:ring-1 dark:ring-success-500/30">
-                  <Icon icon="solar:map-point-search-broken" width="20" height="20" />
+                  <Map size={20} />
                 </div>
                 <div>
                   <h3 className="mb-2 font-montserrat text-xl font-semibold">Interactive Map</h3>
@@ -132,7 +122,7 @@ export const AlertsSection = () => {
                 viewport={{ once: true, margin: "-100px" }}
               >
                 <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary/25 text-primary dark:bg-primary/15 dark:ring-1 dark:ring-primary/30">
-                  <Icon icon="solar:clock-circle-broken" width="20" height="20" />
+                  <Clock size={20} />
                 </div>
                 <div>
                   <h3 className="mb-2 font-montserrat text-xl font-semibold">Real-time Updates</h3>
@@ -147,7 +137,7 @@ export const AlertsSection = () => {
                   color="primary"
                   variant="solid"
                   radius="full"
-                  endContent={<Icon icon="solar:arrow-right-broken" width="20" height="20" />}
+                  endContent={<ArrowRight size={20} />}
                 >
                   Learn More About Alerts
                 </Button>

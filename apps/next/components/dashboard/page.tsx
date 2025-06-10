@@ -7,10 +7,10 @@ import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/d
 import { Popover, PopoverContent, PopoverTrigger } from "@heroui/popover";
 import { CalendarDate, getLocalTimeZone, isSameDay, now, today } from "@internationalized/date";
 import { AlertCircle, AlertTriangle, Calendar as CalendarIcon, CheckCircle } from "lucide-react";
+import { calendarDateToISOString } from "@/utils";
 import { incidentService } from "@/services";
 import { IncidentFilter, IncidentStatistics } from "@/services/incident-service";
 import { StatCard } from "./stats-card";
-import { calendarDateToISOString } from "@/utils";
 
 export const DashboardPage: React.FC = () => {
   const [filter, setFilter] = useState<Partial<IncidentFilter>>({
@@ -142,7 +142,9 @@ export const DashboardPage: React.FC = () => {
             <div>
               <Dropdown>
                 <DropdownTrigger>
-                  <Button size="sm" startContent={<CalendarIcon size={20} />}>{formatDateRange()}</Button>
+                  <Button size="sm" startContent={<CalendarIcon size={20} />}>
+                    {formatDateRange()}
+                  </Button>
                 </DropdownTrigger>
                 <DropdownMenu
                   aria-label="Date Range Filter"

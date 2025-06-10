@@ -7,7 +7,16 @@ import { Button } from "@heroui/button";
 import { Drawer, DrawerBody, DrawerContent, DrawerHeader } from "@heroui/drawer";
 import { Navbar, NavbarContent, NavbarItem } from "@heroui/navbar";
 import { Tooltip } from "@heroui/tooltip";
-import { Icon } from "@iconify-icon/react";
+import {
+  AlertTriangle,
+  Bell,
+  Menu,
+  Search,
+  Sidebar as SidebarIcon,
+  TrafficCone,
+  UserCheck,
+  X
+} from "lucide-react";
 import { stringifyPath } from "@/utils";
 import { categoryService } from "@/services";
 import { useAccountState } from "@/states";
@@ -84,7 +93,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
         <div
           className={`${isSidebarCollapsed ? "w-16" : "w-64"} h-screen flex-shrink-0 transition-all duration-300`}
         >
-          <Sidebar collapsed={isSidebarCollapsed} />
+                  <Sidebar collapsed={isSidebarCollapsed} />
         </div>
       )}
 
@@ -93,7 +102,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
         <Drawer isOpen={isSidebarOpen} onOpenChange={setIsSidebarOpen} placement="left">
           <DrawerContent>
             <DrawerBody className="p-0">
-              <Sidebar />
+                          <Sidebar />
             </DrawerBody>
           </DrawerContent>
         </Drawer>
@@ -112,7 +121,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                   onPress={() => setIsSidebarOpen(true)}
                   aria-label="Open menu"
                 >
-                  <Icon icon="solar:hamburger-menu-broken" width="20" height="20" />
+                  <Menu size={20} />
                 </Button>
               </NavbarItem>
             ) : (
@@ -123,15 +132,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                   onPress={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
                   aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
                 >
-                  <Icon
-                    icon={
-                      isSidebarCollapsed
-                        ? "solar:sidebar-arrow-right-broken"
-                        : "solar:sidebar-arrow-left-broken"
-                    }
-                    width="20"
-                    height="20"
-                  />
+                  <SidebarIcon size={20} />
                 </Button>
               </NavbarItem>
             )}
@@ -142,7 +143,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
               <div className="flex items-center gap-2">
                 <Tooltip content="Search">
                   <Button isIconOnly variant="light" aria-label="Search">
-                    <Icon icon="solar:magnifer-broken" width="20" height="20" />
+                    <Search size={20} />
                   </Button>
                 </Tooltip>
 
@@ -154,7 +155,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                     onPress={() => setIsNotificationsOpen(true)}
                   >
                     <div className="relative">
-                      <Icon icon="solar:bell-broken" width="20" height="20" />
+                      <Bell size={20} />
                       <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-danger text-[10px] text-white">
                         3
                       </span>
@@ -182,7 +183,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                   variant="light"
                   onPress={() => setIsNotificationsOpen(false)}
                 >
-                  <Icon icon="solar:close-circle-broken" width="20" height="20" />
+                  <X size={20} />
                 </Button>
               </div>
             </DrawerHeader>
@@ -191,12 +192,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                 <div className="rounded-medium bg-content2 p-3">
                   <div className="flex items-start gap-3">
                     <div className="rounded-full bg-primary-100 p-2 dark:bg-primary-900">
-                      <Icon
-                        icon="solar:danger-triangle-broken"
-                        className="text-primary"
-                        width="20"
-                        height="20"
-                      />
+                      <AlertTriangle size={20} className="text-primary" />
                     </div>
                     <div>
                       <p className="font-medium">New accident reported</p>
@@ -211,12 +207,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                 <div className="rounded-medium bg-content2 p-3">
                   <div className="flex items-start gap-3">
                     <div className="rounded-full bg-warning-100 p-2 dark:bg-warning-900">
-                      <Icon
-                        icon="solar:traffic-cone-broken"
-                        className="text-warning"
-                        width="20"
-                        height="20"
-                      />
+                      <TrafficCone size={20} className="text-warning" />
                     </div>
                     <div>
                       <p className="font-medium">Traffic jam alert</p>
@@ -231,12 +222,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                 <div className="rounded-medium bg-content2 p-3">
                   <div className="flex items-start gap-3">
                     <div className="rounded-full bg-success-100 p-2 dark:bg-success-900">
-                      <Icon
-                        icon="solar:user-check-broken"
-                        className="text-success"
-                        width="20"
-                        height="20"
-                      />
+                      <UserCheck size={20} className="text-success" />
                     </div>
                     <div>
                       <p className="font-medium">New user registered</p>

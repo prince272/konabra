@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { Button } from "@heroui/button";
-import { Icon } from "@iconify-icon/react";
-import { motion } from "framer-motion";
-import { CanvasMap } from "./canvas-map";
 import NextLink from "next/link";
+import { Button } from "@heroui/button";
+import { motion } from "framer-motion";
+import { AlertCircle, ArrowRight, Compass, MapPin, ShieldCheck, Smartphone } from "lucide-react";
+import { CanvasMap } from "./canvas-map";
 
 export const HeroSection = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -74,7 +74,7 @@ export const HeroSection = () => {
         }}
       />
 
-      <div className="container relative mx-auto px-6 md:px-8">
+      <div className="mx-auto container relative px-6 md:px-8">
         <div className="flex flex-col items-center gap-12 lg:flex-row lg:gap-16">
           <motion.div
             className="flex-1 text-center lg:text-left"
@@ -130,7 +130,7 @@ export const HeroSection = () => {
                 color="primary"
                 radius="full"
                 className="font-medium"
-                endContent={<Icon icon="solar:arrow-right-broken" width="20" height="20" />}
+                endContent={<ArrowRight size={20} />}
                 as={NextLink}
                 href="/dashboard"
               >
@@ -143,7 +143,7 @@ export const HeroSection = () => {
                 color="primary"
                 radius="full"
                 className="font-medium"
-                startContent={<Icon icon="solar:smartphone-broken" width="20" height="20" />}
+                startContent={<Smartphone size={20} />}
               >
                 Mobile App
               </Button>
@@ -155,12 +155,7 @@ export const HeroSection = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.7 }}
             >
-              <Icon
-                icon="solar:shield-check-broken"
-                width="20"
-                height="20"
-                className="text-primary"
-              />
+              <ShieldCheck size={20} className="text-primary" />
               <span>Trusted by over 10,000 Ghanaians</span>
             </motion.div>
           </motion.div>
@@ -184,12 +179,7 @@ export const HeroSection = () => {
                     transition={{ delay: 0.8, duration: 0.5 }}
                   >
                     <div className="rounded-md bg-primary/20 p-1.5">
-                      <Icon
-                        icon="solar:alarm-broken"
-                        className="text-primary"
-                        width="20"
-                        height="20"
-                      />
+                      <AlertCircle size={20} className="text-primary" />
                     </div>
                     <span className="text-xs font-medium dark:text-foreground-400">
                       New incident reported
@@ -204,12 +194,7 @@ export const HeroSection = () => {
                     transition={{ delay: 1, duration: 0.5 }}
                   >
                     <div className="rounded-md bg-success-500/20 p-1.5">
-                      <Icon
-                        icon="solar:map-point-rotate-broken"
-                        className="text-success-500"
-                        width="20"
-                        height="20"
-                      />
+                      <MapPin size={20} className="text-success-500" />
                     </div>
                     <span className="text-xs font-medium dark:text-foreground-400">
                       5 incidents nearby
@@ -224,12 +209,7 @@ export const HeroSection = () => {
                     transition={{ delay: 0.6, duration: 0.5 }}
                   >
                     <div className="rounded-full bg-primary/20 p-2">
-                      <Icon
-                        icon="solar:compass-broken"
-                        className="text-primary"
-                        width="20"
-                        height="20"
-                      />
+                      <Compass size={20} className="text-primary" />
                     </div>
                     <div>
                       <h4 className="text-sm font-semibold">Traffic Alert</h4>

@@ -7,7 +7,7 @@ import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@herou
 import { Spinner } from "@heroui/spinner";
 import { cn } from "@heroui/theme";
 import { addToast } from "@heroui/toast";
-import { Icon } from "@iconify-icon/react";
+import { X } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import { categoryService } from "@/services";
 import { Category, CreateCategoryForm } from "@/services/category-service";
@@ -66,7 +66,7 @@ function AddEditCategoryModal({
     };
 
     loadCategory();
-  }, [isOpen, categoryId, form.reset, onClose]);
+  }, [isOpen, categoryId, form, onClose]);
 
   const handleFormSubmit = form.handleSubmit(async (data) => {
     setIsSubmitting(true);
@@ -121,7 +121,7 @@ function AddEditCategoryModal({
           onPress={onClose}
           className="rounded-full text-foreground-500"
         >
-          <Icon icon="material-symbols:close-rounded" width="20" height="20" />
+          <X size={20} />
         </Button>
       }
       classNames={{

@@ -2,15 +2,15 @@
 
 import React, { useState } from "react";
 import { Chip } from "@heroui/chip";
-import { Icon } from "@iconify-icon/react";
 import { motion } from "framer-motion";
+import { BarChart2, Bell, Map, MapPin, Smartphone, Users } from "lucide-react";
 
 export const FeaturesSection = () => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const features = [
     {
-      icon: "solar:map-point-broken",
+      icon: MapPin,
       title: "Report Road Incidents",
       description:
         "Easily report accidents, police barriers, traffic jams, potholes, and broken streetlights in real-time.",
@@ -19,7 +19,7 @@ export const FeaturesSection = () => {
       chipColor: "primary"
     },
     {
-      icon: "solar:map-broken",
+      icon: Map,
       title: "Intuitive Map Interface",
       description:
         "View current road conditions through an easy-to-use map that shows all reported incidents.",
@@ -28,7 +28,7 @@ export const FeaturesSection = () => {
       chipColor: "success"
     },
     {
-      icon: "solar:bell-broken",
+      icon: Bell,
       title: "Real-time Alerts",
       description:
         "Get instant notifications about incidents and congestion on your planned routes.",
@@ -37,7 +37,7 @@ export const FeaturesSection = () => {
       chipColor: "primary"
     },
     {
-      icon: "solar:chart-broken",
+      icon: BarChart2,
       title: "Smart Dashboards",
       description:
         "Help authorities analyze trends, hotspots, and response effectiveness through data analytics.",
@@ -46,7 +46,7 @@ export const FeaturesSection = () => {
       chipColor: "success"
     },
     {
-      icon: "solar:smartphone-broken",
+      icon: Smartphone,
       title: "Mobile App",
       description:
         "Access Konabra on the go with our mobile application, making it easy to stay informed while traveling.",
@@ -55,7 +55,7 @@ export const FeaturesSection = () => {
       chipColor: "primary"
     },
     {
-      icon: "solar:users-group-rounded-broken",
+      icon: Users,
       title: "Community-Powered",
       description:
         "Join a network of citizens actively contributing to making roads safer for everyone.",
@@ -115,50 +115,53 @@ export const FeaturesSection = () => {
           whileInView="show"
           viewport={{ once: true, margin: "-50px" }}
         >
-          {features.map((feature, index) => (
-            <motion.div
-              key={index}
-              variants={item}
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
-            >
-              <div
-                className="h-full rounded-lg bg-white/95 backdrop-blur-md transition-all duration-300 dark:bg-black/70"
-                style={{
-                  transform: hoveredIndex === index ? "translateY(-8px)" : "translateY(0)",
-                  boxShadow:
-                    hoveredIndex === index
-                      ? "0 10px 25px -5px rgba(0,0,0,0.15), 0 8px 10px -6px rgba(0,0,0,0.1)"
-                      : "0 4px 10px -2px rgba(0,0,0,0.05)"
-                }}
+          {features.map((feature, index) => {
+            const IconComponent = feature.icon;
+            return (
+              <motion.div
+                key={index}
+                variants={item}
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
               >
-                <div className="p-6">
-                  <div
-                    className={`${feature.color} ${feature.bgColor} mb-4 flex h-12 w-12 items-center justify-center rounded-lg`}
-                  >
-                    <Icon icon={feature.icon} width="20" height="20" />
-                  </div>
-                  <h3 className="mb-2 font-montserrat text-xl font-semibold">{feature.title}</h3>
-                  <p className="text-foreground-700 dark:text-foreground-500">
-                    {feature.description}
-                  </p>
-
-                  <div className="mt-4 flex items-center gap-2">
-                    <Chip
-                      size="sm"
-                      color={feature.chipColor as any}
-                      variant="flat"
-                      radius="sm"
-                      className="transition-opacity duration-500 ease-in-out"
-                      style={{ opacity: hoveredIndex === index ? 1 : 0 }}
+                <div
+                  className="h-full rounded-lg bg-white/95 backdrop-blur-md transition-all duration-300 dark:bg-black/70"
+                  style={{
+                    transform: hoveredIndex === index ? "translateY(-8px)" : "translateY(0)",
+                    boxShadow:
+                      hoveredIndex === index
+                        ? "0 10px 25px -5px rgba(0,0,0,0.15), 0 8px 10px -6px rgba(0,0,0,0.1)"
+                        : "0 4px 10px -2px rgba(0,0,0,0.05)"
+                  }}
+                >
+                  <div className="p-6">
+                    <div
+                      className={`${feature.color} ${feature.bgColor} mb-4 flex h-12 w-12 items-center justify-center rounded-lg`}
                     >
-                      Learn more
-                    </Chip>
+                      <IconComponent size={20} />
+                    </div>
+                    <h3 className="mb-2 font-montserrat text-xl font-semibold">{feature.title}</h3>
+                    <p className="text-foreground-700 dark:text-foreground-500">
+                      {feature.description}
+                    </p>
+
+                    <div className="mt-4 flex items-center gap-2">
+                      <Chip
+                        size="sm"
+                        color={feature.chipColor as any}
+                        variant="flat"
+                        radius="sm"
+                        className="transition-opacity duration-500 ease-in-out"
+                        style={{ opacity: hoveredIndex === index ? 1 : 0 }}
+                      >
+                        Learn more
+                      </Chip>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
         </motion.div>
       </div>
     </section>
