@@ -47,7 +47,7 @@ export const DashboardPage: React.FC = () => {
   // Fetch Incident Statistics
   useEffect(() => {
     const fetchIncidentStats = async () => {
-      const [data, problem] = await incidentService.getIncidentsStatistics(filter);
+      const [data, problem] = await incidentService.getIncidentStatistics(filter);
       if (!problem) setStats(data);
       else console.error("Incident stats error:", problem);
     };
@@ -58,7 +58,7 @@ export const DashboardPage: React.FC = () => {
   useEffect(() => {
     const fetchCategoryStats = async () => {
       setIsLoadingCategories(true);
-      const [data, problem] = await categoryService.getCategoriesStatistics(filter);
+      const [data, problem] = await categoryService.getCategoryStatistics(filter);
       if (!problem) setCategoryStats(data);
       else console.error("Category stats error:", problem);
       setIsLoadingCategories(false);
@@ -70,7 +70,7 @@ export const DashboardPage: React.FC = () => {
   useEffect(() => {
     const fetchUserStats = async () => {
       setIsLoadingUsers(true);
-      const [data, problem] = await identityService.getUsersStatistics(filter);
+      const [data, problem] = await identityService.getUserStatistics(filter);
       if (!problem) setUserStats(data);
       else console.error("User stats error:", problem);
       setIsLoadingUsers(false);

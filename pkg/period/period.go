@@ -17,7 +17,7 @@ const (
 
 type DateRange struct {
 	StartDate time.Time `json:"startDate" form:"startDate" time_format:"2006-01-02T15:04:05Z07:00"`
-	EndDate   time.Time `json:"endEnd" form:"endDate" time_format:"2006-01-02T15:04:05Z07:00"`
+	EndDate   time.Time `json:"endDate" form:"endDate" time_format:"2006-01-02T15:04:05Z07:00"`
 }
 
 func (dr *DateRange) Clone() DateRange {
@@ -72,38 +72,38 @@ func GetUnit(start, end time.Time) Unit {
 	return UnitYear
 }
 
-// GetRanges generates time points based on the specified unit
-func GetRanges(start, end time.Time, unit Unit) []time.Time {
-	var ranges []time.Time
+// GetPeriods generates time points based on the specified unit
+func GetPeriods(start, end time.Time, unit Unit) []time.Time {
+	var periods []time.Time
 	start = start.UTC()
 	end = end.UTC()
 
 	switch unit {
 	case UnitTime:
 		for t := start; !t.After(end); t = t.Add(time.Hour) {
-			ranges = append(ranges, t)
+			periods = append(periods, t)
 		}
 	case UnitDay, UnitDate:
 		start = start.Truncate(24 * time.Hour)
 		end = end.Truncate(24 * time.Hour)
 		for t := start; !t.After(end); t = t.AddDate(0, 0, 1) {
-			ranges = append(ranges, t)
+			periods = append(periods, t)
 		}
 	case UnitMonth:
 		start = time.Date(start.Year(), start.Month(), 1, 0, 0, 0, 0, time.UTC)
 		end = time.Date(end.Year(), end.Month(), 1, 0, 0, 0, 0, time.UTC)
 		for t := start; !t.After(end); t = t.AddDate(0, 1, 0) {
-			ranges = append(ranges, t)
+			periods = append(periods, t)
 		}
 	case UnitYear:
 		start = time.Date(start.Year(), 1, 1, 0, 0, 0, 0, time.UTC)
 		end = time.Date(end.Year(), 1, 1, 0, 0, 0, 0, time.UTC)
 		for t := start; !t.After(end); t = t.AddDate(1, 0, 0) {
-			ranges = append(ranges, t)
+			periods = append(periods, t)
 		}
 	}
 
-	return ranges
+	return periods
 }
 
 // GetFormat returns formatted string for the time unit

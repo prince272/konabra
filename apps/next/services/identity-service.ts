@@ -309,7 +309,7 @@ export class IdentityService {
     }
   }
 
-  public async getUsersStatistics(
+  public async getUserStatistics(
     filter: UserFilter
   ): Promise<readonly [UserStatistics, Problem?]> {
     try {

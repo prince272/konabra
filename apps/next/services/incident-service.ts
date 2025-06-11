@@ -132,7 +132,7 @@ export class IncidentService {
     }
   }
 
-  public async getIncidentsStatistics(
+  public async getIncidentStatistics(
     filter: IncidentFilter
   ): Promise<readonly [IncidentStatistics, Problem?]> {
     try {

@@ -7,30 +7,30 @@ import (
 )
 
 type IncidentActivity struct {
-	Id         string `gorm:"primaryKey"`
-	IncidentId string
-	Incident   *Incident
-	Message    string
-	CreatedAt  time.Time
+	Id         string    `gorm:"primaryKey" json:"id"`
+	IncidentId string    `json:"incidentId"`
+	Incident   *Incident `json:"incident"`
+	Message    string    `json:"message"`
+	CreatedAt  time.Time `json:"createdAt"`
 }
 
 type Incident struct {
-	CategoryId   string
-	Category     *Category `gorm:"foreignKey:CategoryId;"`
-	Id           string    `gorm:"primaryKey"`
-	Summary      string
-	Severity     IncidentSeverity
-	Status       IncidentStatus
-	UpdatedAt    time.Time
-	ReportedAt   time.Time
-	ReportedBy   *User
-	ReportedById string
-	ResolvedAt   *time.Time
-	DeletedAt    gorm.DeletedAt `gorm:"column:deleted_at;index"`
-	Latitude     float64
-	Longitude    float64
-	Location     string
-	Activities   []*IncidentActivity `gorm:"foreignKey:IncidentId;"`
+	CategoryId   string              `json:"categoryId"`
+	Category     *Category           `gorm:"foreignKey:CategoryId;" json:"category"`
+	Id           string              `gorm:"primaryKey" json:"id"`
+	Summary      string              `json:"summary"`
+	Severity     IncidentSeverity    `json:"severity"`
+	Status       IncidentStatus      `json:"status"`
+	UpdatedAt    time.Time           `json:"updatedAt"`
+	ReportedAt   time.Time           `json:"reportedAt"`
+	ReportedBy   *User               `json:"reportedBy"`
+	ReportedById string              `json:"reportedById"`
+	ResolvedAt   *time.Time          `json:"resolvedAt"`
+	DeletedAt    gorm.DeletedAt      `gorm:"column:deleted_at;index" json:"deletedAt"`
+	Latitude     float64             `json:"latitude"`
+	Longitude    float64             `json:"longitude"`
+	Location     string              `json:"location"`
+	Activities   []*IncidentActivity `gorm:"foreignKey:IncidentId;" json:"activities"`
 }
 
 type IncidentStatus string
@@ -45,8 +45,7 @@ const (
 type IncidentSeverity string
 
 const (
-	IncidentSeverityLow      IncidentSeverity = "low"
-	IncidentSeverityMedium   IncidentSeverity = "medium"
-	IncidentSeverityHigh     IncidentSeverity = "high"
-	IncidentSeverityCritical IncidentSeverity = "critical"
+	IncidentSeverityLow    IncidentSeverity = "low"
+	IncidentSeverityMedium IncidentSeverity = "medium"
+	IncidentSeverityHigh   IncidentSeverity = "high"
 )

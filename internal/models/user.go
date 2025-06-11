@@ -8,23 +8,23 @@ import (
 )
 
 type User struct {
-	Id                    string `gorm:"primaryKey"`
-	FirstName             string
-	LastName              string
-	UserName              string
-	Email                 string
-	EmailVerified         bool
-	PhoneNumber           string
-	PhoneNumberVerified   bool
-	SecurityStamp         string
-	PasswordHash          string
-	HasPassword           bool
-	CreatedAt             time.Time
-	UpdatedAt             time.Time
-	LastActiveAt          time.Time
-	LastPasswordChangedAt time.Time
-	UserRoles             []*Role        `gorm:"many2many:user_roles;"`
-	DeletedAt             gorm.DeletedAt `gorm:"column:deleted_at;index"`
+	Id                    string         `gorm:"primaryKey" json:"id"`
+	FirstName             string         `json:"firstName"`
+	LastName              string         `json:"lastName"`
+	UserName              string         `json:"userName"`
+	Email                 string         `json:"email"`
+	EmailVerified         bool           `json:"emailVerified"`
+	PhoneNumber           string         `json:"phoneNumber"`
+	PhoneNumberVerified   bool           `json:"phoneNumberVerified"`
+	SecurityStamp         string         `json:"securityStamp"`
+	PasswordHash          string         `json:"passwordHash"`
+	HasPassword           bool           `json:"hasPassword"`
+	CreatedAt             time.Time      `json:"createdAt"`
+	UpdatedAt             time.Time      `json:"updatedAt"`
+	LastActiveAt          time.Time      `json:"lastActiveAt"`
+	LastPasswordChangedAt time.Time      `json:"lastPasswordChangedAt"`
+	UserRoles             []*Role        `gorm:"many2many:user_roles;" json:"userRoles"`
+	DeletedAt             gorm.DeletedAt `gorm:"column:deleted_at;index" json:"deletedAt"`
 }
 
 func (user *User) FullName() string {

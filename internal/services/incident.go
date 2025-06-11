@@ -179,14 +179,26 @@ func (service *IncidentService) GetIncidentById(id string) (*IncidentModel, *pro
 	return model, nil
 }
 
-func (service *IncidentService) GetIncidentsStatistics(dateRange period.DateRange) (*repositories.IncidentStatistics, *problems.Problem) {
+func (service *IncidentService) GetIncidentStatistics(dateRange period.DateRange) (*repositories.IncidentStatistics, *problems.Problem) {
 	if err := service.validator.ValidateStruct(dateRange); err != nil {
 		return nil, problems.FromError(err)
 	}
-	stats, err := service.incidentRepository.GetIncidentsStatistics(dateRange)
+	stats, err := service.incidentRepository.GetIncidentStatistics(dateRange)
 	if err != nil {
 		service.logger.Error("Failed to get incidents statistics", zap.Error(err))
 		return nil, problems.FromError(err)
 	}
 	return stats, nil
+}
+
+func (service *IncidentService) GetIncidentInsights(dateRange period.DateRange) (*repositories.IncidentInsights, *problems.Problem) {
+	if err := service.validator.ValidateStruct(dateRange); err != nil {
+		return nil, problems.FromError(err)
+	}
+	insights, err := service.incidentRepository.GetIncidentInsights(dateRange)
+	if err != nil {
+		service.logger.Error("Failed to get incidents insights", zap.Error(err))
+		return nil, problems.FromError(err)
+	}
+	return insights, nil
 }

@@ -99,7 +99,7 @@ export class CategoryService {
     }
   }
 
-  public async getCategoriesStatistics(
+  public async getCategoryStatistics(
     filter: CategoryFilter
   ): Promise<readonly [CategoryStatistics, Problem?]> {
     try {

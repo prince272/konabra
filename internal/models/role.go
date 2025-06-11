@@ -7,13 +7,13 @@ import (
 )
 
 type Role struct {
-	Id        string `gorm:"primaryKey"`
-	Name      string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at;index"`
-	Order     int
-	Users     []*User `gorm:"many2many:user_roles;"`
+	Id        string         `gorm:"primaryKey" json:"id"`
+	Name      string         `json:"name"`
+	CreatedAt time.Time      `json:"createdAt"`
+	UpdatedAt time.Time      `json:"updatedAt"`
+	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at;index" json:"deletedAt"`
+	Order     int            `json:"order"`
+	Users     []*User        `gorm:"many2many:user_roles;" json:"users"`
 }
 
 var (

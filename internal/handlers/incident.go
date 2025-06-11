@@ -29,7 +29,8 @@ func NewIncidentHandler(router *gin.Engine, incidentService *services.IncidentSe
 		incidentGroup.POST("", handler.handleWithData(handler.CreateIncident))
 		incidentGroup.PUT("/:id", handler.handleWithData(handler.UpdateIncident))
 		incidentGroup.DELETE("/:id", handler.handle(handler.DeleteIncident))
-		incidentGroup.GET("/statistics", handler.handleWithData(handler.GetIncidentsStatistics))
+		incidentGroup.GET("/statistics", handler.handleWithData(handler.GetIncidentStatistics))
+		incidentGroup.GET("/insights", handler.handleWithData(handler.GetIncidentInsights))
 	}
 
 	return handler
@@ -151,7 +152,7 @@ func (handler *IncidentHandler) GetIncidentById(context *gin.Context) (any, *pro
 	return handler.incidentService.GetIncidentById(id)
 }
 
-// GetIncidentsStatistics retrieves statistics for incidents
+// GetIncidentStatistics retrieves statistics for incidents
 // @Summary Get incidents statistics
 // @Tags Incidents
 // @Accept json
@@ -159,11 +160,28 @@ func (handler *IncidentHandler) GetIncidentById(context *gin.Context) (any, *pro
 // @Param dateRange query period.DateRange false "Date range for statistics"
 // @Security BearerAuth
 // @Router /incidents/statistics [get]
-func (handler *IncidentHandler) GetIncidentsStatistics(context *gin.Context) (any, *problems.Problem) {
+func (handler *IncidentHandler) GetIncidentStatistics(context *gin.Context) (any, *problems.Problem) {
 	var dateRange period.DateRange
 	if err := context.ShouldBindQuery(&dateRange); err != nil {
 		return nil, problems.FromError(err)
 	}
 
-	return handler.incidentService.GetIncidentsStatistics(dateRange)
+	return handler.incidentService.GetIncidentStatistics(dateRange)
+}
+
+// GetIncidentInsights retrieves insights for incidents
+// @Summary Get incidents insights
+// @Tags Incidents
+// @Accept json
+// @Produce json
+// @Param dateRange query period.DateRange false "Date range for insights"
+// @Security BearerAuth
+// @Router /incidents/insights [get]
+func (handler *IncidentHandler) GetIncidentInsights(context *gin.Context) (any, *problems.Problem) {
+	var dateRange period.DateRange
+	if err := context.ShouldBindQuery(&dateRange); err != nil {
+		return nil, problems.FromError(err)
+	}
+
+	return handler.incidentService.GetIncidentInsights(dateRange)
 }

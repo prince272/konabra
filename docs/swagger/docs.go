@@ -613,15 +613,13 @@ const docTemplate = `{
                         "enum": [
                             "low",
                             "medium",
-                            "high",
-                            "critical"
+                            "high"
                         ],
                         "type": "string",
                         "x-enum-varnames": [
                             "IncidentSeverityLow",
                             "IncidentSeverityMedium",
-                            "IncidentSeverityHigh",
-                            "IncidentSeverityCritical"
+                            "IncidentSeverityHigh"
                         ],
                         "name": "severity",
                         "in": "query"
@@ -681,6 +679,38 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/services.CreateIncidentForm"
                         }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/incidents/insights": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Incidents"
+                ],
+                "summary": "Get incidents insights",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "endDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "startDate",
+                        "in": "query"
                     }
                 ],
                 "responses": {}
@@ -1018,14 +1048,12 @@ const docTemplate = `{
             "enum": [
                 "low",
                 "medium",
-                "high",
-                "critical"
+                "high"
             ],
             "x-enum-varnames": [
                 "IncidentSeverityLow",
                 "IncidentSeverityMedium",
-                "IncidentSeverityHigh",
-                "IncidentSeverityCritical"
+                "IncidentSeverityHigh"
             ]
         },
         "models.IncidentStatus": {

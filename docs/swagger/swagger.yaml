@@ -5,13 +5,11 @@ definitions:
     - low
     - medium
     - high
-    - critical
     type: string
     x-enum-varnames:
     - IncidentSeverityLow
     - IncidentSeverityMedium
     - IncidentSeverityHigh
-    - IncidentSeverityCritical
   models.IncidentStatus:
     enum:
     - pending
@@ -607,7 +605,6 @@ paths:
         - low
         - medium
         - high
-        - critical
         in: query
         name: severity
         type: string
@@ -615,7 +612,6 @@ paths:
         - IncidentSeverityLow
         - IncidentSeverityMedium
         - IncidentSeverityHigh
-        - IncidentSeverityCritical
       - in: query
         name: sort
         type: string
@@ -717,6 +713,25 @@ paths:
       security:
       - BearerAuth: []
       summary: Update an existing incident
+      tags:
+      - Incidents
+  /incidents/insights:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - in: query
+        name: endDate
+        type: string
+      - in: query
+        name: startDate
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get incidents insights
       tags:
       - Incidents
   /incidents/statistics:

@@ -18,6 +18,17 @@
       "command": "./scripts/api.sh",
       "args": ["clean"],
       "problemMatcher": []
+    },
+    {
+      "label": "Tagify Go Structs (json camelCase)",
+      "type": "shell",
+      "command": "./scripts/tagify.sh",
+      "args": ["run"],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": []
     }
   ]
 }

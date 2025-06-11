@@ -29,8 +29,8 @@ type IncidentFilter struct {
 
 type IncidentPaginatedFilter struct {
 	IncidentFilter
-	Offset int `json:"offset" form:"offset"`
-	Limit  int `json:"limit" form:"limit"`
+	Offset         int `json:"offset" form:"offset"`
+	Limit          int `json:"limit" form:"limit"`
 }
 
 type IncidentStatistics struct {
@@ -40,11 +40,15 @@ type IncidentStatistics struct {
 }
 
 type IncidentInsights struct {
+	LowSeverityIncidents    []IncidentCountByPeriod `json:"lowSeverityIncidents"`
+	MediumSeverityIncidents []IncidentCountByPeriod `json:"mediumSeverityIncidents"`
+	HighSeverityIncidents   []IncidentCountByPeriod `json:"highSeverityIncidents"`
+	TotalIncidents          int64                   `json:"totalIncidents"`
 }
 
-type IncidentInsightsGroup struct {
-	Period time.Time
-	Count  int64
+type IncidentCountByPeriod struct {
+	Period time.Time `json:"period"`
+	Count  int64     `json:"count"`
 }
 
 func NewIncidentRepository(defaultDB *builds.DefaultDB, logger *zap.Logger) *IncidentRepository {
@@ -153,7 +157,7 @@ func (repository *IncidentRepository) GetPaginatedIncidents(filter IncidentPagin
 	return items, count
 }
 
-func (repository *IncidentRepository) GetIncidentsStatistics(dateRange period.DateRange) (*IncidentStatistics, error) {
+func (repository *IncidentRepository) GetIncidentStatistics(dateRange period.DateRange) (*IncidentStatistics, error) {
 
 	countIncidents := func(startDate, endDate time.Time, status models.IncidentStatus) (int64, error) {
 		query := repository.defaultDB.Model(&models.Incident{})
@@ -211,47 +215,91 @@ func (repository *IncidentRepository) GetIncidentsStatistics(dateRange period.Da
 	}, nil
 }
 
-func (repository *IncidentRepository) GetIncidentsInsights(filter IncidentFilter) (*IncidentInsights, error) {
-	unit := period.GetUnit(filter.StartDate, filter.EndDate)
+func (r *IncidentRepository) GetIncidentInsights(dateRange period.DateRange) (*IncidentInsights, error) {
+	unit := period.GetUnit(dateRange.StartDate, dateRange.EndDate)
+	query := r.defaultDB.Model(&models.Incident{})
 
-	query := repository.defaultDB.Model(&models.Incident{})
-
-	if filter.Search != "" {
-		query = query.Where("LOWER(summary) LIKE LOWER(?)", "%"+filter.Search+"%")
+	if !dateRange.StartDate.IsZero() {
+		query = query.Where("reported_at >= ?", dateRange.StartDate)
+	}
+	if !dateRange.EndDate.IsZero() {
+		query = query.Where("reported_at <= ?", dateRange.EndDate)
 	}
 
-	if filter.Severity != "" {
-		query = query.Where("severity = ?", filter.Severity)
+	var totalCount int64
+	if err := query.Count(&totalCount).Error; err != nil {
+		return nil, fmt.Errorf("failed to count incidents: %w", err)
 	}
 
-	if filter.Status != "" {
-		query = query.Where("status = ?", filter.Status)
+	var lowSeverityCountByPeriod, mediumSeverityCountByPeriod, highSeverityCountByPeriod []IncidentCountByPeriod
+
+	// Define query parameters for different time units with intervals
+	type queryConfig struct {
+		trunc     string
+		interval  int
+		sqlFormat string
 	}
 
-	if !filter.StartDate.IsZero() {
-		query = query.Where("reported_at >= ?", filter.StartDate)
+	configs := map[period.Unit]queryConfig{
+		period.UnitTime:  {"hour", 1, `DATE_TRUNC('hour', reported_at) - (EXTRACT(HOUR FROM reported_at)::int % ? * 1) * INTERVAL '1 hour' AS period, COUNT(*) AS count`},
+		period.UnitDay:   {"day", 1, `DATE_TRUNC('day', reported_at) - (EXTRACT(DAY FROM reported_at)::int % ? * 1 - 1) * INTERVAL '1 day' AS period, COUNT(*) AS count`},
+		period.UnitDate:  {"day", 1, `DATE_TRUNC('day', reported_at) - (EXTRACT(DAY FROM reported_at)::int % ? * 1 - 1) * INTERVAL '1 day' AS period, COUNT(*) AS count`},
+		period.UnitMonth: {"month", 1, `DATE_TRUNC('month', reported_at) - ((EXTRACT(MONTH FROM reported_at)::int - 1) % ? * 1) * INTERVAL '1 month' AS period, COUNT(*) AS count`},
+		period.UnitYear:  {"year", 1, `DATE_TRUNC('year', reported_at) - (EXTRACT(YEAR FROM reported_at)::int % ? * 1) * INTERVAL '1 year' AS period, COUNT(*) AS count`},
 	}
 
-	if !filter.EndDate.IsZero() {
-		query = query.Where("reported_at <= ?", filter.EndDate)
+	cfg, exists := configs[unit]
+
+	if !exists {
+		return nil, fmt.Errorf("unsupported time unit: %d", unit)
 	}
 
-	var count int64
-	if result := query.Count(&count); result.Error != nil {
-		return nil, fmt.Errorf("failed to get incidents insights: %w", result.Error)
-	}
-
-	var results []IncidentInsightsGroup
-
-	if unit == period.UnitTime {
-
-		hourInterval := 1
-
-		query.Select(`DATE_TRUNC('hour', reported_at) - (EXTRACT(HOUR FROM reported_at)::int % ?) * INTERVAL '1 hour' AS period,COUNT(*) AS count`, hourInterval).
+	// Query incidents by severity
+	queryBySeverity := func(severity models.IncidentSeverity, result *[]IncidentCountByPeriod) error {
+		q := query.Where("severity = ?", severity)
+		return q.Select(cfg.sqlFormat, cfg.interval).
 			Group("period").
 			Order("period").
-			Scan(&results)
+			Scan(result).Error
 	}
 
-	return &IncidentInsights{}, nil
+	for _, severity := range []models.IncidentSeverity{models.IncidentSeverityLow, models.IncidentSeverityMedium, models.IncidentSeverityHigh} {
+		var result *[]IncidentCountByPeriod
+		switch severity {
+		case models.IncidentSeverityLow:
+			result = &lowSeverityCountByPeriod
+		case models.IncidentSeverityMedium:
+			result = &mediumSeverityCountByPeriod
+		case models.IncidentSeverityHigh:
+			result = &highSeverityCountByPeriod
+		}
+		if err := queryBySeverity(severity, result); err != nil {
+			return nil, fmt.Errorf("failed to query %s incidents: %w", severity, err)
+		}
+	}
+
+	// Normalize incident counts
+	periods := period.GetPeriods(dateRange.StartDate, dateRange.EndDate, unit)
+	normalizeIncidents := func(incidents []IncidentCountByPeriod, periods []time.Time) []IncidentCountByPeriod {
+		countByPeriod := make(map[time.Time]int64, len(incidents))
+		for _, incident := range incidents {
+			countByPeriod[incident.Period] = incident.Count
+		}
+
+		normalized := make([]IncidentCountByPeriod, 0, len(periods))
+		for _, period := range periods {
+			normalized = append(normalized, IncidentCountByPeriod{
+				Period: period,
+				Count:  countByPeriod[period],
+			})
+		}
+		return normalized
+	}
+
+	return &IncidentInsights{
+		LowSeverityIncidents:    normalizeIncidents(lowSeverityCountByPeriod, periods),
+		MediumSeverityIncidents: normalizeIncidents(mediumSeverityCountByPeriod, periods),
+		HighSeverityIncidents:   normalizeIncidents(highSeverityCountByPeriod, periods),
+		TotalIncidents:          totalCount,
+	}, nil
 }
