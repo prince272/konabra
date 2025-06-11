@@ -36,17 +36,17 @@ type Incident struct {
 type IncidentStatus string
 
 const (
-	StatusPending       IncidentStatus = "pending"
-	StatusInvestigating IncidentStatus = "investigating"
-	StatusResolved      IncidentStatus = "resolved"
-	StatusFalseAlarm    IncidentStatus = "falseAlarm"
+	IncidentStatusPending       IncidentStatus = "pending"
+	IncidentStatusInvestigating IncidentStatus = "investigating"
+	IncidentStatusResolved      IncidentStatus = "resolved"
+	IncidentStatusFalseAlarm    IncidentStatus = "falseAlarm"
 )
 
 type IncidentSeverity string
 
 const (
-	SeverityLow      IncidentSeverity = "low"
-	SeverityMedium   IncidentSeverity = "medium"
-	SeverityHigh     IncidentSeverity = "high"
-	SeverityCritical IncidentSeverity = "critical"
+	IncidentSeverityLow      IncidentSeverity = "low"
+	IncidentSeverityMedium   IncidentSeverity = "medium"
+	IncidentSeverityHigh     IncidentSeverity = "high"
+	IncidentSeverityCritical IncidentSeverity = "critical"
 )

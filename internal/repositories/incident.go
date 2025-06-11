@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jinzhu/copier"
 	"github.com/prince272/konabra/internal/builds"
 	"github.com/prince272/konabra/internal/models"
+	"github.com/prince272/konabra/pkg/period"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -18,30 +18,17 @@ type IncidentRepository struct {
 	logger    *zap.Logger
 }
 
-type IncidentSort struct {
-	Sort  string `json:"sort" form:"sort"`
-	Order string `json:"order" form:"order"` // asc or desc
-}
-
 type IncidentFilter struct {
-	Search    string                  `json:"search" form:"search"`
-	Severity  models.IncidentSeverity `json:"severity" form:"severity"`
-	Status    models.IncidentStatus   `json:"status" form:"status"`
-	StartDate time.Time               `json:"startDate" form:"startDate" time_format:"2006-01-02T15:04:05Z07:00"`
-	EndDate   time.Time               `json:"endDate" form:"endDate" time_format:"2006-01-02T15:04:05Z07:00"`
-}
-
-func (source *IncidentFilter) Clone() IncidentFilter {
-	clone := IncidentFilter{}
-	if err := copier.Copy(&clone, source); err != nil {
-		panic(fmt.Errorf("failed to clone IncidentFilter: %w", err))
-	}
-	return clone
+	period.DateRange
+	Sort     string                  `json:"sort" form:"sort"`
+	Order    string                  `json:"order" form:"order"` // asc or desc
+	Search   string                  `json:"search" form:"search"`
+	Severity models.IncidentSeverity `json:"severity" form:"severity"`
+	Status   models.IncidentStatus   `json:"status" form:"status"`
 }
 
 type IncidentPaginatedFilter struct {
 	IncidentFilter
-	IncidentSort
 	Offset int `json:"offset" form:"offset"`
 	Limit  int `json:"limit" form:"limit"`
 }
@@ -50,6 +37,14 @@ type IncidentStatistics struct {
 	TotalIncidents      Trend `json:"totalIncidents"`
 	ResolvedIncidents   Trend `json:"resolvedIncidents"`
 	UnresolvedIncidents Trend `json:"unresolvedIncidents"`
+}
+
+type IncidentInsights struct {
+}
+
+type IncidentInsightsGroup struct {
+	Period time.Time
+	Count  int64
 }
 
 func NewIncidentRepository(defaultDB *builds.DefaultDB, logger *zap.Logger) *IncidentRepository {
@@ -158,7 +153,67 @@ func (repository *IncidentRepository) GetPaginatedIncidents(filter IncidentPagin
 	return items, count
 }
 
-func (repository *IncidentRepository) CountIncidents(filter IncidentFilter) (int64, error) {
+func (repository *IncidentRepository) GetIncidentsStatistics(dateRange period.DateRange) (*IncidentStatistics, error) {
+
+	countIncidents := func(startDate, endDate time.Time, status models.IncidentStatus) (int64, error) {
+		query := repository.defaultDB.Model(&models.Incident{})
+
+		if !startDate.IsZero() {
+			query = query.Where("reported_at >= ?", startDate)
+		}
+
+		if !endDate.IsZero() {
+			query = query.Where("reported_at <= ?", endDate)
+		}
+
+		if status != "" {
+			query = query.Where("status = ?", status)
+		}
+
+		var count int64
+		if result := query.Count(&count); result.Error != nil {
+			return 0, fmt.Errorf("failed to count incidents: %w", result.Error)
+		}
+		return count, nil
+	}
+
+	totalIncidents := CalculateTrend(dateRange.StartDate, dateRange.EndDate, func(startDate, endDate time.Time) int64 {
+		count, err := countIncidents(startDate, endDate, "")
+		if err != nil {
+			repository.logger.Error("Failed to count incidents", zap.Error(err))
+			return 0
+		}
+		return count
+	})
+
+	resolvedIncidents := CalculateTrend(dateRange.StartDate, dateRange.EndDate, func(startDate, endDate time.Time) int64 {
+		count, err := countIncidents(startDate, endDate, models.IncidentStatusResolved)
+		if err != nil {
+			repository.logger.Error("Failed to count resolved incidents", zap.Error(err))
+			return 0
+		}
+		return count
+	})
+
+	unresolvedIncidents := CalculateTrend(dateRange.StartDate, dateRange.EndDate, func(startDate, endDate time.Time) int64 {
+		count, err := countIncidents(startDate, endDate, models.IncidentStatusInvestigating)
+		if err != nil {
+			repository.logger.Error("Failed to count unresolved incidents", zap.Error(err))
+			return 0
+		}
+		return count
+	})
+
+	return &IncidentStatistics{
+		TotalIncidents:      totalIncidents,
+		ResolvedIncidents:   resolvedIncidents,
+		UnresolvedIncidents: unresolvedIncidents,
+	}, nil
+}
+
+func (repository *IncidentRepository) GetIncidentsInsights(filter IncidentFilter) (*IncidentInsights, error) {
+	unit := period.GetUnit(filter.StartDate, filter.EndDate)
+
 	query := repository.defaultDB.Model(&models.Incident{})
 
 	if filter.Search != "" {
@@ -183,54 +238,20 @@ func (repository *IncidentRepository) CountIncidents(filter IncidentFilter) (int
 
 	var count int64
 	if result := query.Count(&count); result.Error != nil {
-		return 0, fmt.Errorf("Failed to count incidents: %w", result.Error)
+		return nil, fmt.Errorf("failed to get incidents insights: %w", result.Error)
 	}
 
-	return count, nil
-}
+	var results []IncidentInsightsGroup
 
-func (repository *IncidentRepository) GetIncidentsStatistics(filter IncidentFilter) (*IncidentStatistics, error) {
-	totalIncidents := CalculateTrend(filter.StartDate, filter.EndDate, func(startDate, endDate time.Time) int64 {
-		countFilter := filter.Clone()
-		countFilter.StartDate = startDate
-		countFilter.EndDate = endDate
-		count, err := repository.CountIncidents(countFilter)
-		if err != nil {
-			repository.logger.Error("Failed to count incidents", zap.Error(err))
-			return 0
-		}
-		return count
-	})
+	if unit == period.UnitTime {
 
-	resolvedIncidents := CalculateTrend(filter.StartDate, filter.EndDate, func(startDate, endDate time.Time) int64 {
-		countFilter := filter.Clone()
-		countFilter.StartDate = startDate
-		countFilter.EndDate = endDate
-		countFilter.Status = models.StatusResolved
-		count, err := repository.CountIncidents(countFilter)
-		if err != nil {
-			repository.logger.Error("Failed to count resolved incidents", zap.Error(err))
-			return 0
-		}
-		return count
-	})
+		hourInterval := 1
 
-	unresolvedIncidents := CalculateTrend(filter.StartDate, filter.EndDate, func(startDate, endDate time.Time) int64 {
-		countFilter := filter.Clone()
-		countFilter.StartDate = startDate
-		countFilter.EndDate = endDate
-		countFilter.Status = models.StatusPending
-		count, err := repository.CountIncidents(countFilter)
-		if err != nil {
-			repository.logger.Error("Failed to count unresolved incidents", zap.Error(err))
-			return 0
-		}
-		return count
-	})
+		query.Select(`DATE_TRUNC('hour', reported_at) - (EXTRACT(HOUR FROM reported_at)::int % ?) * INTERVAL '1 hour' AS period,COUNT(*) AS count`, hourInterval).
+			Group("period").
+			Order("period").
+			Scan(&results)
+	}
 
-	return &IncidentStatistics{
-		TotalIncidents:      totalIncidents,
-		ResolvedIncidents:   resolvedIncidents,
-		UnresolvedIncidents: unresolvedIncidents,
-	}, nil
+	return &IncidentInsights{}, nil
 }

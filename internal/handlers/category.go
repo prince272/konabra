@@ -8,6 +8,7 @@ import (
 	"github.com/prince272/konabra/internal/problems"
 	"github.com/prince272/konabra/internal/repositories"
 	"github.com/prince272/konabra/internal/services"
+	"github.com/prince272/konabra/pkg/period"
 )
 
 // IdentityHandler handles user identity routes
@@ -146,18 +147,19 @@ func (handler *CategoryHandler) GetCategoryById(context *gin.Context) (any, *pro
 	return handler.categoryService.GetCategoryById(id)
 }
 
-// GetCategoriesStatistics retrieves statistics for categories
+// GetCategoriesStatistics retrieves statistics for categories within a date range
 // @Summary Get categories statistics
 // @Tags Categories
 // @Accept json
 // @Produce json
+// @Param dateRange query period.DateRange false "Date range for statistics"
 // @Security BearerAuth
 // @Router /categories/statistics [get]
 func (handler *CategoryHandler) GetCategoriesStatistics(context *gin.Context) (any, *problems.Problem) {
-	var filter repositories.CategoryFilter
-	if err := context.ShouldBindQuery(&filter); err != nil {
+	var dateRange period.DateRange
+	if err := context.ShouldBindQuery(&dateRange); err != nil {
 		return nil, problems.FromError(err)
 	}
 
-	return handler.categoryService.GetCategoriesStatistics(filter)
+	return handler.categoryService.GetCategoriesStatistics(dateRange)
 }

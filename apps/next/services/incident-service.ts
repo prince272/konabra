@@ -46,12 +46,9 @@ export type Incident = {
   reportedBy: Account;
 };
 
-export type IncidentSort = {
+export type IncidentFilter = {
   sort?: string | null;
   order?: "asc" | "desc" | null;
-};
-
-export type IncidentFilter = {
   search?: string;
   status?: IncidentStatus;
   severity?: IncidentSeverity;
@@ -59,11 +56,10 @@ export type IncidentFilter = {
   endDate?: string;
 };
 
-export type IncidentPaginatedFilter = IncidentFilter &
-  IncidentSort & {
-    offset: number;
-    limit: number;
-  };
+export type IncidentPaginatedFilter = IncidentFilter & {
+  offset: number;
+  limit: number;
+};
 
 export type IncidentTrend = {
   oldStartDate: string;

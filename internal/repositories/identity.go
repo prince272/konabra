@@ -10,6 +10,7 @@ import (
 	"github.com/jinzhu/copier"
 	"github.com/prince272/konabra/internal/builds"
 	models "github.com/prince272/konabra/internal/models"
+	"github.com/prince272/konabra/pkg/period"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -19,12 +20,10 @@ type IdentityRepository struct {
 	logger    *zap.Logger
 }
 
-type UserSort struct {
-	Sort  string `json:"sort" form:"sort"`
-	Order string `json:"order" form:"order"` // "asc" or "desc"
-}
-
 type UserFilter struct {
+	period.DateRange
+	Sort        string    `json:"sort" form:"sort"`
+	Order       string    `json:"order" form:"order"` // "asc" or "desc"
 	Search      string    `json:"search" form:"search"`
 	StartDate   time.Time `json:"startDate" form:"startDate" time_format:"2006-01-02T15:04:05Z07:00"`
 	EndDate     time.Time `json:"endDate" form:"endDate" time_format:"2006-01-02T15:04:05Z07:00"`
@@ -35,7 +34,6 @@ type UserFilter struct {
 
 type UserPaginatedFilter struct {
 	UserFilter
-	UserSort
 	Offset int `json:"offset" form:"offset"`
 	Limit  int `json:"limit" form:"limit"`
 }
@@ -355,49 +353,28 @@ func (repository *IdentityRepository) GetPaginatedUsers(filter UserPaginatedFilt
 	return items, count
 }
 
-func (repository *IdentityRepository) CountUsers(filter UserFilter) (int64, error) {
-	query := repository.defaultDB.Model(&models.User{})
+func (repository *IdentityRepository) GetUsersStatistics(dateRange period.DateRange) (*UserStatistics, error) {
+	countUsers := func(startDate, endDate time.Time) (int64, error) {
+		query := repository.defaultDB.Model(&models.User{})
 
-	if filter.Search != "" {
-		query = query.Where("LOWER(name) LIKE LOWER(?)", "%"+filter.Search+"%")
+		if !startDate.IsZero() {
+			query = query.Where("created_at >= ?", startDate)
+		}
+
+		if !endDate.IsZero() {
+			query = query.Where("created_at <= ?", endDate)
+		}
+		var count int64
+		if result := query.Count(&count); result.Error != nil {
+			return 0, fmt.Errorf("failed to count users: %w", result.Error)
+		}
+		return count, nil
 	}
 
-	if filter.StartDate.IsZero() {
-		query = query.Where("created_at >= ?", filter.StartDate)
-	}
-
-	if filter.EndDate.IsZero() {
-		query = query.Where("created_at <= ?", filter.EndDate)
-	}
-
-	if filter.UserName != "" {
-		query = query.Where("LOWER(user_name) LIKE LOWER(?)", "%"+filter.UserName+"%")
-	}
-
-	if filter.Email != "" {
-		query = query.Where("LOWER(email) LIKE LOWER(?)", "%"+filter.Email+"%")
-	}
-
-	if filter.PhoneNumber != "" {
-		query = query.Where("LOWER(phone_number) LIKE LOWER(?)", "%"+filter.PhoneNumber+"%")
-	}
-
-	var count int64
-	if result := query.Count(&count); result.Error != nil {
-		return 0, fmt.Errorf("failed to count categories: %w", result.Error)
-	}
-
-	return count, nil
-}
-
-func (repository *IdentityRepository) GetUsersStatistics(filter UserFilter) (*UserStatistics, error) {
-	totalUsers := CalculateTrend(filter.StartDate, filter.EndDate, func(startDate, endDate time.Time) int64 {
-		countFilter := filter.Clone()
-		countFilter.StartDate = startDate
-		countFilter.EndDate = endDate
-		count, err := repository.CountUsers(countFilter)
+	totalUsers := CalculateTrend(dateRange.StartDate, dateRange.EndDate, func(startDate, endDate time.Time) int64 {
+		count, err := countUsers(startDate, endDate)
 		if err != nil {
-			repository.logger.Error("Failed to count categories", zap.Error(err))
+			repository.logger.Error("Failed to count users", zap.Error(err))
 			return 0
 		}
 		return count

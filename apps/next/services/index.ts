@@ -1,5 +1,4 @@
-import axios, { AxiosError, AxiosResponse, HttpStatusCode, isAxiosError } from "axios";
-import PQueue from "p-queue";
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse, HttpStatusCode, isAxiosError } from "axios";
 import queryString from "query-string";
 import Cookies from "universal-cookie";
 import { stringifyPath, toRelativeUrl } from "@/utils";
@@ -24,121 +23,174 @@ if (api.defaults.baseURL) {
 }
 
 const cookies = new Cookies();
-const refreshQueue = new PQueue({ concurrency: 1 });
 
+// Helper to get current account from cookie
+function getCurrentAccount(): AccountWithToken | undefined {
+  try {
+    return cookies.get("current-account") as AccountWithToken | undefined;
+  } catch (err) {
+    console.warn("Failed to parse account cookie:", err);
+    return undefined;
+  }
+}
+
+// Helper to save updated account
+function setCurrentAccount(account: AccountWithToken) {
+  cookies.set("current-account", account, { path: "/" });
+  // Update default header for future requests
+  api.defaults.headers.common.Authorization = `Bearer ${account.accessToken}`;
+}
+
+// Extend AxiosRequestConfig to include our retry flag
+interface RetryAxiosRequestConfig extends AxiosRequestConfig {
+  _retry?: boolean;
+}
+
+// Queue for holding pending requests while refreshing
+type PendingRequest = {
+  resolve: (value: AxiosResponse<any>) => void;
+  reject: (error: any) => void;
+  config: RetryAxiosRequestConfig;
+};
 let isRefreshing = false;
-let requestQueue: ((token: string) => void)[] = [];
+let failedQueue: PendingRequest[] = [];
 
-// Request interceptor
+// Process the queue: either retry with new token or reject all
+function processQueue(error: any, token: string | null = null) {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else if (token) {
+      // Clone the config to avoid mutation
+      prom.config.headers = prom.config.headers || {};
+      prom.config.headers.Authorization = `Bearer ${token}`;
+      // Retry request
+      api.request(prom.config).then(prom.resolve).catch(prom.reject);
+    } else {
+      // No token and no error: reject generically
+      prom.reject(new Error("Could not refresh token"));
+    }
+  });
+  failedQueue = [];
+}
+
+// Request interceptor: attach access token if present
 api.interceptors.request.use(
   (config) => {
-    try {
-      const currentAccount: AccountWithToken | undefined = cookies.get("current-account");
-      if (currentAccount?.accessToken) {
-        config.headers.Authorization = `Bearer ${currentAccount.accessToken}`;
-      }
-    } catch (err) {
-      console.warn("Failed to parse account cookie:", err);
+    const currentAccount = getCurrentAccount();
+    if (currentAccount?.accessToken) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${currentAccount.accessToken}`;
     }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Response interceptor
+// Response interceptor: handle 401 and refresh token
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
+  async (error: any) => {
+    const originalRequest = error.config as RetryAxiosRequestConfig;
 
-    if (error.response?.status === HttpStatusCode.Unauthorized && !originalRequest._retry) {
-      const currentAccount: AccountWithToken | undefined = cookies.get("current-account");
+    // If no response or not a 401, pass through
+    if (!error.response || error.response.status !== HttpStatusCode.Unauthorized) {
+      return Promise.reject(error);
+    }
 
-      if (!currentAccount?.refreshToken) {
-        console.error("No refresh token available. Redirecting to sign-in.");
-        cookies.remove("current-account", { path: "/" });
+    // Prevent infinite loop
+    if (originalRequest._retry) {
+      // Already retried once; reject
+      return Promise.reject(error);
+    }
 
-        if (typeof window !== "undefined") {
-          window.location.href = "#signin";
-        }
+    // Mark this request as having been retried
+    originalRequest._retry = true;
 
-        return Promise.reject(error);
+    const currentAccount = getCurrentAccount();
+    if (!currentAccount?.refreshToken) {
+      // No refresh token: clear and redirect
+      console.error("No refresh token available. Redirecting to sign-in.");
+      cookies.remove("current-account", { path: "/" });
+      if (typeof window !== "undefined") {
+        window.location.href = "#signin";
       }
+      return Promise.reject(error);
+    }
 
-      originalRequest._retry = true;
-
-      return new Promise((resolve, reject) => {
-        requestQueue.push((newToken: string) => {
-          originalRequest.headers.Authorization = `Bearer ${newToken}`;
-          resolve(api(originalRequest));
-        });
-
-        if (!isRefreshing) {
-          isRefreshing = true;
-
-          refreshQueue.add(async () => {
-            try {
-              const response = await axios.post<AccountWithToken>(
-                `/account/signin/refresh`,
-                { refreshToken: currentAccount.refreshToken },
-                {
-                  baseURL: process.env.NEXT_PUBLIC_SERVER_URL,
-                  withCredentials: !isDev,
-                  headers: {
-                    "Content-Type": "application/json",
-                    ...(currentAccount.accessToken
-                      ? { Authorization: `Bearer ${currentAccount.accessToken}` }
-                      : {})
-                  }
-                }
-              );
-
-              const newAccount = response.data;
-
-              cookies.set("current-account", newAccount, { path: "/" });
-              api.defaults.headers.common.Authorization = `Bearer ${newAccount.accessToken}`;
-
-              // Retry all queued requests
-              requestQueue.forEach((cb) => cb(newAccount.accessToken));
-              requestQueue = [];
-            } catch (refreshError) {
-              requestQueue = [];
-              //cookies.remove("current-account", { path: "/" });
-
-              const status = (refreshError as AxiosError)?.response?.status;
-
-              if (
-                (status === HttpStatusCode.BadRequest || status === HttpStatusCode.Unauthorized) &&
-                typeof window !== "undefined"
-              ) {
-                const returnUrl = toRelativeUrl(window.location.href || "/");
-                window.location.href = stringifyPath(
-                  {
-                    url: "/",
-                    query: { returnUrl },
-                    fragmentIdentifier: "signin"
-                  },
-                  { skipNull: true }
-                );
-              }
-
-              reject(refreshError);
-            } finally {
-              isRefreshing = false;
-            }
-          });
-        }
+    // If already refreshing, queue this request
+    if (isRefreshing) {
+      return new Promise<AxiosResponse<any>>((resolve, reject) => {
+        failedQueue.push({ resolve, reject, config: originalRequest });
       });
     }
 
-    return Promise.reject(error);
+    // Start refresh flow
+    isRefreshing = true;
+
+    return new Promise<AxiosResponse<any>>(async (resolve, reject) => {
+      try {
+        // Perform refresh with raw axios to avoid interceptors
+        const refreshResponse = await axios.post<AccountWithToken>(
+          `/account/signin/refresh`,
+          { refreshToken: currentAccount.refreshToken },
+          {
+            baseURL: process.env.NEXT_PUBLIC_SERVER_URL,
+            withCredentials: !isDev,
+            headers: {
+              "Content-Type": "application/json"
+              // Optionally include old access token if backend expects it
+              // ...(currentAccount.accessToken ? { Authorization: `Bearer ${currentAccount.accessToken}` } : {})
+            }
+          }
+        );
+
+        const newAccount = refreshResponse.data;
+        // Persist new tokens
+        setCurrentAccount(newAccount);
+
+        // Process queued requests
+        processQueue(null, newAccount.accessToken);
+
+        // Retry the original request
+        originalRequest.headers = originalRequest.headers || {};
+        originalRequest.headers.Authorization = `Bearer ${newAccount.accessToken}`;
+        const retryResponse = await api.request(originalRequest);
+        resolve(retryResponse);
+      } catch (refreshError) {
+        // On refresh failure: reject queued requests, clear storage, redirect
+        processQueue(refreshError, null);
+
+        cookies.remove("current-account", { path: "/" });
+        const status = (refreshError as AxiosError)?.response?.status;
+        if (
+          (status === HttpStatusCode.BadRequest || status === HttpStatusCode.Unauthorized) &&
+          typeof window !== "undefined"
+        ) {
+          const returnUrl = toRelativeUrl(window.location.href || "/");
+          window.location.href = stringifyPath(
+            {
+              url: "/",
+              query: { returnUrl },
+              fragmentIdentifier: "signin"
+            },
+            { skipNull: true }
+          );
+        }
+        reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    });
   }
 );
 
+// Export services
 export const identityService = new IdentityService(api);
 export const categoryService = new CategoryService(api);
 export const incidentService = new IncidentService(api);
 
+// Problem parsing logic unchanged
 export type Problem = {
   type: string;
   message: string;

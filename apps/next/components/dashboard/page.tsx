@@ -314,7 +314,7 @@ export const DashboardPage: React.FC = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-1">
+      <div className="grid grid-cols-1">
         <Card shadow="none">
           <CardHeader className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">Incidents</h3>

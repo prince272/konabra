@@ -458,6 +458,18 @@ const docTemplate = `{
                     "Categories"
                 ],
                 "summary": "Get categories statistics",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "endDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "startDate",
+                        "in": "query"
+                    }
+                ],
                 "responses": {}
             }
         },
@@ -606,10 +618,10 @@ const docTemplate = `{
                         ],
                         "type": "string",
                         "x-enum-varnames": [
-                            "SeverityLow",
-                            "SeverityMedium",
-                            "SeverityHigh",
-                            "SeverityCritical"
+                            "IncidentSeverityLow",
+                            "IncidentSeverityMedium",
+                            "IncidentSeverityHigh",
+                            "IncidentSeverityCritical"
                         ],
                         "name": "severity",
                         "in": "query"
@@ -633,10 +645,10 @@ const docTemplate = `{
                         ],
                         "type": "string",
                         "x-enum-varnames": [
-                            "StatusPending",
-                            "StatusInvestigating",
-                            "StatusResolved",
-                            "StatusFalseAlarm"
+                            "IncidentStatusPending",
+                            "IncidentStatusInvestigating",
+                            "IncidentStatusResolved",
+                            "IncidentStatusFalseAlarm"
                         ],
                         "name": "status",
                         "in": "query"
@@ -674,7 +686,7 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/incidents/analysis": {
+        "/incidents/statistics": {
             "get": {
                 "security": [
                     {
@@ -699,46 +711,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "name": "search",
-                        "in": "query"
-                    },
-                    {
-                        "enum": [
-                            "low",
-                            "medium",
-                            "high",
-                            "critical"
-                        ],
-                        "type": "string",
-                        "x-enum-varnames": [
-                            "SeverityLow",
-                            "SeverityMedium",
-                            "SeverityHigh",
-                            "SeverityCritical"
-                        ],
-                        "name": "severity",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
                         "name": "startDate",
-                        "in": "query"
-                    },
-                    {
-                        "enum": [
-                            "pending",
-                            "investigating",
-                            "resolved",
-                            "falseAlarm"
-                        ],
-                        "type": "string",
-                        "x-enum-varnames": [
-                            "StatusPending",
-                            "StatusInvestigating",
-                            "StatusResolved",
-                            "StatusFalseAlarm"
-                        ],
-                        "name": "status",
                         "in": "query"
                     }
                 ],
@@ -1020,9 +993,21 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Statistics"
+                    "Users"
                 ],
                 "summary": "Get user statistics",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "endDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "startDate",
+                        "in": "query"
+                    }
+                ],
                 "responses": {}
             }
         }
@@ -1037,10 +1022,10 @@ const docTemplate = `{
                 "critical"
             ],
             "x-enum-varnames": [
-                "SeverityLow",
-                "SeverityMedium",
-                "SeverityHigh",
-                "SeverityCritical"
+                "IncidentSeverityLow",
+                "IncidentSeverityMedium",
+                "IncidentSeverityHigh",
+                "IncidentSeverityCritical"
             ]
         },
         "models.IncidentStatus": {
@@ -1052,10 +1037,10 @@ const docTemplate = `{
                 "falseAlarm"
             ],
             "x-enum-varnames": [
-                "StatusPending",
-                "StatusInvestigating",
-                "StatusResolved",
-                "StatusFalseAlarm"
+                "IncidentStatusPending",
+                "IncidentStatusInvestigating",
+                "IncidentStatusResolved",
+                "IncidentStatusFalseAlarm"
             ]
         },
         "services.ChangeAccountForm": {

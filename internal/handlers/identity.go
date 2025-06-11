@@ -9,6 +9,7 @@ import (
 	"github.com/prince272/konabra/internal/problems"
 	"github.com/prince272/konabra/internal/repositories"
 	"github.com/prince272/konabra/internal/services"
+	"github.com/prince272/konabra/pkg/period"
 )
 
 // IdentityHandler handles user identity routes
@@ -388,18 +389,19 @@ func (handler *IdentityHandler) GetRoleById(context *gin.Context) (any, *problem
 	return handler.identityService.GetRoleById(id)
 }
 
-// GetUsersStatistics retrieves user statistics
+// GetUsersStatistics retrieves user statistics based on a date range
 // @Summary Get user statistics
-// @Tags Statistics
+// @Tags Users
 // @Accept json
 // @Produce json
+// @Param dateRange query period.DateRange true "Date range for statistics"
 // @Security BearerAuth
 // @Router /users/statistics [get]
 func (handler *IdentityHandler) GetUsersStatistics(context *gin.Context) (any, *problems.Problem) {
-	var filter repositories.UserFilter
-	if err := context.ShouldBindQuery(&filter); err != nil {
+	var dateRange period.DateRange
+	if err := context.ShouldBindQuery(&dateRange); err != nil {
 		return nil, problems.FromError(err)
 	}
 
-	return handler.identityService.GetUsersStatistics(filter)
+	return handler.identityService.GetUsersStatistics(dateRange)
 }

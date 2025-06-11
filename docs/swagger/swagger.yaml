@@ -8,10 +8,10 @@ definitions:
     - critical
     type: string
     x-enum-varnames:
-    - SeverityLow
-    - SeverityMedium
-    - SeverityHigh
-    - SeverityCritical
+    - IncidentSeverityLow
+    - IncidentSeverityMedium
+    - IncidentSeverityHigh
+    - IncidentSeverityCritical
   models.IncidentStatus:
     enum:
     - pending
@@ -20,10 +20,10 @@ definitions:
     - falseAlarm
     type: string
     x-enum-varnames:
-    - StatusPending
-    - StatusInvestigating
-    - StatusResolved
-    - StatusFalseAlarm
+    - IncidentStatusPending
+    - IncidentStatusInvestigating
+    - IncidentStatusResolved
+    - IncidentStatusFalseAlarm
   services.ChangeAccountForm:
     properties:
       newUsername:
@@ -567,6 +567,13 @@ paths:
     get:
       consumes:
       - application/json
+      parameters:
+      - in: query
+        name: endDate
+        type: string
+      - in: query
+        name: startDate
+        type: string
       produces:
       - application/json
       responses: {}
@@ -605,10 +612,10 @@ paths:
         name: severity
         type: string
         x-enum-varnames:
-        - SeverityLow
-        - SeverityMedium
-        - SeverityHigh
-        - SeverityCritical
+        - IncidentSeverityLow
+        - IncidentSeverityMedium
+        - IncidentSeverityHigh
+        - IncidentSeverityCritical
       - in: query
         name: sort
         type: string
@@ -624,10 +631,10 @@ paths:
         name: status
         type: string
         x-enum-varnames:
-        - StatusPending
-        - StatusInvestigating
-        - StatusResolved
-        - StatusFalseAlarm
+        - IncidentStatusPending
+        - IncidentStatusInvestigating
+        - IncidentStatusResolved
+        - IncidentStatusFalseAlarm
       produces:
       - application/json
       responses: {}
@@ -712,7 +719,7 @@ paths:
       summary: Update an existing incident
       tags:
       - Incidents
-  /incidents/analysis:
+  /incidents/statistics:
     get:
       consumes:
       - application/json
@@ -721,37 +728,8 @@ paths:
         name: endDate
         type: string
       - in: query
-        name: search
-        type: string
-      - enum:
-        - low
-        - medium
-        - high
-        - critical
-        in: query
-        name: severity
-        type: string
-        x-enum-varnames:
-        - SeverityLow
-        - SeverityMedium
-        - SeverityHigh
-        - SeverityCritical
-      - in: query
         name: startDate
         type: string
-      - enum:
-        - pending
-        - investigating
-        - resolved
-        - falseAlarm
-        in: query
-        name: status
-        type: string
-        x-enum-varnames:
-        - StatusPending
-        - StatusInvestigating
-        - StatusResolved
-        - StatusFalseAlarm
       produces:
       - application/json
       responses: {}
@@ -869,6 +847,13 @@ paths:
     get:
       consumes:
       - application/json
+      parameters:
+      - in: query
+        name: endDate
+        type: string
+      - in: query
+        name: startDate
+        type: string
       produces:
       - application/json
       responses: {}
@@ -876,7 +861,7 @@ paths:
       - BearerAuth: []
       summary: Get user statistics
       tags:
-      - Statistics
+      - Users
 securityDefinitions:
   BearerAuth:
     in: header

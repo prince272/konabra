@@ -9,6 +9,7 @@ import (
 	"github.com/prince272/konabra/internal/problems"
 	"github.com/prince272/konabra/internal/repositories"
 	"github.com/prince272/konabra/internal/services"
+	"github.com/prince272/konabra/pkg/period"
 )
 
 // IncidentHandler handles incident routes
@@ -150,19 +151,19 @@ func (handler *IncidentHandler) GetIncidentById(context *gin.Context) (any, *pro
 	return handler.incidentService.GetIncidentById(id)
 }
 
-// GetIncidentsStatistics retrieves incidents statistics
+// GetIncidentsStatistics retrieves statistics for incidents
 // @Summary Get incidents statistics
 // @Tags Incidents
 // @Accept json
 // @Produce json
-// @Param filter query repositories.IncidentFilter false "Incident filter"
+// @Param dateRange query period.DateRange false "Date range for statistics"
 // @Security BearerAuth
-// @Router /incidents/analysis [get]
+// @Router /incidents/statistics [get]
 func (handler *IncidentHandler) GetIncidentsStatistics(context *gin.Context) (any, *problems.Problem) {
-	var filter repositories.IncidentFilter
-	if err := context.ShouldBindQuery(&filter); err != nil {
+	var dateRange period.DateRange
+	if err := context.ShouldBindQuery(&dateRange); err != nil {
 		return nil, problems.FromError(err)
 	}
 
-	return handler.incidentService.GetIncidentsStatistics(filter)
+	return handler.incidentService.GetIncidentsStatistics(dateRange)
 }

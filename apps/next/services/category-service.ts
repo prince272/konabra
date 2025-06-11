@@ -17,22 +17,18 @@ export type Category = {
   updatedAt: string;
 };
 
-export type CategorySort = {
+export type CategoryFilter = {
   sort?: string | null;
   order?: "asc" | "desc" | null;
-};
-
-export type CategoryFilter = {
   search?: string;
   startDate?: string | null;
-  endDate?: string | null; 
+  endDate?: string | null;
 };
 
-export type CategoryPaginatedFilter = CategoryFilter &
-  CategorySort & {
-    offset: number;
-    limit: number;
-  };
+export type CategoryPaginatedFilter = CategoryFilter & {
+  offset: number;
+  limit: number;
+};
 
 export type CategoryTrend = {
   oldStartDate: string;

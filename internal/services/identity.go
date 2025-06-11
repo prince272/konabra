@@ -13,6 +13,7 @@ import (
 	"github.com/prince272/konabra/internal/repositories"
 	"github.com/prince272/konabra/pkg/humanize"
 	"github.com/prince272/konabra/pkg/otp"
+	"github.com/prince272/konabra/pkg/period"
 	"github.com/prince272/konabra/utils"
 	"go.uber.org/zap"
 )
@@ -848,11 +849,11 @@ func (service *IdentityService) GetRoleById(id string) (*RoleModel, *problems.Pr
 	return model, nil
 }
 
-func (service *IdentityService) GetUsersStatistics(filter repositories.UserFilter) (*repositories.UserStatistics, *problems.Problem) {
-	if err := service.validator.ValidateStruct(filter); err != nil {
+func (service *IdentityService) GetUsersStatistics(dateRange period.DateRange) (*repositories.UserStatistics, *problems.Problem) {
+	if err := service.validator.ValidateStruct(dateRange); err != nil {
 		return nil, problems.FromError(err)
 	}
-	stats, err := service.identityRepository.GetUsersStatistics(filter)
+	stats, err := service.identityRepository.GetUsersStatistics(dateRange)
 	if err != nil {
 		service.logger.Error("Failed to get users statistics", zap.Error(err))
 		return nil, problems.FromError(err)

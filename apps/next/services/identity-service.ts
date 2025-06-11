@@ -108,22 +108,18 @@ export type RolePaginatedFilter = RoleFilter &
     limit: number;
   };
 
-export type UserSort = {
+export type UserFilter = {
   sort?: string | null;
   order?: "asc" | "desc" | null;
-};
-
-export type UserFilter = {
   search?: string;
   startDate?: string | null; // ISO date string
   endDate?: string | null; // ISO date string
 };
 
-export type UserPaginatedFilter = UserFilter &
-  UserSort & {
-    offset: number;
-    limit: number;
-  };
+export type UserPaginatedFilter = UserFilter & {
+  offset: number;
+  limit: number;
+};
 
 export type UserTrend = {
   oldStartDate: string;

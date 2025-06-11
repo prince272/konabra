@@ -10,6 +10,7 @@ import (
 	"github.com/prince272/konabra/internal/models"
 	"github.com/prince272/konabra/internal/problems"
 	"github.com/prince272/konabra/internal/repositories"
+	"github.com/prince272/konabra/pkg/period"
 	"go.uber.org/zap"
 )
 
@@ -76,7 +77,7 @@ func (service *IncidentService) CreateIncident(userId string, form CreateInciden
 	incident.ReportedById = userId
 	incident.ReportedAt = time.Now()
 	incident.UpdatedAt = incident.ReportedAt
-	incident.Status = models.StatusPending
+	incident.Status = models.IncidentStatusPending
 
 	if err := service.incidentRepository.CreateIncident(incident); err != nil {
 		service.logger.Error("Failed to create incident", zap.Error(err))
@@ -178,11 +179,11 @@ func (service *IncidentService) GetIncidentById(id string) (*IncidentModel, *pro
 	return model, nil
 }
 
-func (service *IncidentService) GetIncidentsStatistics(filter repositories.IncidentFilter) (*repositories.IncidentStatistics, *problems.Problem) {
-	if err := service.validator.ValidateStruct(filter); err != nil {
+func (service *IncidentService) GetIncidentsStatistics(dateRange period.DateRange) (*repositories.IncidentStatistics, *problems.Problem) {
+	if err := service.validator.ValidateStruct(dateRange); err != nil {
 		return nil, problems.FromError(err)
 	}
-	stats, err := service.incidentRepository.GetIncidentsStatistics(filter)
+	stats, err := service.incidentRepository.GetIncidentsStatistics(dateRange)
 	if err != nil {
 		service.logger.Error("Failed to get incidents statistics", zap.Error(err))
 		return nil, problems.FromError(err)
