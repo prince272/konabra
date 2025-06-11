@@ -134,10 +134,10 @@ func (helper *JwtHelper) RevokeToken(subject string, tokenString string) error {
 	return nil
 }
 
-func (helper *JwtHelper) validateToken(subject string, tokenString string) error {
+func (helper *JwtHelper) validateToken(subject string, tokenString string) bool {
 	tokenHash := utils.HashToken(tokenString)
 	if tokenHash == "" {
-		return errors.New("invalid token hash")
+		return false
 	}
 
 	currentTime := time.Now()
@@ -150,14 +150,18 @@ func (helper *JwtHelper) validateToken(subject string, tokenString string) error
 		First(&token)
 
 	if result.Error != nil {
-		return result.Error
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return false
+		}
+
+		panic(fmt.Errorf("failed to query token: %w", result.Error))
 	}
 
 	if token.AccessTokenExpiresAt.After(currentTime) || token.RefreshTokenExpiresAt.After(currentTime) {
-		return nil
+		return true
 	}
 
-	return errors.New("token has expired")
+	return false
 }
 
 func (helper *JwtHelper) GenerateToken(subject string, creationTime, expirationTime time.Time, tokenType string, claims map[string]any) (string, error) {
@@ -284,9 +288,8 @@ func (helper *JwtHelper) verifyToken(tokenType string, tokenString string) (map[
 	}
 
 	// validate token
-	if err := helper.validateToken(sub, tokenString); err != nil {
-		helper.logger.Error("Failed to validate token: ", zap.Error(err))
-		return nil, err
+	if ok := helper.validateToken(sub, tokenString); !ok {
+		return nil, errors.New("token is not valid")
 	}
 
 	return claims, nil

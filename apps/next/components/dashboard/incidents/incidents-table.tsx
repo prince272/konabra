@@ -2,7 +2,6 @@ import React from "react";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
-import { Pagination } from "@heroui/pagination";
 import { Spinner } from "@heroui/spinner";
 import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@heroui/table";
 import { cn } from "@heroui/theme";
@@ -29,8 +28,9 @@ interface IncidentsTableProps {
   errorMessage?: string;
   emptyMessage?: string;
   onReload?: () => void;
-  onEdit: (incident: Incident) => void;
-  onDelete: (incident: Incident) => void;
+  onEdit?: (incident: Incident) => void;
+  onDelete?: (incident: Incident) => void;
+  readOnly?: boolean;
 }
 
 const IncidentsTable: React.FC<IncidentsTableProps> = ({
@@ -41,7 +41,8 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
   emptyMessage,
   onReload,
   onEdit,
-  onDelete
+  onDelete,
+  readOnly = false
 }) => {
   return (
     <Table
@@ -58,7 +59,7 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
         <TableColumn>REPORTER</TableColumn>
         <TableColumn>LOCATION</TableColumn>
         <TableColumn>STATUS</TableColumn>
-        <TableColumn className="text-right">ACTIONS</TableColumn>
+        <TableColumn className={cn("w-16", readOnly && "hidden")}>ACTIONS</TableColumn>
       </TableHeader>
       <TableBody
         isLoading={isLoading}
@@ -167,7 +168,7 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
                 {incident.status}
               </Chip>
             </TableCell>
-            <TableCell>
+            <TableCell className={cn("text-right", readOnly && "hidden")}>
               <div className="flex justify-end">
                 <Dropdown>
                   <DropdownTrigger>
@@ -184,7 +185,7 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
                   <DropdownMenu aria-label="Incident actions" variant="flat">
                     <DropdownItem
                       key="edit"
-                      onClick={() => onEdit(incident)}
+                      onPress={() => onEdit?.(incident)}
                       startContent={<Edit size={20} />}
                     >
                       Edit
@@ -193,7 +194,7 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
                       key="delete"
                       className="text-danger"
                       color="danger"
-                      onClick={() => onDelete(incident)}
+                      onPress={() => onDelete?.(incident)}
                       startContent={<Trash2 size={20} />}
                     >
                       Delete

@@ -3,23 +3,23 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@heroui/button";
 import { RangeCalendar } from "@heroui/calendar";
+import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 import { Popover, PopoverContent, PopoverTrigger } from "@heroui/popover";
 import { CalendarDate, getLocalTimeZone, isSameDay, now, today } from "@internationalized/date";
-import {
-  AlertCircle,
-  AlertTriangle,
-  Calendar as CalendarIcon,
-  CheckCircle,
-  Folder,
-  Users
-} from "lucide-react";
+import { AlertCircle, Calendar as CalendarIcon, CheckCircle, Folder, Users } from "lucide-react";
 import { calendarDateToISOString } from "@/utils";
 import { categoryService, identityService, incidentService } from "@/services";
 import { CategoryStatistics } from "@/services/category-service";
 import { UserStatistics } from "@/services/identity-service";
-import { IncidentFilter, IncidentStatistics } from "@/services/incident-service";
+import {
+  IncidentFilter,
+  IncidentPaginatedFilter,
+  IncidentStatistics
+} from "@/services/incident-service";
+import IncidentsTable from "./incidents/incidents-table";
 import { StatCard } from "./stats-card";
+import NextLink from "next/link";
 
 export const DashboardPage: React.FC = () => {
   const [filter, setFilter] = useState<Partial<{ startDate: string; endDate: string }>>({
@@ -31,6 +31,7 @@ export const DashboardPage: React.FC = () => {
   const [categoryStats, setCategoryStats] = useState<CategoryStatistics | null>(null);
   const [userStats, setUserStats] = useState<UserStatistics | null>(null);
 
+  const [incidents, setIncidents] = useState<any[]>([]);
   const [isLoadingIncidents, setIsLoadingIncidents] = useState(true);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
@@ -46,11 +47,9 @@ export const DashboardPage: React.FC = () => {
   // Fetch Incident Statistics
   useEffect(() => {
     const fetchIncidentStats = async () => {
-      setIsLoadingIncidents(true);
       const [data, problem] = await incidentService.getIncidentsStatistics(filter);
       if (!problem) setStats(data);
       else console.error("Incident stats error:", problem);
-      setIsLoadingIncidents(false);
     };
     fetchIncidentStats();
   }, [filter]);
@@ -77,6 +76,25 @@ export const DashboardPage: React.FC = () => {
       setIsLoadingUsers(false);
     };
     fetchUserStats();
+  }, [filter]);
+
+  // Fetch Incidents
+  useEffect(() => {
+    const fetchIncidents = async () => {
+      setIsLoadingIncidents(true);
+      const query: IncidentPaginatedFilter = {
+        ...filter,
+        sort: "createdAt",
+        order: "desc",
+        offset: 0,
+        limit: 5
+      };
+      const [data, problem] = await incidentService.getPaginatedIncidents(query);
+      if (!problem) setIncidents(data.items ?? []);
+      else console.error("Incident fetch error:", problem);
+      setIsLoadingIncidents(false);
+    };
+    fetchIncidents();
   }, [filter]);
 
   const handleDateRangeChange = (value: { start: CalendarDate; end: CalendarDate }) => {
@@ -294,6 +312,18 @@ export const DashboardPage: React.FC = () => {
           isLoading={isLoadingUsers}
           color="secondary"
         />
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-1">
+        <Card shadow="none">
+          <CardHeader className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Incidents</h3>
+            <Button size="sm" as={NextLink} href="/incidents">View more</Button>
+          </CardHeader>
+          <CardBody className="min-h-[360px]">
+            <IncidentsTable incidents={incidents} readOnly isLoading={isLoadingIncidents} />
+          </CardBody>
+        </Card>
       </div>
     </div>
   );
