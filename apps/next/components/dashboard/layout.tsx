@@ -239,7 +239,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
         </Drawer>
 
         {/* Page content */}
-        <main className="flex flex-1 flex-col overflow-y-auto p-6">{children}</main>
+        <main className="flex flex-1 flex-col overflow-y-auto px-6 pb-6">{children}</main>
       </div>
     </div>
   );

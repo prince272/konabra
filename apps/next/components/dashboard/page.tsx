@@ -6,20 +6,35 @@ import { RangeCalendar } from "@heroui/calendar";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 import { Popover, PopoverContent, PopoverTrigger } from "@heroui/popover";
 import { CalendarDate, getLocalTimeZone, isSameDay, now, today } from "@internationalized/date";
-import { AlertCircle, AlertTriangle, Calendar as CalendarIcon, CheckCircle } from "lucide-react";
+import {
+  AlertCircle,
+  AlertTriangle,
+  Calendar as CalendarIcon,
+  CheckCircle,
+  Folder,
+  Users
+} from "lucide-react";
 import { calendarDateToISOString } from "@/utils";
-import { incidentService } from "@/services";
+import { categoryService, identityService, incidentService } from "@/services";
+import { CategoryStatistics } from "@/services/category-service";
+import { UserStatistics } from "@/services/identity-service";
 import { IncidentFilter, IncidentStatistics } from "@/services/incident-service";
 import { StatCard } from "./stats-card";
 
 export const DashboardPage: React.FC = () => {
-  const [filter, setFilter] = useState<Partial<IncidentFilter>>({
+  const [filter, setFilter] = useState<Partial<{ startDate: string; endDate: string }>>({
     startDate: calendarDateToISOString(today(getLocalTimeZone())),
     endDate: calendarDateToISOString(today(getLocalTimeZone()), true)
   });
 
   const [stats, setStats] = useState<IncidentStatistics | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [categoryStats, setCategoryStats] = useState<CategoryStatistics | null>(null);
+  const [userStats, setUserStats] = useState<UserStatistics | null>(null);
+
+  const [isLoadingIncidents, setIsLoadingIncidents] = useState(true);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+
   const [selectedRange, setSelectedRange] = useState({
     start: today(getLocalTimeZone()),
     end: today(getLocalTimeZone())
@@ -28,19 +43,40 @@ export const DashboardPage: React.FC = () => {
   const [showCustomRange, setShowCustomRange] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState<string>("today");
 
+  // Fetch Incident Statistics
   useEffect(() => {
-    const fetchStats = async () => {
-      setIsLoading(true);
+    const fetchIncidentStats = async () => {
+      setIsLoadingIncidents(true);
       const [data, problem] = await incidentService.getIncidentsStatistics(filter);
-      if (!problem) {
-        setStats(data);
-      } else {
-        console.error("Failed to load incident stats:", problem);
-      }
-      setIsLoading(false);
+      if (!problem) setStats(data);
+      else console.error("Incident stats error:", problem);
+      setIsLoadingIncidents(false);
     };
+    fetchIncidentStats();
+  }, [filter]);
 
-    fetchStats();
+  // Fetch Category Statistics
+  useEffect(() => {
+    const fetchCategoryStats = async () => {
+      setIsLoadingCategories(true);
+      const [data, problem] = await categoryService.getCategoriesStatistics(filter);
+      if (!problem) setCategoryStats(data);
+      else console.error("Category stats error:", problem);
+      setIsLoadingCategories(false);
+    };
+    fetchCategoryStats();
+  }, [filter]);
+
+  // Fetch User Statistics
+  useEffect(() => {
+    const fetchUserStats = async () => {
+      setIsLoadingUsers(true);
+      const [data, problem] = await identityService.getUsersStatistics(filter);
+      if (!problem) setUserStats(data);
+      else console.error("User stats error:", problem);
+      setIsLoadingUsers(false);
+    };
+    fetchUserStats();
   }, [filter]);
 
   const handleDateRangeChange = (value: { start: CalendarDate; end: CalendarDate }) => {
@@ -67,18 +103,14 @@ export const DashboardPage: React.FC = () => {
     switch (preset) {
       case "today":
         break;
-      case "thisWeek": {
-        const firstDayOfWeek = now.subtract({ days: (now.day - 1) % 7 });
-        start = firstDayOfWeek;
-        end = firstDayOfWeek.add({ days: 6 });
+      case "thisWeek":
+        start = now.subtract({ days: (now.day - 1) % 7 });
+        end = start.add({ days: 6 });
         break;
-      }
-      case "lastWeek": {
-        const firstDayOfLastWeek = now.subtract({ days: ((now.day - 1) % 7) + 7 });
-        start = firstDayOfLastWeek;
-        end = firstDayOfLastWeek.add({ days: 6 });
+      case "lastWeek":
+        start = now.subtract({ days: ((now.day - 1) % 7) + 7 });
+        end = start.add({ days: 6 });
         break;
-      }
       case "thisMonth":
         start = now.set({ day: 1 });
         end = start.add({ months: 1 }).subtract({ days: 1 });
@@ -111,10 +143,8 @@ export const DashboardPage: React.FC = () => {
   const formatDateRange = () => {
     if (selectedPreset === "custom") {
       if (!filter.startDate || !filter.endDate) return "Select Date Range";
-
       const start = new Date(filter.startDate);
       const end = new Date(filter.endDate);
-
       return isSameDay(selectedRange.start, selectedRange.end)
         ? start.toLocaleDateString()
         : `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
@@ -150,35 +180,27 @@ export const DashboardPage: React.FC = () => {
                   aria-label="Date Range Filter"
                   selectedKeys={[selectedPreset]}
                   selectionMode="single"
-                  disallowEmptySelection
                 >
-                  <DropdownItem key="today" onPress={() => applyPresetRange("today")}>
-                    Today
-                  </DropdownItem>
-                  <DropdownItem key="thisWeek" onPress={() => applyPresetRange("thisWeek")}>
-                    This Week
-                  </DropdownItem>
-                  <DropdownItem key="lastWeek" onPress={() => applyPresetRange("lastWeek")}>
-                    Last Week
-                  </DropdownItem>
-                  <DropdownItem key="thisMonth" onPress={() => applyPresetRange("thisMonth")}>
-                    This Month
-                  </DropdownItem>
-                  <DropdownItem key="lastMonth" onPress={() => applyPresetRange("lastMonth")}>
-                    Last Month
-                  </DropdownItem>
-                  <DropdownItem key="last3Months" onPress={() => applyPresetRange("last3Months")}>
-                    Last 3 Months
-                  </DropdownItem>
-                  <DropdownItem key="thisYear" onPress={() => applyPresetRange("thisYear")}>
-                    This Year
-                  </DropdownItem>
-                  <DropdownItem key="lastYear" onPress={() => applyPresetRange("lastYear")}>
-                    Last Year
-                  </DropdownItem>
-                  <DropdownItem key="custom" onPress={() => setShowCustomRange(true)}>
-                    Custom Range
-                  </DropdownItem>
+                  {[
+                    "today",
+                    "thisWeek",
+                    "lastWeek",
+                    "thisMonth",
+                    "lastMonth",
+                    "last3Months",
+                    "thisYear",
+                    "lastYear",
+                    "custom"
+                  ].map((key) => (
+                    <DropdownItem
+                      key={key}
+                      onPress={() =>
+                        key === "custom" ? setShowCustomRange(true) : applyPresetRange(key)
+                      }
+                    >
+                      {key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
+                    </DropdownItem>
+                  ))}
                 </DropdownMenu>
               </Dropdown>
             </div>
@@ -192,14 +214,7 @@ export const DashboardPage: React.FC = () => {
               maxValue={today(getLocalTimeZone())}
             />
             <div className="mt-4 flex justify-end space-x-2">
-              <Button
-                variant="flat"
-                onPress={() => {
-                  const resetDate = today(getLocalTimeZone());
-                  setSelectedRange({ start: resetDate, end: resetDate });
-                  applyPresetRange("today");
-                }}
-              >
+              <Button variant="flat" onPress={() => applyPresetRange("today")}>
                 Reset
               </Button>
               <Button color="primary" onPress={applyDateRange}>
@@ -210,7 +225,7 @@ export const DashboardPage: React.FC = () => {
         </Popover>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
         <StatCard
           shadow="none"
           title="Total Incidents"
@@ -225,7 +240,7 @@ export const DashboardPage: React.FC = () => {
               : undefined
           }
           icon={<AlertTriangle />}
-          isLoading={isLoading}
+          isLoading={isLoadingIncidents}
           color="primary"
         />
         <StatCard
@@ -241,8 +256,8 @@ export const DashboardPage: React.FC = () => {
                 }
               : undefined
           }
-          icon={<CheckCircle size={20} />}
-          isLoading={isLoading}
+          icon={<CheckCircle />}
+          isLoading={isLoadingIncidents}
           color="success"
         />
         <StatCard
@@ -258,9 +273,43 @@ export const DashboardPage: React.FC = () => {
                 }
               : undefined
           }
-          icon={<AlertCircle size={20} />}
-          isLoading={isLoading}
+          icon={<AlertCircle />}
+          isLoading={isLoadingIncidents}
           color="danger"
+        />
+        <StatCard
+          shadow="none"
+          title="Total Categories"
+          value={categoryStats?.totalCategories?.newCount ?? 0}
+          change={
+            categoryStats
+              ? {
+                  value: categoryStats.totalCategories.percentChange.toFixed(1),
+                  isIncrease: categoryStats.totalCategories.isIncrease,
+                  isDecrease: categoryStats.totalCategories.isDecrease
+                }
+              : undefined
+          }
+          icon={<Folder />}
+          isLoading={isLoadingCategories}
+          color="warning"
+        />
+        <StatCard
+          shadow="none"
+          title="Total Users"
+          value={userStats?.totalUsers?.newCount ?? 0}
+          change={
+            userStats
+              ? {
+                  value: userStats.totalUsers.percentChange.toFixed(1),
+                  isIncrease: userStats.totalUsers.isIncrease,
+                  isDecrease: userStats.totalUsers.isDecrease
+                }
+              : undefined
+          }
+          icon={<Users />}
+          isLoading={isLoadingUsers}
+          color="secondary"
         />
       </div>
     </div>

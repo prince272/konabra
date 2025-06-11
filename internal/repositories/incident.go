@@ -183,7 +183,7 @@ func (repository *IncidentRepository) CountIncidents(filter IncidentFilter) (int
 
 	var count int64
 	if result := query.Count(&count); result.Error != nil {
-		return 0, fmt.Errorf("failed to count incidents: %w", result.Error)
+		return 0, fmt.Errorf("Failed to count incidents: %w", result.Error)
 	}
 
 	return count, nil
@@ -196,7 +196,7 @@ func (repository *IncidentRepository) GetIncidentsStatistics(filter IncidentFilt
 		countFilter.EndDate = endDate
 		count, err := repository.CountIncidents(countFilter)
 		if err != nil {
-			repository.logger.Error("failed to count incidents", zap.Error(err))
+			repository.logger.Error("Failed to count incidents", zap.Error(err))
 			return 0
 		}
 		return count
@@ -209,7 +209,7 @@ func (repository *IncidentRepository) GetIncidentsStatistics(filter IncidentFilt
 		countFilter.Status = models.StatusResolved
 		count, err := repository.CountIncidents(countFilter)
 		if err != nil {
-			repository.logger.Error("failed to count resolved incidents", zap.Error(err))
+			repository.logger.Error("Failed to count resolved incidents", zap.Error(err))
 			return 0
 		}
 		return count
@@ -222,7 +222,7 @@ func (repository *IncidentRepository) GetIncidentsStatistics(filter IncidentFilt
 		countFilter.Status = models.StatusPending
 		count, err := repository.CountIncidents(countFilter)
 		if err != nil {
-			repository.logger.Error("failed to count unresolved incidents", zap.Error(err))
+			repository.logger.Error("Failed to count unresolved incidents", zap.Error(err))
 			return 0
 		}
 		return count

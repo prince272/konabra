@@ -66,10 +66,10 @@ export type IncidentPaginatedFilter = IncidentFilter &
   };
 
 export type IncidentTrend = {
-  oldStart: Date;
-  oldEnd: Date;
-  newStart: Date;
-  newEnd: Date;
+  oldStartDate: string;
+  oldEndDate: string;
+  newStartDate: string;
+  newEndDate: string;
   oldCount: number;
   newCount: number;
   percentChange: number; // Percentage change from old to new count

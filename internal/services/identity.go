@@ -847,3 +847,15 @@ func (service *IdentityService) GetRoleById(id string) (*RoleModel, *problems.Pr
 
 	return model, nil
 }
+
+func (service *IdentityService) GetUsersStatistics(filter repositories.UserFilter) (*repositories.UserStatistics, *problems.Problem) {
+	if err := service.validator.ValidateStruct(filter); err != nil {
+		return nil, problems.FromError(err)
+	}
+	stats, err := service.identityRepository.GetUsersStatistics(filter)
+	if err != nil {
+		service.logger.Error("Failed to get users statistics", zap.Error(err))
+		return nil, problems.FromError(err)
+	}
+	return stats, nil
+}

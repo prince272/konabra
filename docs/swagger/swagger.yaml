@@ -458,6 +458,9 @@ paths:
       - application/json
       parameters:
       - in: query
+        name: endDate
+        type: string
+      - in: query
         name: limit
         type: integer
       - in: query
@@ -472,6 +475,9 @@ paths:
         type: string
       - in: query
         name: sort
+        type: string
+      - in: query
+        name: startDate
         type: string
       produces:
       - application/json
@@ -555,6 +561,18 @@ paths:
       security:
       - BearerAuth: []
       summary: Update an existing category
+      tags:
+      - Categories
+  /categories/statistics:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get categories statistics
       tags:
       - Categories
   /incidents:
@@ -847,6 +865,18 @@ paths:
       summary: Update an existing role
       tags:
       - Roles
+  /users/statistics:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get user statistics
+      tags:
+      - Statistics
 securityDefinitions:
   BearerAuth:
     in: header

@@ -48,6 +48,12 @@ func NewIdentityHandler(router *gin.Engine, jwtHelper *helpers.JwtHelper, identi
 		rolesGroup.GET("", jwtHelper.RequireAuth(), handler.handleWithData(handler.GetPaginatedRoles))
 	}
 
+	// Users
+	usersGroup := router.Group("/users")
+	{
+		usersGroup.GET("/statistics", jwtHelper.RequireAuth(), handler.handleWithData(handler.GetUsersStatistics))
+	}
+
 	return handler
 }
 
@@ -380,4 +386,20 @@ func (handler *IdentityHandler) GetRoleById(context *gin.Context) (any, *problem
 	}
 
 	return handler.identityService.GetRoleById(id)
+}
+
+// GetUsersStatistics retrieves user statistics
+// @Summary Get user statistics
+// @Tags Statistics
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Router /users/statistics [get]
+func (handler *IdentityHandler) GetUsersStatistics(context *gin.Context) (any, *problems.Problem) {
+	var filter repositories.UserFilter
+	if err := context.ShouldBindQuery(&filter); err != nil {
+		return nil, problems.FromError(err)
+	}
+
+	return handler.identityService.GetUsersStatistics(filter)
 }

@@ -17,15 +17,37 @@ export type Category = {
   updatedAt: string;
 };
 
-export type CategoryFilter = {
+export type CategorySort = {
   sort?: string | null;
   order?: "asc" | "desc" | null;
-  search?: string;
 };
 
-export type CategoryPaginatedFilter = CategoryFilter & {
-  offset: number;
-  limit: number;
+export type CategoryFilter = {
+  search?: string;
+  startDate?: string | null;
+  endDate?: string | null; 
+};
+
+export type CategoryPaginatedFilter = CategoryFilter &
+  CategorySort & {
+    offset: number;
+    limit: number;
+  };
+
+export type CategoryTrend = {
+  oldStartDate: string;
+  oldEndDate: string;
+  newStartDate: string;
+  newEndDate: string;
+  oldCount: number;
+  newCount: number;
+  percentChange: number; // Percentage change from old to new count
+  isIncrease: boolean; // True if new count is greater than old count
+  isDecrease: boolean; // True if new count is less than old count
+};
+
+export type CategoryStatistics = {
+  totalCategories: CategoryTrend;
 };
 
 export class CategoryService {
@@ -75,6 +97,17 @@ export class CategoryService {
   ): Promise<readonly [{ items: Category[]; count: number }, Problem?]> {
     try {
       const response = await this.api.get("/categories", { params: filter });
+      return [response.data, undefined];
+    } catch (error) {
+      return [undefined!, parseProblem(error)];
+    }
+  }
+
+  public async getCategoriesStatistics(
+    filter: CategoryFilter
+  ): Promise<readonly [CategoryStatistics, Problem?]> {
+    try {
+      const response = await this.api.get("/categories/statistics", { params: filter });
       return [response.data, undefined];
     } catch (error) {
       return [undefined!, parseProblem(error)];

@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jinzhu/copier"
 	"github.com/prince272/konabra/internal/builds"
 	"github.com/prince272/konabra/internal/models"
 	"go.uber.org/zap"
@@ -17,16 +18,34 @@ type CategoryRepository struct {
 	logger    *zap.Logger
 }
 
+type CategorySort struct {
+	Sort  string `json:"sort" form:"sort"`
+	Order string `json:"order" form:"order"` // "asc" or "desc"
+}
+
 type CategoryFilter struct {
-	Sort   string `json:"sort" form:"sort"`
-	Order  string `json:"order" form:"order"` // "asc" or "desc"
-	Search string `json:"search" form:"search"`
+	Search    string    `json:"search" form:"search"`
+	StartDate time.Time `json:"startDate" form:"startDate" time_format:"2006-01-02T15:04:05Z07:00"`
+	EndDate   time.Time `json:"endDate" form:"endDate" time_format:"2006-01-02T15:04:05Z07:00"`
+}
+
+func (source *CategoryFilter) Clone() CategoryFilter {
+	clone := CategoryFilter{}
+	if err := copier.Copy(&clone, source); err != nil {
+		panic(fmt.Errorf("failed to clone CategoryFilter: %w", err))
+	}
+	return clone
 }
 
 type CategoryPaginatedFilter struct {
 	CategoryFilter
+	CategorySort
 	Offset int `json:"offset" form:"offset"`
 	Limit  int `json:"limit" form:"limit"`
+}
+
+type CategoryStatistics struct {
+	TotalCategories Trend `json:"totalCategories"`
 }
 
 func NewCategoryRepository(defaultDB *builds.DefaultDB, logger *zap.Logger) *CategoryRepository {
@@ -111,6 +130,14 @@ func (repository *CategoryRepository) GetPaginatedCategories(filter CategoryPagi
 		query = query.Where("LOWER(name) LIKE LOWER(?)", "%"+filter.Search+"%")
 	}
 
+	if !filter.StartDate.IsZero() {
+		query = query.Where("created_at >= ?", filter.StartDate)
+	}
+
+	if !filter.EndDate.IsZero() {
+		query = query.Where("created_at <= ?", filter.EndDate)
+	}
+
 	allowedSortFields := map[string]string{
 		"name":      "name",
 		"createdAt": "created_at",
@@ -161,4 +188,45 @@ func (repository *CategoryRepository) GetPaginatedCategories(filter CategoryPagi
 	}
 
 	return items, count
+}
+
+func (repository *CategoryRepository) CountCategories(filter CategoryFilter) (int64, error) {
+	query := repository.defaultDB.Model(&models.Category{})
+
+	if filter.Search != "" {
+		query = query.Where("LOWER(summary) LIKE LOWER(?)", "%"+filter.Search+"%")
+	}
+
+	if !filter.StartDate.IsZero() {
+		query = query.Where("created_at >= ?", filter.StartDate)
+	}
+
+	if !filter.EndDate.IsZero() {
+		query = query.Where("created_at <= ?", filter.EndDate)
+	}
+
+	var count int64
+	if result := query.Count(&count); result.Error != nil {
+		return 0, fmt.Errorf("failed to count categories: %w", result.Error)
+	}
+
+	return count, nil
+}
+
+func (repository *CategoryRepository) GetCategoriesStatistics(filter CategoryFilter) (*CategoryStatistics, error) {
+	totalCategories := CalculateTrend(filter.StartDate, filter.EndDate, func(startDate, endDate time.Time) int64 {
+		countFilter := filter.Clone()
+		countFilter.StartDate = startDate
+		countFilter.EndDate = endDate
+		count, err := repository.CountCategories(countFilter)
+		if err != nil {
+			repository.logger.Error("Failed to count categories", zap.Error(err))
+			return 0
+		}
+		return count
+	})
+
+	return &CategoryStatistics{
+		TotalCategories: totalCategories,
+	}, nil
 }

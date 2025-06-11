@@ -181,3 +181,15 @@ func (service *CategoryService) GetCategoryById(id string) (*CategoryModel, *pro
 
 	return model, nil
 }
+
+func (service *CategoryService) GetCategoriesStatistics(filter repositories.CategoryFilter) (*repositories.CategoryStatistics, *problems.Problem) {
+	if err := service.validator.ValidateStruct(filter); err != nil {
+		return nil, problems.FromError(err)
+	}
+	stats, err := service.categoryRepository.GetCategoriesStatistics(filter)
+	if err != nil {
+		service.logger.Error("Failed to get categories statistics", zap.Error(err))
+		return nil, problems.FromError(err)
+	}
+	return stats, nil
+}

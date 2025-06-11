@@ -93,15 +93,52 @@ export type Role = {
   description: string;
 };
 
-export type RoleFilter = {
+export type RoleSort = {
   sort?: string | null;
   order?: "asc" | "desc" | null;
+};
+
+export type RoleFilter = {
   search?: string;
 };
 
-export type RolePaginatedFilter = RoleFilter & {
-  offset: number;
-  limit: number;
+export type RolePaginatedFilter = RoleFilter &
+  RoleSort & {
+    offset: number;
+    limit: number;
+  };
+
+export type UserSort = {
+  sort?: string | null;
+  order?: "asc" | "desc" | null;
+};
+
+export type UserFilter = {
+  search?: string;
+  startDate?: string | null; // ISO date string
+  endDate?: string | null; // ISO date string
+};
+
+export type UserPaginatedFilter = UserFilter &
+  UserSort & {
+    offset: number;
+    limit: number;
+  };
+
+export type UserTrend = {
+  oldStartDate: string;
+  oldEndDate: string;
+  newStartDate: string;
+  newEndDate: string;
+  oldCount: number;
+  newCount: number;
+  percentChange: number; // Percentage change from old to new count
+  isIncrease: boolean; // True if new count is greater than old count
+  isDecrease: boolean; // True if new count is less than old count
+};
+
+export type UserStatistics = {
+  totalUsers: UserTrend;
 };
 
 export class IdentityService {
@@ -260,6 +297,30 @@ export class IdentityService {
       return [response.data, undefined] as const;
     } catch (error) {
       return [undefined!, parseProblem(error)] as const;
+    }
+  }
+
+  public async getPaginatedUsers(
+    filter?: UserPaginatedFilter
+  ): Promise<readonly [{ items: Account[]; count: number }, Problem?]> {
+    try {
+      const response = await this.api.get("/users", {
+        params: filter
+      });
+      return [response.data, undefined] as const;
+    } catch (error) {
+      return [undefined!, parseProblem(error)] as const;
+    }
+  }
+
+  public async getUsersStatistics(
+    filter: UserFilter
+  ): Promise<readonly [UserStatistics, Problem?]> {
+    try {
+      const response = await this.api.get("/users/statistics", { params: filter });
+      return [response.data, undefined];
+    } catch (error) {
+      return [undefined!, parseProblem(error)];
     }
   }
 }

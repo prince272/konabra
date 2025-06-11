@@ -27,6 +27,7 @@ func NewCategoryHandler(router *gin.Engine, categoryService *services.CategorySe
 		categoryGroup.POST("", handler.handleWithData(handler.CreateCategory))
 		categoryGroup.PUT("/:id", handler.handleWithData(handler.UpdateCategory))
 		categoryGroup.DELETE("/:id", handler.handle(handler.DeleteCategory))
+		categoryGroup.GET("/statistics", handler.handleWithData(handler.GetCategoriesStatistics))
 	}
 
 	return handler
@@ -143,4 +144,20 @@ func (handler *CategoryHandler) GetCategoryById(context *gin.Context) (any, *pro
 	}
 
 	return handler.categoryService.GetCategoryById(id)
+}
+
+// GetCategoriesStatistics retrieves statistics for categories
+// @Summary Get categories statistics
+// @Tags Categories
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Router /categories/statistics [get]
+func (handler *CategoryHandler) GetCategoriesStatistics(context *gin.Context) (any, *problems.Problem) {
+	var filter repositories.CategoryFilter
+	if err := context.ShouldBindQuery(&filter); err != nil {
+		return nil, problems.FromError(err)
+	}
+
+	return handler.categoryService.GetCategoriesStatistics(filter)
 }

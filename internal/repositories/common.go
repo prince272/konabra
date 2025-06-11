@@ -3,10 +3,10 @@ package repositories
 import "time"
 
 type Trend struct {
-	OldStart      time.Time `json:"oldStart"`
-	OldEnd        time.Time `json:"oldEnd"`
-	NewStart      time.Time `json:"newStart"`
-	NewEnd        time.Time `json:"newEnd"`
+	OldStartDate  time.Time `json:"oldStartDate"`
+	OldEndDate    time.Time `json:"oldEndDate"`
+	NewStartDate  time.Time `json:"newStartDate"`
+	NewEndDate    time.Time `json:"newEndDate"`
 	OldCount      int64     `json:"oldCount"`
 	NewCount      int64     `json:"newCount"`
 	PercentChange float64   `json:"percentChange"` // Percentage change from old to new count
@@ -17,10 +17,10 @@ type Trend struct {
 func CalculateTrend(startDate, endDate time.Time, countFunc func(time.Time, time.Time) int64) Trend {
 	duration := endDate.Sub(startDate)
 
-	oldEnd := startDate.Add(-time.Second)
-	oldStart := oldEnd.Add(-duration)
+	oldEndDate := startDate.Add(-time.Second)
+	oldStartDate := oldEndDate.Add(-duration)
 
-	oldCount := countFunc(oldStart, oldEnd)
+	oldCount := countFunc(oldStartDate, oldEndDate)
 	newCount := countFunc(startDate, endDate)
 
 	var percentChange float64
@@ -29,10 +29,10 @@ func CalculateTrend(startDate, endDate time.Time, countFunc func(time.Time, time
 	}
 
 	return Trend{
-		OldStart:      oldStart,
-		OldEnd:        oldEnd,
-		NewStart:      startDate,
-		NewEnd:        endDate,
+		OldStartDate:  oldStartDate,
+		OldEndDate:    oldEndDate,
+		NewStartDate:  startDate,
+		NewEndDate:    endDate,
 		OldCount:      oldCount,
 		NewCount:      newCount,
 		PercentChange: percentChange,
