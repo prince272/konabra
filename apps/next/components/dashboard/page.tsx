@@ -225,24 +225,7 @@ export const DashboardPage: React.FC = () => {
         </Popover>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
-        <StatCard
-          shadow="none"
-          title="Total Incidents"
-          value={stats?.totalIncidents?.newCount ?? 0}
-          change={
-            stats
-              ? {
-                  value: stats.totalIncidents.percentChange.toFixed(1),
-                  isIncrease: stats.totalIncidents.isIncrease,
-                  isDecrease: stats.totalIncidents.isDecrease
-                }
-              : undefined
-          }
-          icon={<AlertTriangle />}
-          isLoading={isLoadingIncidents}
-          color="primary"
-        />
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           shadow="none"
           title="Resolved Incidents"
