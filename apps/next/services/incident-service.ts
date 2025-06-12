@@ -46,6 +46,11 @@ export type Incident = {
   reportedBy: Account;
 };
 
+export type IncidentDateRange = {
+  startDate: string; // ISO date string
+  endDate: string; // ISO date string
+}
+
 export type IncidentFilter = {
   sort?: string | null;
   order?: "asc" | "desc" | null;
@@ -78,6 +83,20 @@ export type IncidentStatistics = {
   resolvedIncidents: IncidentTrend;
   unresolvedIncidents: IncidentTrend;
 };
+
+export type IncidentSeveritySeriesItem = {
+  label: string;
+  count: number;
+  period: string;
+  low: number;
+  medium: number;
+  high: number;
+}
+
+export type IncidentInsights = {
+  series: IncidentSeveritySeriesItem[];
+  count: number;
+}
 
 export class IncidentService {
   constructor(private readonly api: AxiosInstance) {}
@@ -133,10 +152,21 @@ export class IncidentService {
   }
 
   public async getIncidentStatistics(
-    filter: IncidentFilter
+    dateRage: Partial<IncidentDateRange>
   ): Promise<readonly [IncidentStatistics, Problem?]> {
     try {
-      const response = await this.api.get("/incidents/statistics", { params: filter });
+      const response = await this.api.get("/incidents/statistics", { params: dateRage });
+      return [response.data, undefined];
+    } catch (error) {
+      return [undefined!, parseProblem(error)];
+    }
+  }
+
+  public async getIncidentInsights(
+    dateRage: Partial<IncidentDateRange>
+  ): Promise<readonly [IncidentInsights, Problem?]> {
+    try {
+      const response = await this.api.get("/incidents/insights", { params: dateRage });
       return [response.data, undefined];
     } catch (error) {
       return [undefined!, parseProblem(error)];

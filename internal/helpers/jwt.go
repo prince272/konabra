@@ -12,8 +12,6 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
-	"maps"
-
 	"slices"
 
 	"github.com/prince272/konabra/internal/constants"
@@ -51,18 +49,25 @@ func NewJwtHelper(options JwtOptions, database *gorm.DB, logger *zap.Logger) *Jw
 }
 
 func (helper *JwtHelper) CreateToken(subject string, claims map[string]any) (*JwtTokenModel, error) {
+	if subject == "" {
+		return nil, errors.New("subject cannot be empty")
+	}
+	if len(helper.Options.Secret) < 32 {
+		return nil, errors.New("secret is too short")
+	}
+
 	creationTime := time.Now()
 
 	accessTokenExpiresAt := creationTime.Add(15 * time.Minute) // 15 minutes
 	accessToken, err := helper.GenerateToken(subject, creationTime, accessTokenExpiresAt, "access", claims)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to generate access token: %w", err)
 	}
 
 	refreshTokenExpiresAt := creationTime.Add(30 * 24 * time.Hour) // 30 days
 	refreshToken, err := helper.GenerateToken(subject, creationTime, refreshTokenExpiresAt, "refresh", map[string]any{})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to generate refresh token: %w", err)
 	}
 
 	tokenType := "Bearer"
@@ -79,7 +84,7 @@ func (helper *JwtHelper) CreateToken(subject string, claims map[string]any) (*Jw
 
 	result := helper.database.Create(&token)
 	if result.Error != nil {
-		return nil, result.Error
+		return nil, fmt.Errorf("failed to save token: %w", result.Error)
 	}
 
 	return &JwtTokenModel{
@@ -92,17 +97,25 @@ func (helper *JwtHelper) CreateToken(subject string, claims map[string]any) (*Jw
 }
 
 func (helper *JwtHelper) RevokeAllTokens(subject string) error {
+	if subject == "" {
+		return errors.New("subject cannot be empty")
+	}
+
 	result := helper.database.
 		Model(&models.JwtToken{}).
 		Where("subject = ?", subject).
 		Delete(&models.JwtToken{})
 	if result.Error != nil {
-		return result.Error
+		return fmt.Errorf("failed to revoke all tokens: %w", result.Error)
 	}
 	return nil
 }
 
 func (helper *JwtHelper) RevokeExpiredTokens(subject string) error {
+	if subject == "" {
+		return errors.New("subject cannot be empty")
+	}
+
 	currentTime := time.Now()
 	result := helper.database.
 		Model(&models.JwtToken{}).
@@ -110,31 +123,48 @@ func (helper *JwtHelper) RevokeExpiredTokens(subject string) error {
 			subject, currentTime, currentTime).
 		Delete(&models.JwtToken{})
 	if result.Error != nil {
-		return result.Error
+		return fmt.Errorf("failed to revoke expired tokens: %w", result.Error)
 	}
 	return nil
 }
 
-func (helper *JwtHelper) RevokeToken(subject string, tokenString string) error {
-	tokenHash := utils.HashToken(tokenString)
-	if tokenHash == "" {
+func (helper *JwtHelper) RevokeToken(subject, tokenString string) error {
+	now := time.Now()
+
+	// 1) Always delete any tokens for this subject that have expired
+	if err := helper.database.
+		Model(&models.JwtToken{}).
+		Where("subject = ? AND (access_token_expires_at < ? OR refresh_token_expires_at < ?)",
+			subject, now, now).
+		Delete(&models.JwtToken{}).Error; err != nil {
+		return err
+	}
+
+	// 2) If a tokenString was provided, delete that token (even if not yet expired)
+	if tokenString == "" {
 		return nil
 	}
-
-	currentTime := time.Now()
-
-	result := helper.database.
-		Model(&models.JwtToken{}).
-		Where("subject = ? AND ((access_token_expires_at < ? OR refresh_token_expires_at < ?) OR (access_token_hash = ? OR refresh_token_hash = ?))",
-			subject, currentTime, currentTime, tokenHash, tokenHash).
-		Delete(&models.JwtToken{})
-	if result.Error != nil {
-		return result.Error
+	tokenHash := utils.HashToken(tokenString)
+	if tokenHash == "" {
+		// hashing failed or input was empty—nothing more to revoke
+		return nil
 	}
+	if err := helper.database.
+		Model(&models.JwtToken{}).
+		Where("subject = ? AND (access_token_hash = ? OR refresh_token_hash = ?)",
+			subject, tokenHash, tokenHash).
+		Delete(&models.JwtToken{}).Error; err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (helper *JwtHelper) validateToken(subject string, tokenString string) bool {
+func (helper *JwtHelper) validateToken(subject string, tokenString string, tokenType string) bool {
+	if subject == "" || tokenString == "" {
+		return false
+	}
+
 	tokenHash := utils.HashToken(tokenString)
 	if tokenHash == "" {
 		return false
@@ -143,31 +173,39 @@ func (helper *JwtHelper) validateToken(subject string, tokenString string) bool 
 	currentTime := time.Now()
 	var token models.JwtToken
 
-	result := helper.database.
-		Model(&models.JwtToken{}).
-		Where("subject = ? AND (access_token_hash = ? OR refresh_token_hash = ?)",
-			subject, tokenHash, tokenHash).
-		First(&token)
+	query := helper.database.Model(&models.JwtToken{}).
+		Where("subject = ?", subject)
 
+	if tokenType == "access" {
+		query = query.Where("access_token_hash = ? AND access_token_expires_at > ?", tokenHash, currentTime)
+	} else {
+		query = query.Where("refresh_token_hash = ? AND refresh_token_expires_at > ?", tokenHash, currentTime)
+	}
+
+	result := query.First(&token)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return false
 		}
-
-		panic(fmt.Errorf("failed to query token: %w", result.Error))
+		helper.logger.Error("Failed to query token", zap.Error(result.Error))
+		return false
 	}
 
-	if token.AccessTokenExpiresAt.After(currentTime) || token.RefreshTokenExpiresAt.After(currentTime) {
-		return true
-	}
-
-	return false
+	return true
 }
 
 func (helper *JwtHelper) GenerateToken(subject string, creationTime, expirationTime time.Time, tokenType string, claims map[string]any) (string, error) {
-
+	if subject == "" {
+		return "", errors.New("subject cannot be empty")
+	}
+	if creationTime.IsZero() || expirationTime.IsZero() {
+		return "", errors.New("invalid time parameters")
+	}
 	if tokenType != "access" && tokenType != "refresh" {
 		return "", errors.New("invalid token type")
+	}
+	if len(helper.Options.Secret) < 32 {
+		return "", errors.New("secret is too short")
 	}
 
 	jwtClaims := jwt.MapClaims{
@@ -181,11 +219,22 @@ func (helper *JwtHelper) GenerateToken(subject string, creationTime, expirationT
 		"type": tokenType,
 	}
 
-	maps.Copy(jwtClaims, claims)
+	// Copy only string and number values to prevent potential security issues
+	for k, v := range claims {
+		switch v.(type) {
+		case string, int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, bool:
+			jwtClaims[k] = v
+		}
+	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtClaims)
 
-	return token.SignedString([]byte(helper.Options.Secret))
+	signedToken, err := token.SignedString([]byte(helper.Options.Secret))
+	if err != nil {
+		return "", fmt.Errorf("failed to sign token: %w", err)
+	}
+
+	return signedToken, nil
 }
 
 func (helper *JwtHelper) verifyToken(tokenType string, tokenString string) (map[string]any, error) {
@@ -205,28 +254,27 @@ func (helper *JwtHelper) verifyToken(tokenType string, tokenString string) (map[
 	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Name}))
 
 	if err != nil {
-		return nil, errors.New("invalid token")
+		return nil, fmt.Errorf("failed to parse token: %w", err)
 	}
 
 	if !token.Valid {
-		return nil, errors.New("invalid token")
+		return nil, errors.New("invalid token signature")
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
-
 	if !ok {
-		return nil, errors.New("invalid token")
+		return nil, errors.New("invalid token claims format")
 	}
 
 	tokenTypeClaim, ok := claims["type"].(string)
 	if !ok || tokenTypeClaim != tokenType {
-		return nil, errors.New("invalid token type")
+		return nil, errors.New("invalid token type claim")
 	}
 
 	// Validate expiration time
 	exp, err := claims.GetExpirationTime()
 	if err != nil || exp == nil {
-		return nil, errors.New("missing expiration claim")
+		return nil, errors.New("missing or invalid expiration claim")
 	}
 	if exp.Before(time.Now()) {
 		return nil, errors.New("token has expired")
@@ -235,16 +283,16 @@ func (helper *JwtHelper) verifyToken(tokenType string, tokenString string) (map[
 	// Validate not before time if present
 	nbf, err := claims.GetNotBefore()
 	if err != nil {
-		return nil, errors.New("invalid token")
+		return nil, errors.New("invalid not before claim")
 	}
 	if nbf != nil && nbf.After(time.Now()) {
 		return nil, errors.New("token not valid yet")
 	}
 
-	// Validate issued at time if present
+	// Validate issued at time
 	iat, err := claims.GetIssuedAt()
 	if err != nil {
-		return nil, errors.New("invalid token")
+		return nil, errors.New("invalid issued at claim")
 	}
 	if iat != nil && iat.After(time.Now()) {
 		return nil, errors.New("token issued in the future")
@@ -254,42 +302,39 @@ func (helper *JwtHelper) verifyToken(tokenType string, tokenString string) (map[
 	if helper.Options.Issuer != "" {
 		iss, err := claims.GetIssuer()
 		if err != nil || iss != helper.Options.Issuer {
-			return nil, errors.New("invalid issuer")
+			return nil, errors.New("invalid issuer claim")
 		}
 	}
 
 	// Validate subject
 	sub, err := claims.GetSubject()
-
-	if err != nil {
-		return nil, errors.New("invalid subject")
+	if err != nil || sub == "" {
+		return nil, errors.New("invalid subject claim")
 	}
 
 	// Validate audience
 	if len(helper.Options.Audience) > 0 {
 		aud, err := claims.GetAudience()
 		if err != nil {
-			return nil, errors.New("invalid audience")
+			return nil, errors.New("invalid audience claim")
 		}
 
 		found := false
 		for _, expectedAud := range helper.Options.Audience {
 			if slices.Contains(aud, expectedAud) {
 				found = true
-			}
-			if found {
 				break
 			}
 		}
 
 		if !found {
-			return nil, errors.New("invalid audience")
+			return nil, errors.New("invalid audience claim")
 		}
 	}
 
-	// validate token
-	if ok := helper.validateToken(sub, tokenString); !ok {
-		return nil, errors.New("token is not valid")
+	// validate token against database
+	if ok := helper.validateToken(sub, tokenString, tokenType); !ok {
+		return nil, errors.New("token is revoked or expired")
 	}
 
 	return claims, nil
@@ -307,7 +352,7 @@ func (helper *JwtHelper) RequireAuth(roles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token, err := helper.extractBearerToken(c)
 		if err != nil {
-			helper.logger.Error("Failed to extract token: ", zap.Error(err))
+			helper.logger.Warn("Failed to extract token", zap.Error(err))
 			problem := problems.NewProblem(http.StatusUnauthorized, "You are not authorized to perform this action.")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, problem)
 			return
@@ -315,14 +360,14 @@ func (helper *JwtHelper) RequireAuth(roles ...string) gin.HandlerFunc {
 
 		claims, err := helper.VerifyAccessToken(token)
 		if err != nil {
-			helper.logger.Error("Failed to verify token: ", zap.Error(err))
+			helper.logger.Warn("Failed to verify token", zap.Error(err))
 			problem := problems.NewProblem(http.StatusUnauthorized, "You are not authorized to perform this action.")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, problem)
 			return
 		}
 
 		if len(roles) > 0 && !helper.hasRequiredRole(claims, roles) {
-			helper.logger.Error("Failed to verify token: ", zap.String("roles", fmt.Sprintf("%v", roles)))
+			helper.logger.Warn("Access denied for roles", zap.Strings("requiredRoles", roles))
 			problem := problems.NewProblem(http.StatusForbidden, "You don't have the necessary permissions.")
 			c.AbortWithStatusJSON(http.StatusForbidden, problem)
 			return
@@ -337,14 +382,19 @@ func (helper *JwtHelper) extractBearerToken(c *gin.Context) (string, error) {
 	const prefix = "Bearer "
 
 	if authHeader == "" {
-		return "", errors.New("missing Authorization header")
+		return "", errors.New("authorization header is required")
 	}
 
 	if len(authHeader) <= len(prefix) || authHeader[:len(prefix)] != prefix {
-		return "", errors.New("malformed Authorization header")
+		return "", errors.New("authorization header must start with 'Bearer '")
 	}
 
-	return authHeader[len(prefix):], nil
+	token := authHeader[len(prefix):]
+	if token == "" {
+		return "", errors.New("token cannot be empty")
+	}
+
+	return token, nil
 }
 
 func (helper *JwtHelper) hasRequiredRole(claims map[string]any, requiredRoles []string) bool {
@@ -374,6 +424,8 @@ func (helper *JwtHelper) extractRolesFromClaims(claims map[string]any) []string 
 				roles = append(roles, str)
 			}
 		}
+	case []string:
+		roles = append(roles, v...)
 	}
 
 	return roles

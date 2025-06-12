@@ -29,8 +29,8 @@ type IncidentFilter struct {
 
 type IncidentPaginatedFilter struct {
 	IncidentFilter
-	Offset         int `json:"offset" form:"offset"`
-	Limit          int `json:"limit" form:"limit"`
+	Offset int `json:"offset" form:"offset"`
+	Limit  int `json:"limit" form:"limit"`
 }
 
 type IncidentStatistics struct {
@@ -40,15 +40,22 @@ type IncidentStatistics struct {
 }
 
 type IncidentInsights struct {
-	LowSeverityIncidents    []IncidentCountByPeriod `json:"lowSeverityIncidents"`
-	MediumSeverityIncidents []IncidentCountByPeriod `json:"mediumSeverityIncidents"`
-	HighSeverityIncidents   []IncidentCountByPeriod `json:"highSeverityIncidents"`
-	TotalIncidents          int64                   `json:"totalIncidents"`
+	Series []IncidentSeveritySeriesItem `json:"series"`
+	Count  int64                        `json:"count"`
 }
 
-type IncidentCountByPeriod struct {
+type IncidentTimeSeriesItem struct {
 	Period time.Time `json:"period"`
 	Count  int64     `json:"count"`
+	Label  string    `json:"label,omitempty"`
+}
+
+type IncidentSeveritySeriesItem struct {
+	Label  string    `json:"label"`
+	Period time.Time `json:"period"`
+	Low    int64     `json:"low"`
+	Medium int64     `json:"medium"`
+	High   int64     `json:"high"`
 }
 
 func NewIncidentRepository(defaultDB *builds.DefaultDB, logger *zap.Logger) *IncidentRepository {
@@ -226,12 +233,12 @@ func (r *IncidentRepository) GetIncidentInsights(dateRange period.DateRange) (*I
 		query = query.Where("reported_at <= ?", dateRange.EndDate)
 	}
 
-	var totalCount int64
-	if err := query.Count(&totalCount).Error; err != nil {
+	var count int64
+	if err := query.Count(&count).Error; err != nil {
 		return nil, fmt.Errorf("failed to count incidents: %w", err)
 	}
 
-	var lowSeverityCountByPeriod, mediumSeverityCountByPeriod, highSeverityCountByPeriod []IncidentCountByPeriod
+	var lowSeverityTimeSeries, mediumSeverityTimeSeries, highSeverityTimeSeries []IncidentTimeSeriesItem
 
 	// Define query parameters for different time units with intervals
 	type queryConfig struct {
@@ -255,7 +262,7 @@ func (r *IncidentRepository) GetIncidentInsights(dateRange period.DateRange) (*I
 	}
 
 	// Query incidents by severity
-	queryBySeverity := func(severity models.IncidentSeverity, result *[]IncidentCountByPeriod) error {
+	queryBySeverity := func(severity models.IncidentSeverity, result *[]IncidentTimeSeriesItem) error {
 		q := query.Where("severity = ?", severity)
 		return q.Select(cfg.sqlFormat, cfg.interval).
 			Group("period").
@@ -264,14 +271,14 @@ func (r *IncidentRepository) GetIncidentInsights(dateRange period.DateRange) (*I
 	}
 
 	for _, severity := range []models.IncidentSeverity{models.IncidentSeverityLow, models.IncidentSeverityMedium, models.IncidentSeverityHigh} {
-		var result *[]IncidentCountByPeriod
+		var result *[]IncidentTimeSeriesItem
 		switch severity {
 		case models.IncidentSeverityLow:
-			result = &lowSeverityCountByPeriod
+			result = &lowSeverityTimeSeries
 		case models.IncidentSeverityMedium:
-			result = &mediumSeverityCountByPeriod
+			result = &mediumSeverityTimeSeries
 		case models.IncidentSeverityHigh:
-			result = &highSeverityCountByPeriod
+			result = &highSeverityTimeSeries
 		}
 		if err := queryBySeverity(severity, result); err != nil {
 			return nil, fmt.Errorf("failed to query %s incidents: %w", severity, err)
@@ -279,27 +286,44 @@ func (r *IncidentRepository) GetIncidentInsights(dateRange period.DateRange) (*I
 	}
 
 	// Normalize incident counts
-	periods := period.GetPeriods(dateRange.StartDate, dateRange.EndDate, unit)
-	normalizeIncidents := func(incidents []IncidentCountByPeriod, periods []time.Time) []IncidentCountByPeriod {
+	datePeriods := period.GetPeriods(dateRange.StartDate, dateRange.EndDate, unit)
+
+	normalizeIncidents := func(incidents []IncidentTimeSeriesItem) []IncidentTimeSeriesItem {
 		countByPeriod := make(map[time.Time]int64, len(incidents))
 		for _, incident := range incidents {
 			countByPeriod[incident.Period] = incident.Count
 		}
 
-		normalized := make([]IncidentCountByPeriod, 0, len(periods))
-		for _, period := range periods {
-			normalized = append(normalized, IncidentCountByPeriod{
-				Period: period,
-				Count:  countByPeriod[period],
+		normalized := make([]IncidentTimeSeriesItem, 0, len(datePeriods))
+		for _, datePeriod := range datePeriods {
+			normalized = append(normalized, IncidentTimeSeriesItem{
+				Period: datePeriod,
+				Count:  countByPeriod[datePeriod],
+				Label:  period.GetFormat(datePeriod, unit),
 			})
 		}
 		return normalized
 	}
 
+	transformIncidents := func(incidentsGroup ...[]IncidentTimeSeriesItem) []IncidentSeveritySeriesItem {
+		var transformed []IncidentSeveritySeriesItem
+		for i := range incidentsGroup[0] {
+			transformed = append(transformed, IncidentSeveritySeriesItem{
+				Label:  incidentsGroup[0][i].Label,
+				Period: incidentsGroup[0][i].Period,
+				Low:    incidentsGroup[0][i].Count,
+				Medium: incidentsGroup[1][i].Count,
+				High:   incidentsGroup[2][i].Count,
+			})
+		}
+
+		return transformed
+	}
+
+	series := transformIncidents(normalizeIncidents(lowSeverityTimeSeries), normalizeIncidents(mediumSeverityTimeSeries), normalizeIncidents(highSeverityTimeSeries))
+
 	return &IncidentInsights{
-		LowSeverityIncidents:    normalizeIncidents(lowSeverityCountByPeriod, periods),
-		MediumSeverityIncidents: normalizeIncidents(mediumSeverityCountByPeriod, periods),
-		HighSeverityIncidents:   normalizeIncidents(highSeverityCountByPeriod, periods),
-		TotalIncidents:          totalCount,
+		Series: series,
+		Count:  count,
 	}, nil
 }

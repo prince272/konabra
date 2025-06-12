@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	humanize "github.com/prince272/konabra/pkg/humanize"
@@ -49,6 +50,15 @@ func FromError(err error) *Problem {
 		return &Problem{
 			Type:    buildTypeURL(status),
 			Message: "The request body is not valid JSON.",
+			Status:  status,
+			Errors:  map[string]string{},
+			Reason:  getReasonPhrase(status),
+		}
+	} else if ok := err.(*time.ParseError); ok != nil {
+		status := http.StatusBadRequest
+		return &Problem{
+			Type:    buildTypeURL(status),
+			Message: "The datetime format is not valid.",
 			Status:  status,
 			Errors:  map[string]string{},
 			Reason:  getReasonPhrase(status),

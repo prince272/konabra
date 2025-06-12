@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import NextLink from "next/link";
 import { Button } from "@heroui/button";
 import { RangeCalendar } from "@heroui/calendar";
 import { Card, CardBody, CardHeader } from "@heroui/card";
@@ -8,18 +9,20 @@ import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/d
 import { Popover, PopoverContent, PopoverTrigger } from "@heroui/popover";
 import { CalendarDate, getLocalTimeZone, isSameDay, now, today } from "@internationalized/date";
 import { AlertCircle, Calendar as CalendarIcon, CheckCircle, Folder, Users } from "lucide-react";
+import { useTheme } from "next-themes";
 import { calendarDateToISOString } from "@/utils";
 import { categoryService, identityService, incidentService } from "@/services";
 import { CategoryStatistics } from "@/services/category-service";
 import { UserStatistics } from "@/services/identity-service";
 import {
   IncidentFilter,
+  IncidentInsights,
   IncidentPaginatedFilter,
   IncidentStatistics
 } from "@/services/incident-service";
 import IncidentsTable from "./incidents/incidents-table";
+import { InsightsChart } from "./insights-chart";
 import { StatCard } from "./stats-card";
-import NextLink from "next/link";
 
 export const DashboardPage: React.FC = () => {
   const [filter, setFilter] = useState<Partial<{ startDate: string; endDate: string }>>({
@@ -30,11 +33,13 @@ export const DashboardPage: React.FC = () => {
   const [stats, setStats] = useState<IncidentStatistics | null>(null);
   const [categoryStats, setCategoryStats] = useState<CategoryStatistics | null>(null);
   const [userStats, setUserStats] = useState<UserStatistics | null>(null);
+  const [insights, setInsights] = useState<IncidentInsights | null>(null);
 
   const [incidents, setIncidents] = useState<any[]>([]);
   const [isLoadingIncidents, setIsLoadingIncidents] = useState(true);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+  const [isLoadingInsights, setIsLoadingInsights] = useState(true);
 
   const [selectedRange, setSelectedRange] = useState({
     start: today(getLocalTimeZone()),
@@ -44,7 +49,6 @@ export const DashboardPage: React.FC = () => {
   const [showCustomRange, setShowCustomRange] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState<string>("today");
 
-  // Fetch Incident Statistics
   useEffect(() => {
     const fetchIncidentStats = async () => {
       const [data, problem] = await incidentService.getIncidentStatistics(filter);
@@ -54,7 +58,6 @@ export const DashboardPage: React.FC = () => {
     fetchIncidentStats();
   }, [filter]);
 
-  // Fetch Category Statistics
   useEffect(() => {
     const fetchCategoryStats = async () => {
       setIsLoadingCategories(true);
@@ -66,7 +69,6 @@ export const DashboardPage: React.FC = () => {
     fetchCategoryStats();
   }, [filter]);
 
-  // Fetch User Statistics
   useEffect(() => {
     const fetchUserStats = async () => {
       setIsLoadingUsers(true);
@@ -78,7 +80,6 @@ export const DashboardPage: React.FC = () => {
     fetchUserStats();
   }, [filter]);
 
-  // Fetch Incidents
   useEffect(() => {
     const fetchIncidents = async () => {
       setIsLoadingIncidents(true);
@@ -95,6 +96,17 @@ export const DashboardPage: React.FC = () => {
       setIsLoadingIncidents(false);
     };
     fetchIncidents();
+  }, [filter]);
+
+  useEffect(() => {
+    const fetchInsights = async () => {
+      setIsLoadingInsights(true);
+      const [data, problem] = await incidentService.getIncidentInsights(filter);
+      if (!problem) setInsights(data);
+      else console.error("Incident insights error:", problem);
+      setIsLoadingInsights(false);
+    };
+    fetchInsights();
   }, [filter]);
 
   const handleDateRangeChange = (value: { start: CalendarDate; end: CalendarDate }) => {
@@ -119,8 +131,6 @@ export const DashboardPage: React.FC = () => {
     let end = now;
 
     switch (preset) {
-      case "today":
-        break;
       case "thisWeek":
         start = now.subtract({ days: (now.day - 1) % 7 });
         end = start.add({ days: 6 });
@@ -148,6 +158,8 @@ export const DashboardPage: React.FC = () => {
       case "lastYear":
         start = now.subtract({ years: 1 }).set({ month: 1, day: 1 });
         end = start.set({ month: 12, day: 31 });
+        break;
+      default: // today
         break;
     }
 
@@ -184,6 +196,7 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Date Filter */}
       <div className="flex justify-end">
         <Popover isOpen={showCustomRange} onOpenChange={setShowCustomRange}>
           <PopoverTrigger>
@@ -243,6 +256,7 @@ export const DashboardPage: React.FC = () => {
         </Popover>
       </div>
 
+      {/* Stat Cards */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           shadow="none"
@@ -314,14 +328,37 @@ export const DashboardPage: React.FC = () => {
         />
       </div>
 
+      {/* Recent Incidents */}
       <div className="grid grid-cols-1">
         <Card shadow="none">
           <CardHeader className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">Incidents</h3>
-            <Button size="sm" as={NextLink} href="/incidents">View more</Button>
+            <Button size="sm" as={NextLink} href="/incidents">
+              View more
+            </Button>
           </CardHeader>
           <CardBody className="min-h-[360px]">
             <IncidentsTable incidents={incidents} readOnly isLoading={isLoadingIncidents} />
+          </CardBody>
+        </Card>
+      </div>
+
+      {/* Incident Insights */}
+      <div className="grid grid-cols-1 lg:grid-cols-2  gap-6">
+        <Card shadow="none">
+          <CardHeader className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Incident Insights</h3>
+          </CardHeader>
+          <CardBody>
+            <InsightsChart
+              height={300}
+              data={insights?.series || []}
+              series={[
+                { key: "low", label: "Low Severity", color: "hsl(var(--heroui-secondary))" },
+                { key: "medium", label: "Medium Severity", color: "hsl(var(--heroui-warning))" },
+                { key: "high", label: "High Severity", color: "hsl(var(--heroui-danger))" }
+              ]}
+            />
           </CardBody>
         </Card>
       </div>
