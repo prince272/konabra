@@ -203,7 +203,7 @@ export const DashboardPage: React.FC = () => {
             <div>
               <Dropdown>
                 <DropdownTrigger>
-                  <Button size="sm" startContent={<CalendarIcon size={20} />}>
+                  <Button size="sm" variant="flat" startContent={<CalendarIcon size={20} />}>
                     {formatDateRange()}
                   </Button>
                 </DropdownTrigger>
@@ -328,30 +328,16 @@ export const DashboardPage: React.FC = () => {
         />
       </div>
 
-      {/* Recent Incidents */}
-      <div className="grid grid-cols-1">
-        <Card shadow="none">
-          <CardHeader className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">Incidents</h3>
-            <Button size="sm" as={NextLink} href="/incidents">
-              View more
-            </Button>
-          </CardHeader>
-          <CardBody className="min-h-[360px]">
-            <IncidentsTable incidents={incidents} readOnly isLoading={isLoadingIncidents} />
-          </CardBody>
-        </Card>
-      </div>
-
       {/* Incident Insights */}
-      <div className="grid grid-cols-1 lg:grid-cols-2  gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card shadow="none">
           <CardHeader className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">Severity Insights</h3>
           </CardHeader>
-          <CardBody>
+          <CardBody className="pt-0">
             <InsightsChart
               height={300}
+              isLoading={isLoadingInsights}
               data={insights?.series || []}
               series={[
                 { key: "low", label: "Low Severity", color: "hsl(var(--heroui-secondary))" },
@@ -359,6 +345,21 @@ export const DashboardPage: React.FC = () => {
                 { key: "high", label: "High Severity", color: "hsl(var(--heroui-danger))" }
               ]}
             />
+          </CardBody>
+        </Card>
+      </div>
+
+      {/* Recent Incidents */}
+      <div className="grid grid-cols-1">
+        <Card shadow="none">
+          <CardHeader className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Incidents</h3>
+            <Button size="sm" variant="flat" as={NextLink} href="/incidents">
+              View more
+            </Button>
+          </CardHeader>
+          <CardBody className="min-h-[360px]">
+            <IncidentsTable incidents={incidents} readOnly isLoading={isLoadingIncidents} />
           </CardBody>
         </Card>
       </div>

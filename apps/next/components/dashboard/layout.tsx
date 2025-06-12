@@ -93,7 +93,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
         <div
           className={`${isSidebarCollapsed ? "w-16" : "w-64"} h-screen flex-shrink-0 transition-all duration-300`}
         >
-                  <Sidebar collapsed={isSidebarCollapsed} />
+          <Sidebar
+            collapsed={isSidebarCollapsed}
+            onItemClick={(path) => {
+              router.push(path);
+            }}
+          />
         </div>
       )}
 
@@ -102,7 +107,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
         <Drawer isOpen={isSidebarOpen} onOpenChange={setIsSidebarOpen} placement="left">
           <DrawerContent>
             <DrawerBody className="p-0">
-                          <Sidebar />
+              <Sidebar
+                onItemClick={(path) => {
+                  router.push(path);
+                  setIsSidebarOpen(false);
+                }}
+              />
             </DrawerBody>
           </DrawerContent>
         </Drawer>

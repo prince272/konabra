@@ -40,6 +40,7 @@ import { categoryStore } from "@/states/categories";
 
 interface SidebarProps {
   collapsed?: boolean;
+  onItemClick?: (path: string) => void;
 }
 
 interface MenuItemProps {
@@ -186,7 +187,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
   );
 };
 
-export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false, onItemClick }) => {
   const pathname = usePathname();
   const router = useRouter();
   const [currentAccount] = useAccountState();
@@ -272,10 +273,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
     isChildActive
   };
 
-  const handleItemClick = (path: string) => {
-    router.push(path);
-  };
-
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-16 items-center px-4">
@@ -302,50 +299,50 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
               title="Dashboard"
               path="/dashboard"
               icon={Home}
-              onItemClick={handleItemClick}
+              onItemClick={onItemClick}
             />
             <MenuItem
               title="Incidents"
               path="/incidents"
               icon={AlertCircle}
-              onItemClick={handleItemClick}
+              onItemClick={onItemClick}
             />
             <MenuItem
               title="Categories"
               path="/categories"
               icon={Tag}
-              onItemClick={handleItemClick}
+              onItemClick={onItemClick}
             />
-            <MenuItem title="Map View" path="/map-view" icon={Map} onItemClick={handleItemClick} />
+            <MenuItem title="Map View" path="/map-view" icon={Map} onItemClick={onItemClick} />
             <MenuItem title="Analytics" path="/analytics" icon={BarChart2}>
               <MenuItem
                 title="Overview"
                 path="/analytics"
                 icon={BarChart2}
-                onItemClick={handleItemClick}
+                onItemClick={onItemClick}
               />
               <MenuItem
                 title="Hotspots"
                 path="/hotspots"
                 icon={Flame}
-                onItemClick={handleItemClick}
+                onItemClick={onItemClick}
               />
               <MenuItem
                 title="Reports"
                 path="/reports"
                 icon={FileText}
-                onItemClick={handleItemClick}
+                onItemClick={onItemClick}
               />
             </MenuItem>
             <MenuItem title="Management" path="/users" icon={Users}>
-              <MenuItem title="Users" path="/users" icon={User} onItemClick={handleItemClick} />
-              <MenuItem title="Roles" path="/roles" icon={Shield} onItemClick={handleItemClick} />
+              <MenuItem title="Users" path="/users" icon={User} onItemClick={onItemClick} />
+              <MenuItem title="Roles" path="/roles" icon={Shield} onItemClick={onItemClick} />
             </MenuItem>
             <MenuItem
               title="Help & Support"
               path="/help"
               icon={HelpCircle}
-              onItemClick={handleItemClick}
+              onItemClick={onItemClick}
             />
           </MenuContext.Provider>
         </nav>
@@ -368,16 +365,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
               <DropdownMenu aria-label="User menu">
                 <DropdownItem
                   key="settings"
-                  as={NextLink}
-                  href="#settings"
                   startContent={<Settings size={20} />}
+                  onPress={() => onItemClick?.("#settings")}
                 >
                   Settings
                 </DropdownItem>
                 <DropdownItem
                   key="signout"
-                  as={NextLink}
-                  href="#signout"
+                  onPress={() => onItemClick?.("#signout")}
                   startContent={<LogOut size={20} />}
                   color="primary"
                 >

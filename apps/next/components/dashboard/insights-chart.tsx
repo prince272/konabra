@@ -11,6 +11,8 @@ import {
   XAxis,
   YAxis
 } from "recharts";
+import { Spinner } from "@heroui/spinner";
+import { cn } from "@heroui/theme";
 
 interface InsightsChartProps extends React.HTMLAttributes<HTMLDivElement> {
   data: Array<{ label: string } & { [key: string]: number | string }>;
@@ -20,6 +22,7 @@ interface InsightsChartProps extends React.HTMLAttributes<HTMLDivElement> {
     color: string;
   }>;
   height?: number;
+  isLoading?: boolean; // New prop
 }
 
 const CustomTooltip = ({ active, payload, label }: TooltipProps<any, any>) => {
@@ -46,9 +49,14 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<any, any>) => {
 };
 
 export const InsightsChart = React.forwardRef<HTMLDivElement, InsightsChartProps>(
-  ({ data, series, height, ...divProps }, ref) => {
+  ({ data, series, height = 300, isLoading = false, ...divProps }, ref) => {
     return (
-      <div ref={ref} style={{ ...divProps.style }} {...divProps}>
+      <div ref={ref} className="relative w-full" style={{ ...divProps.style }} {...divProps}>
+        {isLoading && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-content1/80">
+            <Spinner size="lg" />
+          </div>
+        )}
         <ResponsiveContainer width="100%" height={height}>
           <AreaChart data={data}>
             <CartesianGrid
@@ -70,15 +78,15 @@ export const InsightsChart = React.forwardRef<HTMLDivElement, InsightsChartProps
               verticalAlign="top"
               align="right"
               wrapperStyle={{ paddingRight: 20, paddingBottom: 20, fontSize: 12 }}
-            ></Legend>
-            {series.map(({ key, label, color }) => (
+            />
+            {series.map(({ key, label, color }, index) => (
               <Area
                 key={key}
                 type="monotone"
                 dataKey={key}
                 name={label}
-                stackId="1"
-                fill={color}
+                stackId={index + 1}
+                fill={`url(#color-${key})`}
                 stroke={color}
               />
             ))}
