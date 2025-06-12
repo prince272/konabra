@@ -1,0 +1,224 @@
+{"level":"debug","ts":1749719254.5079195,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1749686400,"endDate":1749772799.999,"unit":"\u0000"}
+{"level":"debug","ts":1749719254.9512954,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":0}
+{"level":"debug","ts":1749719254.9512954,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"low"}
+{"level":"debug","ts":1749719255.3930175,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"medium"}
+{"level":"debug","ts":1749719255.8404636,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"high"}
+{"level":"debug","ts":1749719256.2955096,"caller":"repositories/incident.go:300","msg":"Date periods computed","periodsCount":24}
+{"level":"debug","ts":1749719305.0547214,"caller":"repositories/incident.go:339","msg":"Returning insights result","seriesLength":24,"totalCount":0}
+{"level":"debug","ts":1749719315.0858195,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1748736000,"endDate":1751327999.999,"unit":"\u0002"}
+{"level":"debug","ts":1749719315.332885,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":5}
+{"level":"debug","ts":1749719315.332885,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"low"}
+{"level":"debug","ts":1749719315.7660348,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"medium"}
+{"level":"debug","ts":1749719316.1959517,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"high"}
+{"level":"debug","ts":1749719316.6177154,"caller":"repositories/incident.go:300","msg":"Date periods computed","periodsCount":30}
+{"level":"warn","ts":1749720095.5285482,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749720095.5304391,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749720095.530967,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749720095.5315084,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749720095.5321991,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749720095.535423,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"debug","ts":1749720111.5613623,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1749686400,"endDate":1749772799.999,"unit":"\u0000"}
+{"level":"debug","ts":1749720112.2023852,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":0}
+{"level":"debug","ts":1749720112.2023852,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"low"}
+{"level":"debug","ts":1749720112.6584413,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"medium"}
+{"level":"debug","ts":1749720113.095013,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"high"}
+{"level":"debug","ts":1749720113.6305287,"caller":"repositories/incident.go:300","msg":"Date periods computed","periodsCount":24}
+{"level":"debug","ts":1749720131.3118231,"caller":"repositories/incident.go:339","msg":"Returning insights result","seriesLength":24,"totalCount":0}
+{"level":"debug","ts":1749720141.6402726,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1748736000,"endDate":1751327999.999,"unit":"\u0002"}
+{"level":"debug","ts":1749720141.8512595,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":5}
+{"level":"debug","ts":1749720141.8512595,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"low"}
+{"level":"debug","ts":1749720142.2874527,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"medium"}
+{"level":"debug","ts":1749720142.7228136,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"high"}
+{"level":"debug","ts":1749720143.4502354,"caller":"repositories/incident.go:300","msg":"Date periods computed","periodsCount":30}
+{"level":"debug","ts":1749720614.225111,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1749686400,"endDate":1749772799.999,"unit":"\u0000"}
+{"level":"debug","ts":1749720614.9028337,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":0}
+{"level":"debug","ts":1749720614.9028337,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"low"}
+{"level":"debug","ts":1749720615.4437282,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"medium"}
+{"level":"debug","ts":1749720615.8930418,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"high"}
+{"level":"debug","ts":1749720616.3363526,"caller":"repositories/incident.go:300","msg":"Date periods computed","periodsCount":24}
+{"level":"debug","ts":1749720632.2220285,"caller":"repositories/incident.go:343","msg":"Returning insights result","seriesLength":24,"totalCount":0}
+{"level":"debug","ts":1749720639.2510908,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1749340800,"endDate":1749945599.999,"unit":"\u0002"}
+{"level":"debug","ts":1749720639.4872482,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":5}
+{"level":"debug","ts":1749720639.4872482,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"low"}
+{"level":"debug","ts":1749720640.043536,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"medium"}
+{"level":"debug","ts":1749720640.5037358,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"high"}
+{"level":"debug","ts":1749720640.9344614,"caller":"repositories/incident.go:300","msg":"Date periods computed","periodsCount":7}
+{"level":"debug","ts":1749720655.2595484,"caller":"repositories/incident.go:343","msg":"Returning insights result","seriesLength":7,"totalCount":5}
+{"level":"debug","ts":1749720709.0974565,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1749686400,"endDate":1749772799.999,"unit":"\u0000"}
+{"level":"debug","ts":1749720709.7307227,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":0}
+{"level":"debug","ts":1749720709.7307227,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"low"}
+{"level":"debug","ts":1749720710.1628032,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"medium"}
+{"level":"debug","ts":1749720710.616006,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"high"}
+{"level":"debug","ts":1749720711.052915,"caller":"repositories/incident.go:300","msg":"Date periods computed","periodsCount":24}
+{"level":"debug","ts":1749720711.052915,"caller":"repositories/incident.go:343","msg":"Returning insights result","seriesLength":24,"totalCount":0}
+{"level":"debug","ts":1749720719.0565062,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1735689600,"endDate":1767225599.999,"unit":"\u0003"}
+{"level":"debug","ts":1749720719.2786746,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":5}
+{"level":"debug","ts":1749720719.2786746,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"low"}
+{"level":"debug","ts":1749720719.7304454,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"medium"}
+{"level":"debug","ts":1749720720.1842422,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"high"}
+{"level":"debug","ts":1749720720.6234903,"caller":"repositories/incident.go:300","msg":"Date periods computed","periodsCount":12}
+{"level":"debug","ts":1749720720.6234903,"caller":"repositories/incident.go:343","msg":"Returning insights result","seriesLength":12,"totalCount":5}
+{"level":"debug","ts":1749720843.6736574,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1749686400,"endDate":1749772799.999,"unit":"\u0000"}
+{"level":"debug","ts":1749720843.8934073,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":0}
+{"level":"debug","ts":1749720843.8934073,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"low"}
+{"level":"debug","ts":1749720844.3445897,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"medium"}
+{"level":"debug","ts":1749720844.7799199,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"high"}
+{"level":"debug","ts":1749720845.214089,"caller":"repositories/incident.go:300","msg":"Date periods computed","periodsCount":24}
+{"level":"debug","ts":1749720845.2146997,"caller":"repositories/incident.go:343","msg":"Returning insights result","seriesLength":24,"totalCount":0}
+{"level":"debug","ts":1749720851.7062976,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1735689600,"endDate":1767225599.999,"unit":"\u0003"}
+{"level":"debug","ts":1749720851.9304876,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":5}
+{"level":"debug","ts":1749720851.9304876,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"low"}
+{"level":"debug","ts":1749720852.159867,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"medium"}
+{"level":"debug","ts":1749720852.6140468,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"high"}
+{"level":"debug","ts":1749720853.041333,"caller":"repositories/incident.go:300","msg":"Date periods computed","periodsCount":12}
+{"level":"debug","ts":1749720853.041333,"caller":"repositories/incident.go:343","msg":"Returning insights result","seriesLength":12,"totalCount":5}
+{"level":"warn","ts":1749721421.5004003,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749721421.5009363,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749721421.5009363,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749721421.5009363,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749721421.5009363,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"debug","ts":1749721428.546299,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1748736000,"endDate":1751327999.999,"unit":"\u0002"}
+{"level":"debug","ts":1749721428.9930282,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":5}
+{"level":"debug","ts":1749721428.9930282,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"low"}
+{"level":"debug","ts":1749721429.4312096,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"medium"}
+{"level":"debug","ts":1749721429.8602157,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"high"}
+{"level":"debug","ts":1749721430.305238,"caller":"repositories/incident.go:300","msg":"Date periods computed","periodsCount":30}
+{"level":"debug","ts":1749721471.1160388,"caller":"repositories/incident.go:343","msg":"Returning insights result","seriesLength":30,"totalCount":5}
+{"level":"debug","ts":1749721723.4383028,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1749686400,"endDate":1749772799.999,"unit":"0"}
+{"level":"debug","ts":1749721724.0782259,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":0}
+{"level":"debug","ts":1749721736.2307405,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"low"}
+{"level":"debug","ts":1749721736.925781,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"medium"}
+{"level":"debug","ts":1749721737.3494756,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"high"}
+{"level":"debug","ts":1749721740.3325005,"caller":"repositories/incident.go:300","msg":"Date periods computed","periodsCount":24}
+{"level":"debug","ts":1749721740.3330162,"caller":"repositories/incident.go:343","msg":"Returning insights result","seriesLength":24,"totalCount":0}
+{"level":"debug","ts":1749721751.9855626,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1748736000,"endDate":1751327999.999,"unit":"2"}
+{"level":"debug","ts":1749721752.212779,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":5}
+{"level":"debug","ts":1749721802.4849226,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"low"}
+{"level":"debug","ts":1749721803.161511,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"medium"}
+{"level":"debug","ts":1749721803.6571524,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"high"}
+{"level":"debug","ts":1749721903.6550493,"caller":"repositories/incident.go:300","msg":"Date periods computed","periodsCount":30}
+{"level":"debug","ts":1749721903.6550493,"caller":"repositories/incident.go:343","msg":"Returning insights result","seriesLength":30,"totalCount":5}
+{"level":"debug","ts":1749721911.8959887,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1749686400,"endDate":1749772799.999,"unit":"0"}
+{"level":"debug","ts":1749721912.117081,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":0}
+{"level":"debug","ts":1749721912.117081,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"low"}
+{"level":"debug","ts":1749721917.8816564,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"medium"}
+{"level":"debug","ts":1749721945.7284412,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"high"}
+{"level":"debug","ts":1749721956.908775,"caller":"repositories/incident.go:300","msg":"Date periods computed","periodsCount":24}
+{"level":"debug","ts":1749721956.908775,"caller":"repositories/incident.go:343","msg":"Returning insights result","seriesLength":24,"totalCount":0}
+{"level":"debug","ts":1749721964.659165,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1749686400,"endDate":1749772799.999,"unit":"0"}
+{"level":"debug","ts":1749721965.1105785,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":0}
+{"level":"debug","ts":1749721965.111367,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"low"}
+{"level":"debug","ts":1749721998.15059,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"medium"}
+{"level":"debug","ts":1749722001.0966995,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"high"}
+{"level":"debug","ts":1749722001.8524272,"caller":"repositories/incident.go:300","msg":"Date periods computed","periodsCount":24}
+{"level":"debug","ts":1749722001.8524272,"caller":"repositories/incident.go:343","msg":"Returning insights result","seriesLength":24,"totalCount":0}
+{"level":"debug","ts":1749722015.0079248,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1748736000,"endDate":1751327999.999,"unit":"2"}
+{"level":"debug","ts":1749722015.218511,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":5}
+{"level":"debug","ts":1749722015.219179,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"low"}
+{"level":"debug","ts":1749722015.6642292,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"medium"}
+{"level":"debug","ts":1749722016.1114025,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"high"}
+{"level":"debug","ts":1749722016.5584593,"caller":"repositories/incident.go:300","msg":"Date periods computed","periodsCount":30}
+{"level":"debug","ts":1749722016.5584593,"caller":"repositories/incident.go:343","msg":"Returning insights result","seriesLength":30,"totalCount":5}
+{"level":"debug","ts":1749722100.4081166,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1735689600,"endDate":1767225599.999,"unit":"3"}
+{"level":"debug","ts":1749722100.6205926,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":5}
+{"level":"debug","ts":1749722163.5906415,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"low"}
+{"level":"debug","ts":1749722164.0751696,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1735689600,"endDate":1767225599.999,"unit":"3"}
+{"level":"debug","ts":1749722164.4955428,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":5}
+{"level":"debug","ts":1749722164.4955428,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"low"}
+{"level":"debug","ts":1749722165.7769942,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"medium"}
+{"level":"debug","ts":1749722168.4903038,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"medium"}
+{"level":"debug","ts":1749722168.700616,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"high"}
+{"level":"debug","ts":1749722169.1195045,"caller":"repositories/incident.go:300","msg":"Date periods computed","periodsCount":12}
+{"level":"debug","ts":1749722169.1195045,"caller":"repositories/incident.go:343","msg":"Returning insights result","seriesLength":12,"totalCount":5}
+{"level":"debug","ts":1749722169.149975,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"high"}
+{"level":"debug","ts":1749722169.5899856,"caller":"repositories/incident.go:300","msg":"Date periods computed","periodsCount":12}
+{"level":"debug","ts":1749722169.5899856,"caller":"repositories/incident.go:343","msg":"Returning insights result","seriesLength":12,"totalCount":5}
+{"level":"debug","ts":1749722223.1319342,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1735689600,"endDate":1767225599.999,"unit":"3"}
+{"level":"debug","ts":1749722347.2507098,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":5}
+{"level":"debug","ts":1749722347.251261,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"low"}
+{"level":"debug","ts":1749722347.6846297,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"medium"}
+{"level":"debug","ts":1749722347.899395,"caller":"repositories/incident.go:272","msg":"Querying time series","severity":"high"}
+{"level":"debug","ts":1749722348.1134198,"caller":"repositories/incident.go:300","msg":"Date periods computed","periodsCount":12}
+{"level":"debug","ts":1749722348.1134198,"caller":"repositories/incident.go:343","msg":"Returning insights result","seriesLength":12,"totalCount":5}
+{"level":"warn","ts":1749722578.6552567,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749722625.4120266,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749722640.7078562,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749722640.715933,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749722640.715933,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749722640.719002,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749722640.7197552,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749722640.7197552,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"debug","ts":1749722647.4343374,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1749686400,"endDate":1749772799.999,"unit":"0"}
+{"level":"debug","ts":1749722648.081246,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":0}
+{"level":"debug","ts":1749722648.081246,"caller":"repositories/incident.go:296","msg":"Querying time series","severity":"low"}
+{"level":"debug","ts":1749722648.5245621,"caller":"repositories/incident.go:296","msg":"Querying time series","severity":"medium"}
+{"level":"debug","ts":1749722648.9545622,"caller":"repositories/incident.go:296","msg":"Querying time series","severity":"high"}
+{"level":"debug","ts":1749722649.3947318,"caller":"repositories/incident.go:324","msg":"Date periods computed","periodsCount":24}
+{"level":"debug","ts":1749722649.3952384,"caller":"repositories/incident.go:365","msg":"Returning insights result","seriesLength":24,"totalCount":0}
+{"level":"debug","ts":1749722686.370492,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1735689600,"endDate":1767225599.999,"unit":"3"}
+{"level":"debug","ts":1749722686.5835478,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":5}
+{"level":"debug","ts":1749722686.5835478,"caller":"repositories/incident.go:296","msg":"Querying time series","severity":"low"}
+{"level":"debug","ts":1749722687.02461,"caller":"repositories/incident.go:296","msg":"Querying time series","severity":"medium"}
+{"level":"debug","ts":1749722687.459069,"caller":"repositories/incident.go:296","msg":"Querying time series","severity":"high"}
+{"level":"debug","ts":1749722687.9157841,"caller":"repositories/incident.go:324","msg":"Date periods computed","periodsCount":12}
+{"level":"debug","ts":1749722687.9157841,"caller":"repositories/incident.go:365","msg":"Returning insights result","seriesLength":12,"totalCount":5}
+{"level":"warn","ts":1749723902.419958,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749723915.2646859,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749723915.2686617,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749723915.2697594,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749723915.274652,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749723915.2751598,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749723915.2751598,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"debug","ts":1749723923.5627327,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1749686400,"endDate":1749772799.999,"unit":"0"}
+{"level":"debug","ts":1749723924.4393022,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":0}
+{"level":"debug","ts":1749723944.8673105,"caller":"repositories/incident.go:296","msg":"Querying time series","severity":"low"}
+{"level":"debug","ts":1749723950.8182237,"caller":"repositories/incident.go:296","msg":"Querying time series","severity":"medium"}
+{"level":"debug","ts":1749723956.2872417,"caller":"repositories/incident.go:296","msg":"Querying time series","severity":"high"}
+{"level":"debug","ts":1749723957.141789,"caller":"repositories/incident.go:324","msg":"Date periods computed","periodsCount":24}
+{"level":"debug","ts":1749723957.141789,"caller":"repositories/incident.go:365","msg":"Returning insights result","seriesLength":24,"totalCount":0}
+{"level":"debug","ts":1749723978.0992286,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1735689600,"endDate":1767225599.999,"unit":"3"}
+{"level":"debug","ts":1749723978.5313454,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":5}
+{"level":"debug","ts":1749723984.266967,"caller":"repositories/incident.go:296","msg":"Querying time series","severity":"low"}
+{"level":"debug","ts":1749723985.8562217,"caller":"repositories/incident.go:296","msg":"Querying time series","severity":"medium"}
+{"level":"debug","ts":1749723987.2815473,"caller":"repositories/incident.go:296","msg":"Querying time series","severity":"high"}
+{"level":"debug","ts":1749723987.9235182,"caller":"repositories/incident.go:324","msg":"Date periods computed","periodsCount":12}
+{"level":"debug","ts":1749723987.9235182,"caller":"repositories/incident.go:365","msg":"Returning insights result","seriesLength":12,"totalCount":5}
+{"level":"debug","ts":1749724257.9751236,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1735689600,"endDate":1767225599.999,"unit":"3"}
+{"level":"debug","ts":1749724258.50716,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":5}
+{"level":"debug","ts":1749724261.4000142,"caller":"repositories/incident.go:313","msg":"Date periods computed","periodsCount":12}
+{"level":"debug","ts":1749724261.4000142,"caller":"repositories/incident.go:354","msg":"Returning insights result","seriesLength":12,"totalCount":5}
+{"level":"debug","ts":1749724321.4674873,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1735689600,"endDate":1767225599.999,"unit":"3"}
+{"level":"debug","ts":1749724321.6796856,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":5}
+{"level":"debug","ts":1749724355.6207025,"caller":"repositories/incident.go:313","msg":"Date periods computed","periodsCount":12}
+{"level":"debug","ts":1749724355.6207025,"caller":"repositories/incident.go:354","msg":"Returning insights result","seriesLength":12,"totalCount":5}
+{"level":"debug","ts":1749724379.4801037,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1735689600,"endDate":1767225599.999,"unit":"3"}
+{"level":"debug","ts":1749724379.7014942,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":5}
+{"level":"debug","ts":1749724502.825165,"caller":"repositories/incident.go:313","msg":"Date periods computed","periodsCount":12}
+{"level":"debug","ts":1749724502.8257399,"caller":"repositories/incident.go:354","msg":"Returning insights result","seriesLength":12,"totalCount":5}
+{"level":"warn","ts":1749725590.3994842,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749725607.2026434,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749725607.2053165,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749725607.2068138,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749725607.2073288,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749725607.2097063,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749725607.2097063,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"debug","ts":1749725613.6960082,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1749686400,"endDate":1749772799.999,"unit":"0"}
+{"level":"debug","ts":1749725614.3582087,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":0}
+{"level":"debug","ts":1749725615.4697733,"caller":"repositories/incident.go:313","msg":"Date periods computed","periodsCount":24}
+{"level":"debug","ts":1749725615.4697733,"caller":"repositories/incident.go:354","msg":"Returning insights result","seriesLength":24,"totalCount":0}
+{"level":"debug","ts":1749725652.3874805,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1735689600,"endDate":1767225599.999,"unit":"3"}
+{"level":"debug","ts":1749725652.6066372,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":5}
+{"level":"debug","ts":1749725653.466595,"caller":"repositories/incident.go:313","msg":"Date periods computed","periodsCount":12}
+{"level":"debug","ts":1749725653.466595,"caller":"repositories/incident.go:354","msg":"Returning insights result","seriesLength":12,"totalCount":5}
+{"level":"debug","ts":1749725683.2807555,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1749686400,"endDate":1749772799.999,"unit":"0"}
+{"level":"debug","ts":1749725683.5077612,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":0}
+{"level":"debug","ts":1749725684.166781,"caller":"repositories/incident.go:313","msg":"Date periods computed","periodsCount":24}
+{"level":"debug","ts":1749725684.166781,"caller":"repositories/incident.go:354","msg":"Returning insights result","seriesLength":24,"totalCount":0}
+{"level":"debug","ts":1749725691.7789373,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1749340800,"endDate":1749945599.999,"unit":"2"}
+{"level":"debug","ts":1749725692.0720105,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":5}
+{"level":"debug","ts":1749725692.9395707,"caller":"repositories/incident.go:313","msg":"Date periods computed","periodsCount":7}
+{"level":"debug","ts":1749725692.9404037,"caller":"repositories/incident.go:354","msg":"Returning insights result","seriesLength":7,"totalCount":5}
+{"level":"debug","ts":1749725715.2773623,"caller":"repositories/incident.go:227","msg":"Starting GetIncidentInsights","startDate":1748736000,"endDate":1751327999.999,"unit":"2"}
+{"level":"debug","ts":1749725715.4982414,"caller":"repositories/incident.go:247","msg":"Incident count retrieved","count":5}
+{"level":"debug","ts":1749725716.5859745,"caller":"repositories/incident.go:313","msg":"Date periods computed","periodsCount":30}
+{"level":"debug","ts":1749725716.5865552,"caller":"repositories/incident.go:354","msg":"Returning insights result","seriesLength":30,"totalCount":5}

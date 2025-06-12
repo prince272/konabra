@@ -21,9 +21,9 @@ import (
 )
 
 type JwtHelper struct {
-	Options  JwtOptions
-	database *gorm.DB
-	logger   *zap.Logger
+	Options   JwtOptions
+	defaultDb *gorm.DB
+	logger    *zap.Logger
 }
 
 type JwtOptions struct {
@@ -40,11 +40,11 @@ type JwtTokenModel struct {
 	RefreshTokenExpiresAt time.Time `json:"refreshTokenExpiresAt"`
 }
 
-func NewJwtHelper(options JwtOptions, database *gorm.DB, logger *zap.Logger) *JwtHelper {
+func NewJwtHelper(options JwtOptions, defaultDb *gorm.DB, logger *zap.Logger) *JwtHelper {
 	return &JwtHelper{
-		Options:  options,
-		database: database,
-		logger:   logger,
+		Options:   options,
+		defaultDb: defaultDb,
+		logger:    logger,
 	}
 }
 
@@ -82,7 +82,7 @@ func (helper *JwtHelper) CreateToken(subject string, claims map[string]any) (*Jw
 		TokenType:             tokenType,
 	}
 
-	result := helper.database.Create(&token)
+	result := helper.defaultDb.Create(&token)
 	if result.Error != nil {
 		return nil, fmt.Errorf("failed to save token: %w", result.Error)
 	}
@@ -101,7 +101,7 @@ func (helper *JwtHelper) RevokeAllTokens(subject string) error {
 		return errors.New("subject cannot be empty")
 	}
 
-	result := helper.database.
+	result := helper.defaultDb.
 		Model(&models.JwtToken{}).
 		Where("subject = ?", subject).
 		Delete(&models.JwtToken{})
@@ -117,7 +117,7 @@ func (helper *JwtHelper) RevokeExpiredTokens(subject string) error {
 	}
 
 	currentTime := time.Now()
-	result := helper.database.
+	result := helper.defaultDb.
 		Model(&models.JwtToken{}).
 		Where("subject = ? AND (access_token_expires_at < ? OR refresh_token_expires_at < ?)",
 			subject, currentTime, currentTime).
@@ -132,7 +132,7 @@ func (helper *JwtHelper) RevokeToken(subject, tokenString string) error {
 	now := time.Now()
 
 	// 1) Always delete any tokens for this subject that have expired
-	if err := helper.database.
+	if err := helper.defaultDb.
 		Model(&models.JwtToken{}).
 		Where("subject = ? AND (access_token_expires_at < ? OR refresh_token_expires_at < ?)",
 			subject, now, now).
@@ -149,7 +149,7 @@ func (helper *JwtHelper) RevokeToken(subject, tokenString string) error {
 		// hashing failed or input was empty—nothing more to revoke
 		return nil
 	}
-	if err := helper.database.
+	if err := helper.defaultDb.
 		Model(&models.JwtToken{}).
 		Where("subject = ? AND (access_token_hash = ? OR refresh_token_hash = ?)",
 			subject, tokenHash, tokenHash).
@@ -173,7 +173,7 @@ func (helper *JwtHelper) validateToken(subject string, tokenString string, token
 	currentTime := time.Now()
 	var token models.JwtToken
 
-	query := helper.database.Model(&models.JwtToken{}).
+	query := helper.defaultDb.Model(&models.JwtToken{}).
 		Where("subject = ?", subject)
 
 	if tokenType == "access" {

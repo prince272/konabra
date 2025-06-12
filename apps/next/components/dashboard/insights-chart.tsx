@@ -63,10 +63,14 @@ export const InsightsChart = React.forwardRef<HTMLDivElement, InsightsChartProps
                 </linearGradient>
               ))}
             </defs>
-            <XAxis dataKey="label" tick={{ fontSize: 14 }} />
-            <YAxis tick={{ fontSize: 14 }} />
+            <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+            <YAxis tick={{ fontSize: 12 }} />
             <Tooltip content={<CustomTooltip />} />
-            <Legend />
+            <Legend
+              verticalAlign="top"
+              align="right"
+              wrapperStyle={{ paddingRight: 20, paddingBottom: 20, fontSize: 12 }}
+            ></Legend>
             {series.map(({ key, label, color }) => (
               <Area
                 key={key}

@@ -222,9 +222,15 @@ func (repository *IncidentRepository) GetIncidentStatistics(dateRange period.Dat
 	}, nil
 }
 
-func (r *IncidentRepository) GetIncidentInsights(dateRange period.DateRange) (*IncidentInsights, error) {
+func (repository *IncidentRepository) GetIncidentInsights(dateRange period.DateRange) (*IncidentInsights, error) {
 	unit := period.GetUnit(dateRange.StartDate, dateRange.EndDate)
-	query := r.defaultDB.Model(&models.Incident{})
+	repository.logger.Debug("Starting GetIncidentInsights",
+		zap.Time("startDate", dateRange.StartDate),
+		zap.Time("endDate", dateRange.EndDate),
+		zap.String("unit", fmt.Sprint(unit)),
+	)
+
+	query := repository.defaultDB.Model(&models.Incident{})
 
 	if !dateRange.StartDate.IsZero() {
 		query = query.Where("reported_at >= ?", dateRange.StartDate)
@@ -235,42 +241,58 @@ func (r *IncidentRepository) GetIncidentInsights(dateRange period.DateRange) (*I
 
 	var count int64
 	if err := query.Count(&count).Error; err != nil {
+		repository.logger.Error("Failed to count incidents", zap.Error(err))
 		return nil, fmt.Errorf("failed to count incidents: %w", err)
 	}
+	repository.logger.Debug("Incident count retrieved", zap.Int64("count", count))
 
 	var lowSeverityTimeSeries, mediumSeverityTimeSeries, highSeverityTimeSeries []IncidentTimeSeriesItem
 
-	// Define query parameters for different time units with intervals
-	type queryConfig struct {
-		trunc     string
-		interval  int
-		sqlFormat string
-	}
-
-	configs := map[period.Unit]queryConfig{
-		period.UnitTime:  {"hour", 1, `DATE_TRUNC('hour', reported_at) - (EXTRACT(HOUR FROM reported_at)::int % ? * 1) * INTERVAL '1 hour' AS period, COUNT(*) AS count`},
-		period.UnitDay:   {"day", 1, `DATE_TRUNC('day', reported_at) - (EXTRACT(DAY FROM reported_at)::int % ? * 1 - 1) * INTERVAL '1 day' AS period, COUNT(*) AS count`},
-		period.UnitDate:  {"day", 1, `DATE_TRUNC('day', reported_at) - (EXTRACT(DAY FROM reported_at)::int % ? * 1 - 1) * INTERVAL '1 day' AS period, COUNT(*) AS count`},
-		period.UnitMonth: {"month", 1, `DATE_TRUNC('month', reported_at) - ((EXTRACT(MONTH FROM reported_at)::int - 1) % ? * 1) * INTERVAL '1 month' AS period, COUNT(*) AS count`},
-		period.UnitYear:  {"year", 1, `DATE_TRUNC('year', reported_at) - (EXTRACT(YEAR FROM reported_at)::int % ? * 1) * INTERVAL '1 year' AS period, COUNT(*) AS count`},
+	configs := map[period.Unit]struct {
+		trunc    string
+		interval int
+	}{
+		period.UnitTime:  {"hour", 1},
+		period.UnitDay:   {"day", 1},
+		period.UnitDate:  {"day", 1},
+		period.UnitMonth: {"month", 1},
+		period.UnitYear:  {"year", 1},
 	}
 
 	cfg, exists := configs[unit]
-
 	if !exists {
+		repository.logger.Error("Unsupported time unit", zap.String("unit", fmt.Sprint(unit)))
 		return nil, fmt.Errorf("unsupported time unit: %d", unit)
 	}
 
-	// Query incidents by severity
-	queryBySeverity := func(severity models.IncidentSeverity, result *[]IncidentTimeSeriesItem) error {
-		q := query.Where("severity = ?", severity)
-		return q.Select(cfg.sqlFormat, cfg.interval).
-			Group("period").
-			Order("period").
-			Scan(result).Error
+	var sqlSelect string
+	switch cfg.trunc {
+	case "hour":
+		sqlSelect = fmt.Sprintf(`
+			DATE_TRUNC('hour', reported_at) - 
+			((EXTRACT(HOUR FROM reported_at)::int %% %d) * INTERVAL '1 hour') AS period, COUNT(*) AS count`, cfg.interval)
+	case "day":
+		sqlSelect = fmt.Sprintf(`
+			DATE_TRUNC('day', reported_at) - 
+			((EXTRACT(DAY FROM reported_at)::int - 1) %% %d * INTERVAL '1 day') AS period, COUNT(*) AS count`, cfg.interval)
+	case "month":
+		sqlSelect = fmt.Sprintf(`
+			DATE_TRUNC('month', reported_at) - 
+			((EXTRACT(MONTH FROM reported_at)::int - 1) %% %d * INTERVAL '1 month') AS period, COUNT(*) AS count`, cfg.interval)
+	case "year":
+		sqlSelect = fmt.Sprintf(`
+			DATE_TRUNC('year', reported_at) - 
+			((EXTRACT(YEAR FROM reported_at)::int) %% %d * INTERVAL '1 year') AS period, COUNT(*) AS count`, cfg.interval)
+	default:
+		repository.logger.Error("Unsupported truncation unit", zap.String("trunc", cfg.trunc))
+		return nil, fmt.Errorf("unsupported truncation unit: %s", cfg.trunc)
 	}
 
-	for _, severity := range []models.IncidentSeverity{models.IncidentSeverityLow, models.IncidentSeverityMedium, models.IncidentSeverityHigh} {
+	for _, severity := range []models.IncidentSeverity{
+		models.IncidentSeverityLow,
+		models.IncidentSeverityMedium,
+		models.IncidentSeverityHigh,
+	} {
 		var result *[]IncidentTimeSeriesItem
 		switch severity {
 		case models.IncidentSeverityLow:
@@ -280,47 +302,64 @@ func (r *IncidentRepository) GetIncidentInsights(dateRange period.DateRange) (*I
 		case models.IncidentSeverityHigh:
 			result = &highSeverityTimeSeries
 		}
-		if err := queryBySeverity(severity, result); err != nil {
+
+		if err := query.Session(&gorm.Session{}).
+			Where("severity = ?", severity).
+			Select(sqlSelect).
+			Group("period").
+			Order("period").
+			Scan(result).Error; err != nil {
+			repository.logger.Error("Failed to query severity incidents",
+				zap.String("severity", string(severity)), zap.Error(err))
 			return nil, fmt.Errorf("failed to query %s incidents: %w", severity, err)
 		}
 	}
 
-	// Normalize incident counts
 	datePeriods := period.GetPeriods(dateRange.StartDate, dateRange.EndDate, unit)
+	repository.logger.Debug("Date periods computed", zap.Int("periodsCount", len(datePeriods)))
 
 	normalizeIncidents := func(incidents []IncidentTimeSeriesItem) []IncidentTimeSeriesItem {
 		countByPeriod := make(map[time.Time]int64, len(incidents))
 		for _, incident := range incidents {
-			countByPeriod[incident.Period] = incident.Count
+			countByPeriod[incident.Period.UTC().Round(0)] = incident.Count
 		}
 
 		normalized := make([]IncidentTimeSeriesItem, 0, len(datePeriods))
 		for _, datePeriod := range datePeriods {
 			normalized = append(normalized, IncidentTimeSeriesItem{
 				Period: datePeriod,
-				Count:  countByPeriod[datePeriod],
-				Label:  period.GetFormat(datePeriod, unit),
+				Count:  countByPeriod[datePeriod.UTC().Round(0)],
+				Label:  period.GetFormattedUnit(datePeriod, unit),
 			})
 		}
 		return normalized
 	}
 
-	transformIncidents := func(incidentsGroup ...[]IncidentTimeSeriesItem) []IncidentSeveritySeriesItem {
-		var transformed []IncidentSeveritySeriesItem
-		for i := range incidentsGroup[0] {
-			transformed = append(transformed, IncidentSeveritySeriesItem{
-				Label:  incidentsGroup[0][i].Label,
-				Period: incidentsGroup[0][i].Period,
-				Low:    incidentsGroup[0][i].Count,
-				Medium: incidentsGroup[1][i].Count,
-				High:   incidentsGroup[2][i].Count,
-			})
+	transformIncidents := func(groups ...[]IncidentTimeSeriesItem) []IncidentSeveritySeriesItem {
+		length := len(groups[0])
+		transformed := make([]IncidentSeveritySeriesItem, length)
+		for i := 0; i < length; i++ {
+			transformed[i] = IncidentSeveritySeriesItem{
+				Label:  groups[0][i].Label,
+				Period: groups[0][i].Period,
+				Low:    groups[0][i].Count,
+				Medium: groups[1][i].Count,
+				High:   groups[2][i].Count,
+			}
 		}
-
 		return transformed
 	}
 
-	series := transformIncidents(normalizeIncidents(lowSeverityTimeSeries), normalizeIncidents(mediumSeverityTimeSeries), normalizeIncidents(highSeverityTimeSeries))
+	series := transformIncidents(
+		normalizeIncidents(lowSeverityTimeSeries),
+		normalizeIncidents(mediumSeverityTimeSeries),
+		normalizeIncidents(highSeverityTimeSeries),
+	)
+
+	repository.logger.Debug("Returning insights result",
+		zap.Int("seriesLength", len(series)),
+		zap.Int64("totalCount", count),
+	)
 
 	return &IncidentInsights{
 		Series: series,

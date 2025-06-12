@@ -347,7 +347,7 @@ export const DashboardPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2  gap-6">
         <Card shadow="none">
           <CardHeader className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">Incident Insights</h3>
+            <h3 className="text-lg font-semibold">Severity Insights</h3>
           </CardHeader>
           <CardBody>
             <InsightsChart

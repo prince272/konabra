@@ -107,7 +107,7 @@ func GetPeriods(start, end time.Time, unit Unit) []time.Time {
 }
 
 // GetFormat returns formatted string for the time unit
-func GetFormat(t time.Time, unit Unit) string {
+func GetFormattedUnit(t time.Time, unit Unit) string {
 	switch unit {
 	case UnitTime:
 		return t.Format("3:04 PM")
