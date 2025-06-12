@@ -1,61 +1,51 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Switch } from "@heroui/switch";
-import { Tooltip } from "@heroui/tooltip";
-import { Moon, Sun } from "lucide-react";
-import { useApplicationState } from "@/states";
+import React from "react";
+import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
+import { Laptop, Moon, Sun, ChevronDown } from "lucide-react";
+import { useTheme } from "next-themes";
+import { Button } from "@heroui/button";
 
-export const ThemeSwitcher = () => {
-  const [appState, setAppState] = useApplicationState();
-  const isDark = appState.theme === "dark";
+const options = [
+  { key: "light", label: "Light", icon: <Sun size={20} /> },
+  { key: "dark", label: "Dark", icon: <Moon size={20} /> },
+  { key: "system", label: "System", icon: <Laptop size={20} /> },
+];
 
-  // Initialize theme based on system preference or saved state
-  useEffect(() => {
-    // If no theme is set in appState, check system preference
-    if (!appState.theme) {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const initialTheme = prefersDark ? "dark" : "light";
-      setAppState((prev) => ({ ...prev, theme: initialTheme }));
+export const ThemeSwitcher: React.FC = () => {
+  const { theme = "system", setTheme } = useTheme();
 
-      if (prefersDark) {
-        document.documentElement.classList.add("dark");
-      }
-    } else {
-      // Apply the theme from appState
-      if (appState.theme === "dark") {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
-    }
-  }, [appState.theme, setAppState]);
-
-  const handleToggle = () => {
-    const newTheme = isDark ? "light" : "dark";
-    setAppState((prev) => ({ ...prev, theme: newTheme }));
-
-    if (newTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      document.documentElement.classList.add("light");
-    }
-  };
+  const selectedOption = options.find((opt) => opt.key === theme) || options[2];
 
   return (
-    <Tooltip title={`Switch to ${isDark ? "light" : "dark"} mode`} placement="bottom">
-      <div className="flex items-center gap-2">
-        <Sun size={20} className={`text-default-500 ${!isDark && "text-primary"}`} />
-        <Switch
-          isSelected={isDark}
-          onValueChange={handleToggle}
-          size="sm"
-          color="primary"
-          className="mx-1"
-        />
-        <Moon size={20} className={`text-default-500 ${isDark && "text-primary"}`} />
-      </div>
-    </Tooltip>
+    <Dropdown>
+      <DropdownTrigger>
+        <Button
+          variant="flat"
+          endContent={<ChevronDown size={20} />}
+          className="capitalize justify-between"
+        >
+          {selectedOption.icon}
+          {selectedOption.label}
+        </Button>
+      </DropdownTrigger>
+      <DropdownMenu
+        aria-label="Theme Options"
+        variant="flat"
+        disallowEmptySelection
+        selectionMode="single"
+        selectedKeys={[theme]}
+        onSelectionChange={(keys) => {
+          const selected = Array.from(keys)[0] as string;
+          setTheme(selected);
+        }}
+      >
+        {options.map(({ key, label, icon }) => (
+          <DropdownItem key={key} startContent={icon}>
+            {label}
+          </DropdownItem>
+        ))}
+      </DropdownMenu>
+    </Dropdown>
   );
 };

@@ -15,14 +15,17 @@ import {
   ArrowLeft,
   AudioLines,
   Bell,
+  ChevronDown,
   Folder,
   Key,
+  Laptop,
   Lock,
   Menu,
   Monitor,
   Moon,
   Phone,
   Settings,
+  Sun,
   Trash2,
   User,
   X
@@ -40,6 +43,7 @@ import { useAccountState, useApplicationState } from "@/states";
 import { useBreakpoint, useHashState, useInterval, useTimer } from "@/hooks";
 import { useModalRouter } from "@/components/common/modals";
 import { Remount } from "../common/remount";
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/dropdown";
 
 interface ViewContextType {
   title: string;
@@ -605,20 +609,16 @@ function NotificationsView({ currentView }: BaseViewProps) {
   );
 }
 
-function DisplayView({ currentView }: BaseViewProps) {
-  const [appState, setAppState] = useApplicationState();
-  const isDark = appState.theme === "dark";
+const themeOptions = [
+  { key: "light", label: "Light", icon: <Sun size={20} /> },
+  { key: "dark", label: "Dark", icon: <Moon size={20} /> },
+  { key: "system", label: "System", icon: <Laptop size={20} /> }
+];
 
-  const handleToggle = () => {
-    const newTheme = isDark ? "light" : "dark";
-    setAppState((prev) => ({ ...prev, theme: newTheme }));
+export function DisplayView({ currentView }: BaseViewProps) {
+  const { theme = "system", setTheme } = useTheme();
 
-    if (newTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  };
+  const selectedOption = themeOptions.find((opt) => opt.key === theme) || themeOptions[2];
 
   return (
     <View id="display" currentView={currentView}>
@@ -627,8 +627,37 @@ function DisplayView({ currentView }: BaseViewProps) {
           <h4 className="font-medium">Theme</h4>
           <div className="mt-3 space-y-3">
             <div className="flex items-center justify-between">
-              <span>Dark Mode</span>
-              <Switch isSelected={isDark} onValueChange={handleToggle} color="primary" />
+              <span>Appearance</span>
+              <Dropdown>
+                <DropdownTrigger>
+                  <Button
+                    size="sm"
+                    variant="flat"
+                    endContent={<ChevronDown size={20} />}
+                    className="w-[140px] justify-between capitalize"
+                  >
+                    {selectedOption.icon}
+                    {selectedOption.label}
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu
+                  aria-label="Theme Options"
+                  variant="flat"
+                  disallowEmptySelection
+                  selectionMode="single"
+                  selectedKeys={[theme]}
+                  onSelectionChange={(keys) => {
+                    const selected = Array.from(keys)[0] as string;
+                    setTheme(selected);
+                  }}
+                >
+                  {themeOptions.map(({ key, label, icon }) => (
+                    <DropdownItem key={key} startContent={icon}>
+                      {label}
+                    </DropdownItem>
+                  ))}
+                </DropdownMenu>
+              </Dropdown>
             </div>
           </div>
         </div>

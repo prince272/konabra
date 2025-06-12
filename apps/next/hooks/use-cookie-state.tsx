@@ -9,7 +9,7 @@ import {
   useContext,
   useEffect,
   useRef,
-  useState
+  useState,
 } from "react";
 import { isEqual } from "lodash";
 import { BehaviorSubject } from "rxjs";
@@ -27,12 +27,16 @@ type CookieOptions = {
   sameSite?: "strict" | "lax" | "none";
 };
 
+// ----- BROADCAST CHANNEL FOR CROSS-TAB SYNC -----
+const COOKIE_CHANNEL = "cookie-sync-channel";
+const broadcastChannel = typeof window !== "undefined" ? new BroadcastChannel(COOKIE_CHANNEL) : null;
+
 // ----- CONTEXT PROVIDER -----
 const CookiesContext = createContext<CookiesContextValue>(undefined);
 
 export const CookiesProvider = ({
   children,
-  value
+  value,
 }: {
   children: ReactNode;
   value?: CookiesContextValue;
@@ -96,6 +100,25 @@ export function useCookieState<S>(
     return () => sub.unsubscribe();
   }, [subject]);
 
+  // Handle cross-tab cookie updates via BroadcastChannel
+  useEffect(() => {
+    if (!broadcastChannel) return;
+
+    const handleMessage = (event: MessageEvent) => {
+      const { key: updatedKey, value } = event.data;
+      if (updatedKey === key) {
+        const parsedValue =
+          typeof value === "string" && value.startsWith("{") ? JSON.parse(value) : value;
+        if (!isEqual(parsedValue, subject.value)) {
+          subject.next(parsedValue);
+        }
+      }
+    };
+
+    broadcastChannel.addEventListener("message", handleMessage);
+    return () => broadcastChannel.removeEventListener("message", handleMessage);
+  }, [key, subject]);
+
   // Sync cookie on state change
   useEffect(() => {
     if (isMountedRef.current) {
@@ -103,10 +126,12 @@ export function useCookieState<S>(
         typeof state === "object" && state !== null ? JSON.parse(JSON.stringify(state)) : state;
       cookies.set(key, serializedState, optionsRef.current || { path: "/" });
       subject.next(serializedState);
+      // Broadcast the change to other tabs
+      broadcastChannel?.postMessage({ key, value: serializedState });
     } else {
       isMountedRef.current = true;
     }
-  }, [key, state]);
+  }, [key, state, cookies]);
 
   // Updater function
   const setCookieState: Dispatch<SetStateAction<S>> = useCallback(
@@ -119,6 +144,8 @@ export function useCookieState<S>(
           : newValue;
       cookies.set(key, serializedValue, optionsRef.current || { path: "/" });
       subject.next(serializedValue);
+      // Broadcast the change to other tabs
+      broadcastChannel?.postMessage({ key, value: serializedValue });
     },
     [subject, key, cookies]
   );
