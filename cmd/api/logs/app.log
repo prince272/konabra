@@ -4147,3 +4147,15 @@
 {"level":"debug","ts":1749835115.3705132,"caller":"repositories/incident.go:272","msg":"Incident count retrieved","count":9}
 {"level":"debug","ts":1749835116.4227927,"caller":"repositories/incident.go:344","msg":"Date periods computed","periodsCount":30}
 {"level":"debug","ts":1749835116.4227927,"caller":"repositories/incident.go:384","msg":"Returning insights result","seriesLength":30,"totalCount":9}
+{"level":"warn","ts":1749835801.3315432,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749835801.3362188,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749835801.3371637,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749835801.339173,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749835801.339173,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749835801.3401713,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"debug","ts":1749835809.5782394,"caller":"repositories/incident.go:247","msg":"Starting GetIncidentInsights","startDate":1748736000,"endDate":1751327999.999,"unit":"2"}
+{"level":"debug","ts":1749835809.5829763,"caller":"repositories/incident.go:397","msg":"Starting GetIncidentCategoryInsights","startDate":1748736000,"endDate":1751327999.999,"unit":"2"}
+{"level":"debug","ts":1749835810.2281594,"caller":"repositories/incident.go:429","msg":"Incident category insights retrieved","count":7,"counts":[{"id":"0ccaaf49-ecfb-4f52-8f8a-908d5c2aca32","count":3,"name":"Pothole","slug":"pothole"},{"id":"24402c37-35ad-4dd4-b1a2-f31df9de2423","count":1,"name":"Illegal Parking","slug":"illegal-parking"},{"id":"2c6081f0-d911-4d39-be43-0b1f7bca002c","count":1,"name":"Others","slug":"others"},{"id":"8c140656-0f2a-4b8a-9030-07b5c4b3b3da","count":1,"name":"Vehicle Breakdown","slug":"vehicle-breakdown"},{"id":"a9b48181-4dab-46a3-a86f-831addbe7729","count":1,"name":"Roadworks","slug":"roadworks"},{"id":"be5106a3-89aa-4bb4-a189-774b0863581b","count":1,"name":"Fire on Road","slug":"fire-on-road"},{"id":"fbb58995-b407-4ae2-ab58-5d94a6876ed4","count":1,"name":"Broken Streetlight","slug":"broken-streetlight"}]}
+{"level":"debug","ts":1749835810.282897,"caller":"repositories/incident.go:272","msg":"Incident count retrieved","count":9}
+{"level":"debug","ts":1749835811.1121826,"caller":"repositories/incident.go:344","msg":"Date periods computed","periodsCount":30}
+{"level":"debug","ts":1749835811.1121826,"caller":"repositories/incident.go:384","msg":"Returning insights result","seriesLength":30,"totalCount":9}
