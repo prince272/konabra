@@ -3,14 +3,15 @@ import { Card, CardBody, CardProps } from "@heroui/card";
 import { Skeleton } from "@heroui/skeleton";
 import { cn } from "@heroui/theme";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+import { formatNumber } from "@/utils";
 
 type ColorVariant = "primary" | "secondary" | "success" | "warning" | "danger";
 
 export interface StatCardProps extends CardProps {
   title: string;
-  value: string | number;
+  value: number;
   change?: {
-    value: string | number;
+    value: number;
     isIncrease: boolean;
     isDecrease: boolean;
   };
@@ -55,7 +56,7 @@ export const StatCard: React.FC<StatCardProps> = ({
             </Skeleton>
 
             <Skeleton isLoaded={!isLoading} className="h-8 w-24 rounded">
-              <h3 className="text-2xl font-semibold">{value}</h3>
+              <h3 className="text-2xl font-semibold">{formatNumber(value)}</h3>
             </Skeleton>
 
             <Skeleton isLoaded={!isLoading} className="mt-2 h-4 w-36 rounded">

@@ -50,7 +50,7 @@ export const DashboardPage: React.FC = () => {
   });
 
   const [showCustomRange, setShowCustomRange] = useState(false);
-  const [selectedPreset, setSelectedPreset] = useState<string>("today");
+  const [selectedPreset, setSelectedPreset] = useState<string>("thisWeek");
 
   useEffect(() => {
     const fetchIncidentStats = async () => {
@@ -184,6 +184,17 @@ export const DashboardPage: React.FC = () => {
     });
   };
 
+  const labels: Record<string, string> = {
+    today: "Today",
+    thisWeek: "This Week",
+    lastWeek: "Last Week",
+    thisMonth: "This Month",
+    lastMonth: "Last Month",
+    last3Months: "Last 3 Months",
+    thisYear: "This Year",
+    lastYear: "Last Year"
+  };
+
   const formatDateRange = () => {
     if (selectedPreset === "custom") {
       if (!filter.startDate || !filter.endDate) return "Select Date Range";
@@ -193,17 +204,6 @@ export const DashboardPage: React.FC = () => {
         ? start.toLocaleDateString()
         : `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
     }
-
-    const labels: Record<string, string> = {
-      today: "Today",
-      thisWeek: "This Week",
-      lastWeek: "Last Week",
-      thisMonth: "This Month",
-      lastMonth: "Last Month",
-      last3Months: "Last 3 Months",
-      thisYear: "This Year",
-      lastYear: "Last Year"
-    };
 
     return labels[selectedPreset] || "Select Date Range";
   };
@@ -243,7 +243,7 @@ export const DashboardPage: React.FC = () => {
                         key === "custom" ? setShowCustomRange(true) : applyPresetRange(key)
                       }
                     >
-                      {key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
+                      {labels[key] || "Custom Range"}
                     </DropdownItem>
                   ))}
                 </DropdownMenu>
@@ -279,7 +279,7 @@ export const DashboardPage: React.FC = () => {
           change={
             stats
               ? {
-                  value: stats.resolvedIncidents.percentChange.toFixed(1),
+                  value: stats.resolvedIncidents.percentChange,
                   isIncrease: stats.resolvedIncidents.isIncrease,
                   isDecrease: stats.resolvedIncidents.isDecrease
                 }
@@ -296,7 +296,7 @@ export const DashboardPage: React.FC = () => {
           change={
             stats
               ? {
-                  value: stats.unresolvedIncidents.percentChange.toFixed(1),
+                  value: stats.unresolvedIncidents.percentChange,
                   isIncrease: stats.unresolvedIncidents.isIncrease,
                   isDecrease: stats.unresolvedIncidents.isDecrease
                 }
@@ -313,7 +313,7 @@ export const DashboardPage: React.FC = () => {
           change={
             categoryStats
               ? {
-                  value: categoryStats.totalCategories.percentChange.toFixed(1),
+                  value: categoryStats.totalCategories.percentChange,
                   isIncrease: categoryStats.totalCategories.isIncrease,
                   isDecrease: categoryStats.totalCategories.isDecrease
                 }
@@ -330,7 +330,7 @@ export const DashboardPage: React.FC = () => {
           change={
             userStats
               ? {
-                  value: userStats.totalUsers.percentChange.toFixed(1),
+                  value: userStats.totalUsers.percentChange,
                   isIncrease: userStats.totalUsers.isIncrease,
                   isDecrease: userStats.totalUsers.isDecrease
                 }

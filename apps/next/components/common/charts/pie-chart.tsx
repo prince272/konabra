@@ -3,6 +3,7 @@ import { Card, CardBody } from "@heroui/card";
 import { Spinner } from "@heroui/spinner";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip, TooltipProps } from "recharts";
 import { AlertCircle } from "lucide-react";
+import { formatNumber } from "@/utils";
 
 interface InsightsPieChartProps extends React.HTMLAttributes<HTMLDivElement> {
   data: Array<{ name: string; value: number; color: string }>;
@@ -95,10 +96,10 @@ export const InsightsPieChart = React.forwardRef<HTMLDivElement, InsightsPieChar
 
             {/* Legend */}
             <div className="mt-4 flex flex-wrap justify-center gap-4">
-              {data.map(({ name, color }, index) => (
+              {data.map(({ name, color, value }, index) => (
                 <div key={`legend-${index}`} className="flex items-center space-x-2">
                   <div className="w-4 h-4 rounded" style={{ backgroundColor: color }} />
-                  <span className="text-sm text-foreground">{name}</span>
+                  <span className="text-sm text-foreground">{name} ({formatNumber(value)})</span>
                 </div>
               ))}
             </div>

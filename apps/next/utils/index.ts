@@ -13,6 +13,13 @@ export function formatInternationalNumber(
   return number;
 }
 
+export function formatNumber(num: number) {
+  return new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    maximumFractionDigits: 2,
+  }).format(num);
+}
+
 export function maybePhoneNumber(input?: string): boolean {
   const phonePattern = /^[-+0-9() ]+$/;
   return phonePattern.test(input || "");
