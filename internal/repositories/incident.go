@@ -39,7 +39,7 @@ type IncidentStatistics struct {
 	UnresolvedIncidents Trend `json:"unresolvedIncidents"`
 }
 
-type IncidentInsights struct {
+type IncidentSeverityInsights struct {
 	Series []IncidentSeveritySeriesItem `json:"series"`
 	Count  int64                        `json:"count"`
 }
@@ -56,6 +56,26 @@ type IncidentSeveritySeriesItem struct {
 	Low    int64     `json:"low"`
 	Medium int64     `json:"medium"`
 	High   int64     `json:"high"`
+}
+
+type IncidentSeverityInsightsFilter struct {
+	period.DateRange
+	categoryId string
+}
+
+type IncidentCategoryCount struct {
+	Id    string `json:"id"`
+	Count int64  `json:"count"`
+	Name  string `json:"name"`
+	Slug  string `json:"slug"`
+}
+
+type IncidentCategoryInsights struct {
+	Counts []IncidentCategoryCount `json:"counts"`
+}
+
+type IncidentCategoryInsightsFilter struct {
+	period.DateRange
 }
 
 func NewIncidentRepository(defaultDB *builds.DefaultDB, logger *zap.Logger) *IncidentRepository {
@@ -222,21 +242,26 @@ func (repository *IncidentRepository) GetIncidentStatistics(dateRange period.Dat
 	}, nil
 }
 
-func (repository *IncidentRepository) GetIncidentInsights(dateRange period.DateRange) (*IncidentInsights, error) {
-	unit := period.GetUnit(dateRange.StartDate, dateRange.EndDate)
+func (repository *IncidentRepository) GetIncidentSeverityInsights(filter IncidentSeverityInsightsFilter) (*IncidentSeverityInsights, error) {
+	unit := period.GetUnit(filter.StartDate, filter.EndDate)
 	repository.logger.Debug("Starting GetIncidentInsights",
-		zap.Time("startDate", dateRange.StartDate),
-		zap.Time("endDate", dateRange.EndDate),
+		zap.Time("startDate", filter.StartDate),
+		zap.Time("endDate", filter.EndDate),
 		zap.String("unit", fmt.Sprint(unit)),
 	)
 
 	query := repository.defaultDB.Model(&models.Incident{})
 
-	if !dateRange.StartDate.IsZero() {
-		query = query.Where("reported_at >= ?", dateRange.StartDate)
+	if !filter.StartDate.IsZero() {
+		query = query.Where("reported_at >= ?", filter.StartDate)
 	}
-	if !dateRange.EndDate.IsZero() {
-		query = query.Where("reported_at <= ?", dateRange.EndDate)
+
+	if !filter.EndDate.IsZero() {
+		query = query.Where("reported_at <= ?", filter.EndDate)
+	}
+
+	if filter.categoryId != "" {
+		query = query.Where("category_id = ?", filter.categoryId)
 	}
 
 	var count int64
@@ -315,7 +340,7 @@ func (repository *IncidentRepository) GetIncidentInsights(dateRange period.DateR
 		}
 	}
 
-	datePeriods := period.GetPeriods(dateRange.StartDate, dateRange.EndDate, unit)
+	datePeriods := period.GetPeriods(filter.StartDate, filter.EndDate, unit)
 	repository.logger.Debug("Date periods computed", zap.Int("periodsCount", len(datePeriods)))
 
 	normalizeIncidents := func(incidents []IncidentTimeSeriesItem) []IncidentTimeSeriesItem {
@@ -361,8 +386,50 @@ func (repository *IncidentRepository) GetIncidentInsights(dateRange period.DateR
 		zap.Int64("totalCount", count),
 	)
 
-	return &IncidentInsights{
+	return &IncidentSeverityInsights{
 		Series: series,
 		Count:  count,
 	}, nil
+}
+
+func (repository *IncidentRepository) GetIncidentCategoryInsights(filter IncidentCategoryInsightsFilter) (*IncidentCategoryInsights, error) {
+	unit := period.GetUnit(filter.StartDate, filter.EndDate)
+	repository.logger.Debug("Starting GetIncidentCategoryInsights",
+		zap.Time("startDate", filter.StartDate),
+		zap.Time("endDate", filter.EndDate),
+		zap.String("unit", fmt.Sprint(unit)),
+	)
+
+	query := repository.defaultDB.Model(&models.Incident{})
+
+	if !filter.StartDate.IsZero() {
+		query = query.Where("reported_at >= ?", filter.StartDate)
+	}
+
+	if !filter.EndDate.IsZero() {
+		query = query.Where("reported_at <= ?", filter.EndDate)
+	}
+
+	var counts []IncidentCategoryCount
+
+	if err := query.Select("category_id AS id, COUNT(*) AS count, c.name, c.slug").
+		Joins("JOIN categories c ON c.id = category_id").
+		Group("category_id, c.name, c.slug").
+		Order("count DESC").
+		Scan(&counts).Error; err != nil {
+		repository.logger.Error("Failed to query incident category insights", zap.Error(err))
+		return nil, fmt.Errorf("failed to query incident category insights: %w", err)
+	}
+
+	if len(counts) == 0 {
+		repository.logger.Debug("No incident category insights found")
+		return &IncidentCategoryInsights{Counts: []IncidentCategoryCount{}}, nil
+	}
+
+	repository.logger.Debug("Incident category insights retrieved",
+		zap.Int("count", len(counts)),
+		zap.Any("counts", counts),
+	)
+
+	return &IncidentCategoryInsights{Counts: counts}, nil
 }

@@ -212,7 +212,8 @@ func (service *IdentityService) CreateAccount(form CreateAccountForm) (*AccountW
 		HasPassword:           true,
 		SecurityStamp:         uuid.New().String(),
 		LastActiveAt:          currentTime,
-		LastPasswordChangedAt: currentTime,
+		LastPasswordChangedAt: &currentTime,
+		Status:                models.UserStatusActive,
 	}
 
 	if err := service.identityRepository.CreateUser(user); err != nil {
@@ -667,11 +668,13 @@ func (service *IdentityService) CompleteResetPassword(form CompleteResetPassword
 		return nil
 	}
 
+	currentTime := time.Now()
+
 	user.HasPassword = true
 	user.PasswordHash = utils.MustHashPassword(form.NewPassword)
 	user.SecurityStamp = uuid.New().String()
-	user.UpdatedAt = time.Now()
-	user.LastPasswordChangedAt = time.Now()
+	user.UpdatedAt = currentTime
+	user.LastPasswordChangedAt = &currentTime
 
 	if err := service.identityRepository.UpdateUser(user); err != nil {
 		service.logger.Error("User update error: ", zap.Error(err))
@@ -696,11 +699,12 @@ func (service *IdentityService) ChangePassword(userId string, form ChangePasswor
 		return problems.NewValidationProblem(map[string]string{"oldPassword": "Old password is incorrect."})
 	}
 
+	currentTime := time.Now()
 	user.HasPassword = true
 	user.PasswordHash = utils.MustHashPassword(form.NewPassword)
 	user.SecurityStamp = uuid.New().String()
-	user.UpdatedAt = time.Now()
-	user.LastPasswordChangedAt = time.Now()
+	user.UpdatedAt = currentTime
+	user.LastPasswordChangedAt = &currentTime
 
 	if err := service.identityRepository.UpdateUser(user); err != nil {
 		service.logger.Error("User update error: ", zap.Error(err))

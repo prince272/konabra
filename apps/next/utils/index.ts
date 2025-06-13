@@ -67,3 +67,28 @@ export function calendarDateToISOString(date: CalendarDate, isEndOfDay = false):
   );
   return dateObj.toISOString();
 }
+
+export function getDeterministicMapping(
+  keys: string[],
+  values: string[]
+): Record<string, string> {
+  // Simple hash function for a string, returns a number
+  function hashString(str: string): number {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = (hash << 5) - hash + str.charCodeAt(i);
+      hash |= 0; // Convert to 32bit integer
+    }
+    return Math.abs(hash);
+  }
+
+  const result: Record<string, string> = {};
+
+  for (const key of keys) {
+    // Use the hash of the key modulo the number of values to pick the value index
+    const index = hashString(key) % values.length;
+    result[key] = values[index];
+  }
+
+  return result;
+}

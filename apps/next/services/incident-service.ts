@@ -46,19 +46,14 @@ export type Incident = {
   reportedBy: Account;
 };
 
-export type IncidentDateRange = {
-  startDate: string; // ISO date string
-  endDate: string; // ISO date string
-}
-
 export type IncidentFilter = {
   sort?: string | null;
   order?: "asc" | "desc" | null;
-  search?: string;
-  status?: IncidentStatus;
-  severity?: IncidentSeverity;
-  startDate?: string;
-  endDate?: string;
+  search?: string | null;
+  status?: IncidentStatus | null;
+  severity?: IncidentSeverity | null;
+  startDate?: string | null; // ISO date string
+  endDate?: string | null; // ISO date string
 };
 
 export type IncidentPaginatedFilter = IncidentFilter & {
@@ -84,6 +79,20 @@ export type IncidentStatistics = {
   unresolvedIncidents: IncidentTrend;
 };
 
+export type IncidentStatisticsFilter = {
+  startDate?: string | null;
+  endDate?: string | null;
+};
+
+export type IncidentCategoryInsights = {
+  counts: {
+    id: string;
+    name: string;
+    slug: string;
+    count: number;
+  }[];
+};
+
 export type IncidentSeveritySeriesItem = {
   label: string;
   count: number;
@@ -91,12 +100,23 @@ export type IncidentSeveritySeriesItem = {
   low: number;
   medium: number;
   high: number;
-}
+};
 
-export type IncidentInsights = {
+export type IncidentSeverityInsights = {
   series: IncidentSeveritySeriesItem[];
   count: number;
-}
+};
+
+export type IncidentSeverityInsightsFilter = {
+  startDate?: string | null; // ISO date string
+  endDate?: string | null; // ISO date string
+  categoryId?: string | null;
+};
+
+export type IncidentCategoryInsightsFilter = {
+  startDate?: string | null; // ISO date string
+  endDate?: string | null; // ISO date string
+};
 
 export class IncidentService {
   constructor(private readonly api: AxiosInstance) {}
@@ -152,21 +172,32 @@ export class IncidentService {
   }
 
   public async getIncidentStatistics(
-    dateRage: Partial<IncidentDateRange>
+    filter: Partial<IncidentStatisticsFilter>
   ): Promise<readonly [IncidentStatistics, Problem?]> {
     try {
-      const response = await this.api.get("/incidents/statistics", { params: dateRage });
+      const response = await this.api.get("/incidents/statistics", { params: filter });
       return [response.data, undefined];
     } catch (error) {
       return [undefined!, parseProblem(error)];
     }
   }
 
-  public async getIncidentInsights(
-    dateRage: Partial<IncidentDateRange>
-  ): Promise<readonly [IncidentInsights, Problem?]> {
+  public async getIncidentSeverityInsights(
+    filter: Partial<IncidentSeverityInsightsFilter>
+  ): Promise<readonly [IncidentSeverityInsights, Problem?]> {
     try {
-      const response = await this.api.get("/incidents/insights", { params: dateRage });
+      const response = await this.api.get("/incidents/insights/severity", { params: filter });
+      return [response.data, undefined];
+    } catch (error) {
+      return [undefined!, parseProblem(error)];
+    }
+  }
+
+  public async getIncidentCategoryInsights(
+    filter: Partial<IncidentCategoryInsightsFilter>
+  ): Promise<readonly [IncidentCategoryInsights, Problem?]> {
+    try {
+      const response = await this.api.get("/incidents/insights/category", { params: filter });
       return [response.data, undefined];
     } catch (error) {
       return [undefined!, parseProblem(error)];

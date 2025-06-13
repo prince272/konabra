@@ -10,19 +10,22 @@ import { Popover, PopoverContent, PopoverTrigger } from "@heroui/popover";
 import { CalendarDate, getLocalTimeZone, isSameDay, now, today } from "@internationalized/date";
 import { AlertCircle, Calendar as CalendarIcon, CheckCircle, Folder, Users } from "lucide-react";
 import { useTheme } from "next-themes";
-import { calendarDateToISOString } from "@/utils";
+import { calendarDateToISOString, getDeterministicMapping } from "@/utils";
 import { categoryService, identityService, incidentService } from "@/services";
 import { CategoryStatistics } from "@/services/category-service";
 import { UserStatistics } from "@/services/identity-service";
 import {
-  IncidentFilter,
-  IncidentInsights,
+  Incident,
+  IncidentCategoryInsights,
   IncidentPaginatedFilter,
+  IncidentSeverityInsights,
   IncidentStatistics
 } from "@/services/incident-service";
+import { InsightsAreaChart } from "../common/charts/area-chart";
+import { InsightsPieChart } from "../common/charts/pie-chart";
 import IncidentsTable from "./incidents/incidents-table";
-import { InsightsChart } from "./insights-chart";
 import { StatCard } from "./stats-card";
+import { commonColors } from "@heroui/theme";
 
 export const DashboardPage: React.FC = () => {
   const [filter, setFilter] = useState<Partial<{ startDate: string; endDate: string }>>({
@@ -33,13 +36,15 @@ export const DashboardPage: React.FC = () => {
   const [stats, setStats] = useState<IncidentStatistics | null>(null);
   const [categoryStats, setCategoryStats] = useState<CategoryStatistics | null>(null);
   const [userStats, setUserStats] = useState<UserStatistics | null>(null);
-  const [insights, setInsights] = useState<IncidentInsights | null>(null);
+  const [severityInsights, setSeverityInsights] = useState<IncidentSeverityInsights | null>(null);
+  const [categoryInsights, setCategoryInsights] = useState<IncidentCategoryInsights | null>(null);
 
-  const [incidents, setIncidents] = useState<any[]>([]);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
   const [isLoadingIncidents, setIsLoadingIncidents] = useState(true);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
-  const [isLoadingInsights, setIsLoadingInsights] = useState(true);
+  const [isLoadingSeverityInsights, setIsLoadingSeverityInsights] = useState(true);
+  const [isLoadingCategoryInsights, setIsLoadingCategoryInsights] = useState(true);
 
   const [selectedRange, setSelectedRange] = useState({
     start: today(getLocalTimeZone()),
@@ -99,14 +104,25 @@ export const DashboardPage: React.FC = () => {
   }, [filter]);
 
   useEffect(() => {
-    const fetchInsights = async () => {
-      setIsLoadingInsights(true);
-      const [data, problem] = await incidentService.getIncidentInsights(filter);
-      if (!problem) setInsights(data);
-      else console.error("Incident insights error:", problem);
-      setIsLoadingInsights(false);
+    const fetchSeverityInsights = async () => {
+      setIsLoadingSeverityInsights(true);
+      const [data, problem] = await incidentService.getIncidentSeverityInsights(filter);
+      if (!problem) setSeverityInsights(data);
+      else console.error("Incident severity insights error:", problem);
+      setIsLoadingSeverityInsights(false);
     };
-    fetchInsights();
+    fetchSeverityInsights();
+  }, [filter]);
+
+  useEffect(() => {
+    const fetchCategoryInsights = async () => {
+      setIsLoadingCategoryInsights(true);
+      const [data, problem] = await incidentService.getIncidentCategoryInsights(filter);
+      if (!problem) setCategoryInsights(data);
+      else console.error("Category insights error:", problem);
+      setIsLoadingCategoryInsights(false);
+    };
+    fetchCategoryInsights();
   }, [filter]);
 
   const handleDateRangeChange = (value: { start: CalendarDate; end: CalendarDate }) => {
@@ -328,22 +344,46 @@ export const DashboardPage: React.FC = () => {
         />
       </div>
 
-      {/* Incident Insights */}
+      {/* Incident Severity Insights */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card shadow="none">
           <CardHeader className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">Severity Insights</h3>
           </CardHeader>
-          <CardBody className="pt-0">
-            <InsightsChart
-              height={300}
-              isLoading={isLoadingInsights}
-              data={insights?.series || []}
-              series={[
+          <CardBody className="pt-0 min-h-80">
+            <InsightsAreaChart
+              isLoading={isLoadingSeverityInsights}
+              data={severityInsights?.series || []}
+              areas={[
                 { key: "low", label: "Low Severity", color: "hsl(var(--heroui-secondary))" },
                 { key: "medium", label: "Medium Severity", color: "hsl(var(--heroui-warning))" },
                 { key: "high", label: "High Severity", color: "hsl(var(--heroui-danger))" }
               ]}
+            />
+          </CardBody>
+        </Card>
+        <Card shadow="none">
+          <CardHeader className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Incident Categories</h3>
+          </CardHeader>
+          <CardBody className="pt-0 min-h-80">
+            <InsightsPieChart
+              isLoading={isLoadingCategoryInsights}
+              data={(categoryInsights?.counts || []).map((item) => ({
+                name: item.name,
+                value: item.count,
+                color: getDeterministicMapping(
+                  (categoryInsights?.counts || []).map((_) => _.slug),
+                  [
+  "#fdb302", "#f78502", "#f16502", "#cc4a02", "#d93a01", "#ee6a5a", "#d83c42", "#ff4646",
+  "#e2001a", "#e11c55", "#e6008c", "#c20086", "#970d90", "#7f0e86", "#0f63bf", "#005ea3",
+  "#9489d4", "#7d7ad3", "#6f60bf", "#8a2ca8", "#650b84", "#108b9d", "#2d748d", "#0ab1bf",
+  "#0a7f7a", "#00bf7a", "#15cf45", "#1b7036", "#8a8a8a", "#646464", "#737d8b", "#5a636f",
+  "#517067", "#5a5d5a", "#40640f", "#277200", "#848484", "#494949", "#6a737a", "#404647",
+  "#6c6e5d", "#756e45", "#91846f"
+]
+                )[item.slug]
+              }))}
             />
           </CardBody>
         </Card>

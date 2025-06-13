@@ -191,11 +191,23 @@ func (service *IncidentService) GetIncidentStatistics(dateRange period.DateRange
 	return stats, nil
 }
 
-func (service *IncidentService) GetIncidentInsights(dateRange period.DateRange) (*repositories.IncidentInsights, *problems.Problem) {
-	if err := service.validator.ValidateStruct(dateRange); err != nil {
+func (service *IncidentService) GetIncidentSeverityInsights(filter repositories.IncidentSeverityInsightsFilter) (*repositories.IncidentSeverityInsights, *problems.Problem) {
+	if err := service.validator.ValidateStruct(filter); err != nil {
 		return nil, problems.FromError(err)
 	}
-	insights, err := service.incidentRepository.GetIncidentInsights(dateRange)
+	insights, err := service.incidentRepository.GetIncidentSeverityInsights(filter)
+	if err != nil {
+		service.logger.Error("Failed to get incidents insights", zap.Error(err))
+		return nil, problems.FromError(err)
+	}
+	return insights, nil
+}
+
+func (service *IncidentService) GetIncidentCategoryInsights(filter repositories.IncidentCategoryInsightsFilter) (*repositories.IncidentCategoryInsights, *problems.Problem) {
+	if err := service.validator.ValidateStruct(filter); err != nil {
+		return nil, problems.FromError(err)
+	}
+	insights, err := service.incidentRepository.GetIncidentCategoryInsights(filter)
 	if err != nil {
 		service.logger.Error("Failed to get incidents insights", zap.Error(err))
 		return nil, problems.FromError(err)

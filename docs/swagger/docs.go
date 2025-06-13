@@ -457,7 +457,7 @@ const docTemplate = `{
                 "tags": [
                     "Categories"
                 ],
-                "summary": "Get categories statistics",
+                "summary": "Get category statistics",
                 "parameters": [
                     {
                         "type": "string",
@@ -684,7 +684,7 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/incidents/insights": {
+        "/incidents/insights/category": {
             "get": {
                 "security": [
                     {
@@ -700,7 +700,39 @@ const docTemplate = `{
                 "tags": [
                     "Incidents"
                 ],
-                "summary": "Get incidents insights",
+                "summary": "Get incident category insights",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "endDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "startDate",
+                        "in": "query"
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/incidents/insights/severity": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Incidents"
+                ],
+                "summary": "Get incident severity insights",
                 "parameters": [
                     {
                         "type": "string",

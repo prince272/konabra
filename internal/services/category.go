@@ -9,7 +9,6 @@ import (
 	"github.com/prince272/konabra/internal/models"
 	"github.com/prince272/konabra/internal/problems"
 	"github.com/prince272/konabra/internal/repositories"
-	"github.com/prince272/konabra/pkg/period"
 	"github.com/prince272/konabra/utils"
 	"go.uber.org/zap"
 )
@@ -183,11 +182,11 @@ func (service *CategoryService) GetCategoryById(id string) (*CategoryModel, *pro
 	return model, nil
 }
 
-func (service *CategoryService) GetCategoriesStatistics(dateRange period.DateRange) (*repositories.CategoryStatistics, *problems.Problem) {
-	if err := service.validator.ValidateStruct(dateRange); err != nil {
+func (service *CategoryService) GetCategoryStatistics(filter repositories.CategoryStatisticsFilter) (*repositories.CategoryStatistics, *problems.Problem) {
+	if err := service.validator.ValidateStruct(filter); err != nil {
 		return nil, problems.FromError(err)
 	}
-	stats, err := service.categoryRepository.GetCategoriesStatistics(dateRange)
+	stats, err := service.categoryRepository.GetCategoryStatistics(filter)
 	if err != nil {
 		service.logger.Error("Failed to get categories statistics", zap.Error(err))
 		return nil, problems.FromError(err)

@@ -1,4 +1,10 @@
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse, HttpStatusCode, isAxiosError } from "axios";
+import axios, {
+  AxiosError,
+  AxiosRequestConfig,
+  AxiosResponse,
+  HttpStatusCode,
+  isAxiosError
+} from "axios";
 import queryString from "query-string";
 import Cookies from "universal-cookie";
 import { stringifyPath, toRelativeUrl } from "@/utils";
@@ -57,7 +63,7 @@ let failedQueue: PendingRequest[] = [];
 
 // Process the queue: either retry with new token or reject all
 function processQueue(error: any, token: string | null = null) {
-  failedQueue.forEach(prom => {
+  failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
     } else if (token) {
@@ -161,12 +167,12 @@ api.interceptors.response.use(
         // On refresh failure: reject queued requests, clear storage, redirect
         processQueue(refreshError, null);
 
-        cookies.remove("current-account", { path: "/" });
         const status = (refreshError as AxiosError)?.response?.status;
         if (
           (status === HttpStatusCode.BadRequest || status === HttpStatusCode.Unauthorized) &&
           typeof window !== "undefined"
         ) {
+          cookies.remove("current-account", { path: "/" });
           const returnUrl = toRelativeUrl(window.location.href || "/");
           window.location.href = stringifyPath(
             {

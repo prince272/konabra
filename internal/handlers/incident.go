@@ -30,7 +30,8 @@ func NewIncidentHandler(router *gin.Engine, incidentService *services.IncidentSe
 		incidentGroup.PUT("/:id", handler.handleWithData(handler.UpdateIncident))
 		incidentGroup.DELETE("/:id", handler.handle(handler.DeleteIncident))
 		incidentGroup.GET("/statistics", handler.handleWithData(handler.GetIncidentStatistics))
-		incidentGroup.GET("/insights", handler.handleWithData(handler.GetIncidentInsights))
+		incidentGroup.GET("/insights/severity", handler.handleWithData(handler.GetIncidentSeverityInsights))
+		incidentGroup.GET("/insights/category", handler.handleWithData(handler.GetIncidentCategoryInsights))
 	}
 
 	return handler
@@ -169,19 +170,36 @@ func (handler *IncidentHandler) GetIncidentStatistics(context *gin.Context) (any
 	return handler.incidentService.GetIncidentStatistics(dateRange)
 }
 
-// GetIncidentInsights retrieves insights for incidents
-// @Summary Get incidents insights
+// GetIncidentSeverityInsights retrieves insights on incident severity
+// @Summary Get incident severity insights
 // @Tags Incidents
 // @Accept json
 // @Produce json
-// @Param dateRange query period.DateRange false "Date range for insights"
+// @Param filter query repositories.IncidentSeverityInsightsFilter false "Incident severity insights filter"
 // @Security BearerAuth
-// @Router /incidents/insights [get]
-func (handler *IncidentHandler) GetIncidentInsights(context *gin.Context) (any, *problems.Problem) {
-	var dateRange period.DateRange
-	if err := context.ShouldBindQuery(&dateRange); err != nil {
+// @Router /incidents/insights/severity [get]
+func (handler *IncidentHandler) GetIncidentSeverityInsights(context *gin.Context) (any, *problems.Problem) {
+	var filter repositories.IncidentSeverityInsightsFilter
+	if err := context.ShouldBindQuery(&filter); err != nil {
 		return nil, problems.FromError(err)
 	}
 
-	return handler.incidentService.GetIncidentInsights(dateRange)
+	return handler.incidentService.GetIncidentSeverityInsights(filter)
+}
+
+// GetIncidentCategoryInsights retrieves insights on incident categories
+// @Summary Get incident category insights
+// @Tags Incidents
+// @Accept json
+// @Produce json
+// @Param filter query repositories.IncidentCategoryInsightsFilter false "Incident category insights filter"
+// @Security BearerAuth
+// @Router /incidents/insights/category [get]
+func (handler *IncidentHandler) GetIncidentCategoryInsights(context *gin.Context) (any, *problems.Problem) {
+	var filter repositories.IncidentCategoryInsightsFilter
+	if err := context.ShouldBindQuery(&filter); err != nil {
+		return nil, problems.FromError(err)
+	}
+
+	return handler.incidentService.GetIncidentCategoryInsights(filter)
 }

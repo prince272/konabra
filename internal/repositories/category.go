@@ -35,6 +35,14 @@ type CategoryStatistics struct {
 	TotalCategories Trend `json:"totalCategories"`
 }
 
+type CategoryStatisticsFilter struct {
+	period.DateRange
+}
+
+type CategoryInsightsFilter struct {
+	period.DateRange
+}
+
 func NewCategoryRepository(defaultDB *builds.DefaultDB, logger *zap.Logger) *CategoryRepository {
 	return &CategoryRepository{defaultDB, logger}
 }
@@ -177,7 +185,7 @@ func (repository *CategoryRepository) GetPaginatedCategories(filter CategoryPagi
 	return items, count
 }
 
-func (repository *CategoryRepository) GetCategoriesStatistics(dateRange period.DateRange) (*CategoryStatistics, error) {
+func (repository *CategoryRepository) GetCategoryStatistics(filter CategoryStatisticsFilter) (*CategoryStatistics, error) {
 	countCategories := func(startDate, endDate time.Time) (int64, error) {
 		query := repository.defaultDB.Model(&models.Category{})
 
@@ -195,7 +203,7 @@ func (repository *CategoryRepository) GetCategoriesStatistics(dateRange period.D
 		return count, nil
 	}
 
-	totalCategories := CalculateTrend(dateRange.StartDate, dateRange.EndDate, func(startDate, endDate time.Time) int64 {
+	totalCategories := CalculateTrend(filter.StartDate, filter.EndDate, func(startDate, endDate time.Time) int64 {
 		count, err := countCategories(startDate, endDate)
 		if err != nil {
 			repository.logger.Error("Failed to count categories", zap.Error(err))

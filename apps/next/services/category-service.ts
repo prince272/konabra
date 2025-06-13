@@ -46,6 +46,11 @@ export type CategoryStatistics = {
   totalCategories: CategoryTrend;
 };
 
+export type CategoryStatisticsFilter = {
+  startDate?: string | null;
+  endDate?: string | null;
+}
+
 export class CategoryService {
   constructor(private readonly api: AxiosInstance) {}
 
@@ -100,7 +105,7 @@ export class CategoryService {
   }
 
   public async getCategoryStatistics(
-    filter: CategoryFilter
+    filter: CategoryStatisticsFilter
   ): Promise<readonly [CategoryStatistics, Problem?]> {
     try {
       const response = await this.api.get("/categories/statistics", { params: filter });

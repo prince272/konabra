@@ -577,7 +577,7 @@ paths:
       responses: {}
       security:
       - BearerAuth: []
-      summary: Get categories statistics
+      summary: Get category statistics
       tags:
       - Categories
   /incidents:
@@ -715,7 +715,7 @@ paths:
       summary: Update an existing incident
       tags:
       - Incidents
-  /incidents/insights:
+  /incidents/insights/category:
     get:
       consumes:
       - application/json
@@ -731,7 +731,26 @@ paths:
       responses: {}
       security:
       - BearerAuth: []
-      summary: Get incidents insights
+      summary: Get incident category insights
+      tags:
+      - Incidents
+  /incidents/insights/severity:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - in: query
+        name: endDate
+        type: string
+      - in: query
+        name: startDate
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get incident severity insights
       tags:
       - Incidents
   /incidents/statistics:

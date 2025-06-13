@@ -8,7 +8,6 @@ import (
 	"github.com/prince272/konabra/internal/problems"
 	"github.com/prince272/konabra/internal/repositories"
 	"github.com/prince272/konabra/internal/services"
-	"github.com/prince272/konabra/pkg/period"
 )
 
 // IdentityHandler handles user identity routes
@@ -28,7 +27,7 @@ func NewCategoryHandler(router *gin.Engine, categoryService *services.CategorySe
 		categoryGroup.POST("", handler.handleWithData(handler.CreateCategory))
 		categoryGroup.PUT("/:id", handler.handleWithData(handler.UpdateCategory))
 		categoryGroup.DELETE("/:id", handler.handle(handler.DeleteCategory))
-		categoryGroup.GET("/statistics", handler.handleWithData(handler.GetCategoriesStatistics))
+		categoryGroup.GET("/statistics", handler.handleWithData(handler.GetCategoryStatistics))
 	}
 
 	return handler
@@ -147,19 +146,19 @@ func (handler *CategoryHandler) GetCategoryById(context *gin.Context) (any, *pro
 	return handler.categoryService.GetCategoryById(id)
 }
 
-// GetCategoriesStatistics retrieves statistics for categories within a date range
-// @Summary Get categories statistics
+// GetCategoryStatistics retrieves statistics for categories
+// @Summary Get category statistics
 // @Tags Categories
 // @Accept json
 // @Produce json
-// @Param dateRange query period.DateRange false "Date range for statistics"
+// @Param filter query repositories.CategoryStatisticsFilter false "Category statistics filter"
 // @Security BearerAuth
 // @Router /categories/statistics [get]
-func (handler *CategoryHandler) GetCategoriesStatistics(context *gin.Context) (any, *problems.Problem) {
-	var dateRange period.DateRange
-	if err := context.ShouldBindQuery(&dateRange); err != nil {
+func (handler *CategoryHandler) GetCategoryStatistics(context *gin.Context) (any, *problems.Problem) {
+	var filter repositories.CategoryStatisticsFilter
+	if err := context.ShouldBindQuery(&filter); err != nil {
 		return nil, problems.FromError(err)
 	}
 
-	return handler.categoryService.GetCategoriesStatistics(dateRange)
+	return handler.categoryService.GetCategoryStatistics(filter)
 }
