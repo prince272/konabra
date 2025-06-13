@@ -7,7 +7,7 @@ import { RangeCalendar } from "@heroui/calendar";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 import { Popover, PopoverContent, PopoverTrigger } from "@heroui/popover";
-import { CalendarDate, getLocalTimeZone, isSameDay, now, today } from "@internationalized/date";
+import { CalendarDate, getLocalTimeZone, isSameDay, today } from "@internationalized/date";
 import { AlertCircle, Calendar as CalendarIcon, CheckCircle, Folder, Users } from "lucide-react";
 import { calendarDateToISOString, getDeterministicMapping } from "@/utils";
 import { categoryService, identityService, incidentService } from "@/services";
@@ -20,16 +20,48 @@ import {
   IncidentSeverityInsights,
   IncidentStatistics
 } from "@/services/incident-service";
-import { InsightsAreaChart } from "../common/charts/area-chart";
-import { InsightsPieChart, pieChartColors } from "../common/charts/pie-chart";
+import { InsightsAreaChart } from "../common/area-chart";
+import { InsightsPieChart, pieChartColors } from "../common/pie-chart";
+import { StatCard } from "../common/stats-card";
 import IncidentsTable from "./incidents/incidents-table";
-import { StatCard } from "./stats-card";
 
-export const DashboardPage: React.FC = () => {
+interface DashboardPageProps {
+  initialPreset?:
+    | "today"
+    | "thisWeek"
+    | "lastWeek"
+    | "thisMonth"
+    | "lastMonth"
+    | "last3Months"
+    | "thisYear"
+    | "lastYear"
+    | "custom";
+  initialCustomRange?: { start: CalendarDate; end: CalendarDate };
+}
+
+export const DashboardPage: React.FC<DashboardPageProps> = ({
+  initialPreset = "thisMonth", // Default preset
+  initialCustomRange
+}) => {
+  const localTimeZone = getLocalTimeZone();
+  const now = today(localTimeZone);
+
+  // Initialize selectedRange and filter based on initialPreset or initialCustomRange
+  const initialRange =
+    initialPreset === "custom" && initialCustomRange
+      ? initialCustomRange
+      : getRangeForPreset(initialPreset, now);
+
   const [filter, setFilter] = useState<Partial<{ startDate: string; endDate: string }>>({
-    startDate: calendarDateToISOString(today(getLocalTimeZone())),
-    endDate: calendarDateToISOString(today(getLocalTimeZone()), true)
+    startDate: calendarDateToISOString(initialRange.start),
+    endDate: calendarDateToISOString(initialRange.end, true)
   });
+
+  const [selectedRange, setSelectedRange] = useState<{ start: CalendarDate; end: CalendarDate }>(
+    initialRange
+  );
+  const [selectedPreset, setSelectedPreset] = useState<string>(initialPreset);
+  const [showCustomRange, setShowCustomRange] = useState(false);
 
   const [stats, setStats] = useState<IncidentStatistics | null>(null);
   const [categoryStats, setCategoryStats] = useState<CategoryStatistics | null>(null);
@@ -43,14 +75,6 @@ export const DashboardPage: React.FC = () => {
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [isLoadingSeverityInsights, setIsLoadingSeverityInsights] = useState(true);
   const [isLoadingCategoryInsights, setIsLoadingCategoryInsights] = useState(true);
-
-  const [selectedRange, setSelectedRange] = useState({
-    start: today(getLocalTimeZone()),
-    end: today(getLocalTimeZone())
-  });
-
-  const [showCustomRange, setShowCustomRange] = useState(false);
-  const [selectedPreset, setSelectedPreset] = useState<string>("thisWeek");
 
   useEffect(() => {
     const fetchIncidentStats = async () => {
@@ -140,47 +164,11 @@ export const DashboardPage: React.FC = () => {
     setSelectedPreset(preset);
     setShowCustomRange(false);
 
-    const now = today(getLocalTimeZone());
-    let start = now;
-    let end = now;
-
-    switch (preset) {
-      case "thisWeek":
-        start = now.subtract({ days: (now.day - 1) % 7 });
-        end = start.add({ days: 6 });
-        break;
-      case "lastWeek":
-        start = now.subtract({ days: ((now.day - 1) % 7) + 7 });
-        end = start.add({ days: 6 });
-        break;
-      case "thisMonth":
-        start = now.set({ day: 1 });
-        end = start.add({ months: 1 }).subtract({ days: 1 });
-        break;
-      case "lastMonth":
-        start = now.subtract({ months: 1 }).set({ day: 1 });
-        end = start.add({ months: 1 }).subtract({ days: 1 });
-        break;
-      case "last3Months":
-        start = now.subtract({ months: 2 }).set({ day: 1 });
-        end = now;
-        break;
-      case "thisYear":
-        start = now.set({ month: 1, day: 1 });
-        end = now.set({ month: 12, day: 31 });
-        break;
-      case "lastYear":
-        start = now.subtract({ years: 1 }).set({ month: 1, day: 1 });
-        end = start.set({ month: 12, day: 31 });
-        break;
-      default: // today
-        break;
-    }
-
-    setSelectedRange({ start, end });
+    const range = getRangeForPreset(preset, now);
+    setSelectedRange(range);
     setFilter({
-      startDate: calendarDateToISOString(start),
-      endDate: calendarDateToISOString(end, true)
+      startDate: calendarDateToISOString(range.start),
+      endDate: calendarDateToISOString(range.end, true)
     });
   };
 
@@ -192,7 +180,8 @@ export const DashboardPage: React.FC = () => {
     lastMonth: "Last Month",
     last3Months: "Last 3 Months",
     thisYear: "This Year",
-    lastYear: "Last Year"
+    lastYear: "Last Year",
+    custom: "Custom Range"
   };
 
   const formatDateRange = () => {
@@ -255,8 +244,8 @@ export const DashboardPage: React.FC = () => {
               aria-label="Custom date range"
               value={selectedRange}
               onChange={handleDateRangeChange}
-              minValue={today(getLocalTimeZone()).subtract({ years: 10 })}
-              maxValue={today(getLocalTimeZone())}
+              minValue={today(localTimeZone).subtract({ years: 10 })}
+              maxValue={today(localTimeZone)}
             />
             <div className="mt-4 flex justify-end space-x-2">
               <Button variant="flat" onPress={() => applyPresetRange("today")}>
@@ -348,7 +337,7 @@ export const DashboardPage: React.FC = () => {
           <CardHeader className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">Severity Insights</h3>
           </CardHeader>
-          <CardBody className="min-h-80 pt-0">
+          <CardBody className="pt-0">
             <InsightsAreaChart
               isLoading={isLoadingSeverityInsights}
               data={severityInsights?.series || []}
@@ -364,7 +353,7 @@ export const DashboardPage: React.FC = () => {
           <CardHeader className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">Incident Categories</h3>
           </CardHeader>
-          <CardBody className="min-h-80 pt-0">
+          <CardBody className="pt-0">
             <InsightsPieChart
               isLoading={isLoadingCategoryInsights}
               data={(categoryInsights?.counts || []).map((item) => ({
@@ -396,4 +385,47 @@ export const DashboardPage: React.FC = () => {
       </div>
     </div>
   );
+};
+
+const getRangeForPreset = (
+  preset: string,
+  now: CalendarDate
+): { start: CalendarDate; end: CalendarDate } => {
+  let start = now;
+  let end = now;
+
+  switch (preset) {
+    case "thisWeek":
+      start = now.subtract({ days: (now.day - 1) % 7 });
+      end = start.add({ days: 6 });
+      break;
+    case "lastWeek":
+      start = now.subtract({ days: ((now.day - 1) % 7) + 7 });
+      end = start.add({ days: 6 });
+      break;
+    case "thisMonth":
+      start = now.set({ day: 1 });
+      end = start.add({ months: 1 }).subtract({ days: 1 });
+      break;
+    case "lastMonth":
+      start = now.subtract({ months: 1 }).set({ day: 1 });
+      end = start.add({ months: 1 }).subtract({ days: 1 });
+      break;
+    case "last3Months":
+      start = now.subtract({ months: 2 }).set({ day: 1 });
+      end = now;
+      break;
+    case "thisYear":
+      start = now.set({ month: 1, day: 1 });
+      end = now.set({ month: 12, day: 31 });
+      break;
+    case "lastYear":
+      start = now.subtract({ years: 1 }).set({ month: 1, day: 1 });
+      end = start.set({ month: 12, day: 31 });
+      break;
+    default: // "today"
+      break;
+  }
+
+  return { start, end };
 };

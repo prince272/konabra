@@ -1,5 +1,6 @@
 import React from "react";
 import { Card, CardBody } from "@heroui/card";
+import { Spinner } from "@heroui/spinner";
 import {
   Area,
   AreaChart,
@@ -11,7 +12,6 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { Spinner } from "@heroui/spinner";
 
 interface InsightsAreaChartProps extends React.HTMLAttributes<HTMLDivElement> {
   data: Array<{ label: string } & { [key: string]: number | string }>;
@@ -48,14 +48,12 @@ const InsightsAreaTooltip = ({ active, payload, label }: TooltipProps<any, any>)
 };
 
 export const InsightsAreaChart = React.forwardRef<HTMLDivElement, InsightsAreaChartProps>(
-  ({ data, areas, height, isLoading = false, ...divProps }, ref) => {
-    const resolvedHeight = height ?? "100%";
-
+  ({ data, areas, height = 300, isLoading = false, ...divProps }, ref) => {
     return (
       <div
         ref={ref}
         className="relative w-full"
-        style={{ height: resolvedHeight, ...divProps.style }}
+        style={{ ...divProps.style, minHeight: height }}
         {...divProps}
       >
         {isLoading && (
@@ -63,7 +61,7 @@ export const InsightsAreaChart = React.forwardRef<HTMLDivElement, InsightsAreaCh
             <Spinner size="lg" />
           </div>
         )}
-        <ResponsiveContainer width="100%" height={resolvedHeight}>
+        <ResponsiveContainer width="100%" minHeight={height}>
           <AreaChart data={data}>
             <CartesianGrid
               stroke="hsl(var(--heroui-divider) / var(--heroui-divider-opacity, var(--tw-bg-opacity)))"
