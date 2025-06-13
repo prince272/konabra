@@ -223,4 +223,6 @@ const MapViewer = forwardRef<MapRef, MapViewerProps>(({ incidents = [], ...props
   );
 });
 
+MapViewer.displayName = "MapViewer";
+
 export default MapViewer;
