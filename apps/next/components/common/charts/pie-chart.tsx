@@ -110,3 +110,12 @@ export const InsightsPieChart = React.forwardRef<HTMLDivElement, InsightsPieChar
 );
 
 InsightsPieChart.displayName = "InsightsPieChart";
+
+export const pieChartColors =                   [
+  "#fdb302", "#f78502", "#f16502", "#cc4a02", "#d93a01", "#ee6a5a", "#d83c42", "#ff4646",
+  "#e2001a", "#e11c55", "#e6008c", "#c20086", "#970d90", "#7f0e86", "#0f63bf", "#005ea3",
+  "#9489d4", "#7d7ad3", "#6f60bf", "#8a2ca8", "#650b84", "#108b9d", "#2d748d", "#0ab1bf",
+  "#0a7f7a", "#00bf7a", "#15cf45", "#1b7036", "#8a8a8a", "#646464", "#737d8b", "#5a636f",
+  "#517067", "#5a5d5a", "#40640f", "#277200", "#848484", "#494949", "#6a737a", "#404647",
+  "#6c6e5d", "#756e45", "#91846f"
+];
