@@ -30,7 +30,6 @@ if (api.defaults.baseURL) {
 
 const cookies = new Cookies();
 
-// Helper to get current account from cookie
 function getCurrentAccount(): AccountWithToken | undefined {
   try {
     return cookies.get("current-account") as AccountWithToken | undefined;
@@ -40,47 +39,39 @@ function getCurrentAccount(): AccountWithToken | undefined {
   }
 }
 
-// Helper to save updated account
 function setCurrentAccount(account: AccountWithToken) {
   cookies.set("current-account", account, { path: "/" });
-  // Update default header for future requests
   api.defaults.headers.common.Authorization = `Bearer ${account.accessToken}`;
 }
 
-// Extend AxiosRequestConfig to include our retry flag
 interface RetryAxiosRequestConfig extends AxiosRequestConfig {
   _retry?: boolean;
 }
 
-// Queue for holding pending requests while refreshing
 type PendingRequest = {
   resolve: (value: AxiosResponse<any>) => void;
   reject: (error: any) => void;
   config: RetryAxiosRequestConfig;
 };
+
 let isRefreshing = false;
 let failedQueue: PendingRequest[] = [];
 
-// Process the queue: either retry with new token or reject all
 function processQueue(error: any, token: string | null = null) {
   failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
     } else if (token) {
-      // Clone the config to avoid mutation
       prom.config.headers = prom.config.headers || {};
       prom.config.headers.Authorization = `Bearer ${token}`;
-      // Retry request
       api.request(prom.config).then(prom.resolve).catch(prom.reject);
     } else {
-      // No token and no error: reject generically
       prom.reject(new Error("Could not refresh token"));
     }
   });
   failedQueue = [];
 }
 
-// Request interceptor: attach access token if present
 api.interceptors.request.use(
   (config) => {
     const currentAccount = getCurrentAccount();
@@ -93,29 +84,23 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor: handle 401 and refresh token
 api.interceptors.response.use(
   (response) => response,
   async (error: any) => {
     const originalRequest = error.config as RetryAxiosRequestConfig;
 
-    // If no response or not a 401, pass through
     if (!error.response || error.response.status !== HttpStatusCode.Unauthorized) {
       return Promise.reject(error);
     }
 
-    // Prevent infinite loop
     if (originalRequest._retry) {
-      // Already retried once; reject
       return Promise.reject(error);
     }
 
-    // Mark this request as having been retried
     originalRequest._retry = true;
 
     const currentAccount = getCurrentAccount();
     if (!currentAccount?.refreshToken) {
-      // No refresh token: clear and redirect
       console.error("No refresh token available. Redirecting to sign-in.");
       cookies.remove("current-account", { path: "/" });
       if (typeof window !== "undefined") {
@@ -124,19 +109,19 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // If already refreshing, queue this request
     if (isRefreshing) {
       return new Promise<AxiosResponse<any>>((resolve, reject) => {
         failedQueue.push({ resolve, reject, config: originalRequest });
       });
     }
 
-    // Start refresh flow
     isRefreshing = true;
 
     return new Promise<AxiosResponse<any>>(async (resolve, reject) => {
+      let newAccount: AccountWithToken;
+
+      // STEP 1: Try refreshing token
       try {
-        // Perform refresh with raw axios to avoid interceptors
         const refreshResponse = await axios.post<AccountWithToken>(
           `/account/signin/refresh`,
           { refreshToken: currentAccount.refreshToken },
@@ -145,26 +130,14 @@ api.interceptors.response.use(
             withCredentials: !isDev,
             headers: {
               "Content-Type": "application/json"
-              // Optionally include old access token if backend expects it
-              // ...(currentAccount.accessToken ? { Authorization: `Bearer ${currentAccount.accessToken}` } : {})
             }
           }
         );
 
-        const newAccount = refreshResponse.data;
-        // Persist new tokens
+        newAccount = refreshResponse.data;
         setCurrentAccount(newAccount);
-
-        // Process queued requests
         processQueue(null, newAccount.accessToken);
-
-        // Retry the original request
-        originalRequest.headers = originalRequest.headers || {};
-        originalRequest.headers.Authorization = `Bearer ${newAccount.accessToken}`;
-        const retryResponse = await api.request(originalRequest);
-        resolve(retryResponse);
       } catch (refreshError) {
-        // On refresh failure: reject queued requests, clear storage, redirect
         processQueue(refreshError, null);
 
         const status = (refreshError as AxiosError)?.response?.status;
@@ -183,7 +156,19 @@ api.interceptors.response.use(
             { skipNull: true }
           );
         }
-        reject(refreshError);
+
+        isRefreshing = false;
+        return reject(refreshError);
+      }
+
+      // STEP 2: Retry the original request
+      try {
+        originalRequest.headers = originalRequest.headers || {};
+        originalRequest.headers.Authorization = `Bearer ${newAccount.accessToken}`;
+        const retryResponse = await api.request(originalRequest);
+        resolve(retryResponse);
+      } catch (retryError) {
+        reject(retryError); // Don't confuse with refreshError
       } finally {
         isRefreshing = false;
       }
@@ -191,12 +176,12 @@ api.interceptors.response.use(
   }
 );
 
-// Export services
+// Services
 export const identityService = new IdentityService(api);
 export const categoryService = new CategoryService(api);
 export const incidentService = new IncidentService(api);
 
-// Problem parsing logic unchanged
+// Error parsing
 export type Problem = {
   type: string;
   message: string;
