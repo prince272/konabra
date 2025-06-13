@@ -53,7 +53,7 @@ export const InsightsAreaChart = React.forwardRef<HTMLDivElement, InsightsAreaCh
       <div
         ref={ref}
         className="relative w-full"
-        style={{ ...divProps.style, minHeight: height }}
+        style={{ height, ...divProps.style }}
         {...divProps}
       >
         {isLoading && (
@@ -61,7 +61,7 @@ export const InsightsAreaChart = React.forwardRef<HTMLDivElement, InsightsAreaCh
             <Spinner size="lg" />
           </div>
         )}
-        <ResponsiveContainer width="100%" minHeight={height}>
+        <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data}>
             <CartesianGrid
               stroke="hsl(var(--heroui-divider) / var(--heroui-divider-opacity, var(--tw-bg-opacity)))"

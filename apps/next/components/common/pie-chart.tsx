@@ -80,7 +80,7 @@ export const InsightsPieChart = React.forwardRef<HTMLDivElement, InsightsPieChar
                     nameKey="name"
                     labelLine={false}
                     label={renderCustomizedLabel}
-                    outerRadius="80%"
+                    outerRadius="100%"
                     stroke="none"
                     strokeWidth={0}
                   >
@@ -94,7 +94,7 @@ export const InsightsPieChart = React.forwardRef<HTMLDivElement, InsightsPieChar
           )}
         </div>
         {/* Legend */}
-        <div className="mt-4 flex flex-wrap justify-center gap-4">
+        <div className="p-4 flex flex-wrap justify-center gap-4">
           {data.map(({ name, color, value }, index) => (
             <div key={`legend-${index}`} className="flex items-center space-x-2">
               <div className="h-4 w-4 rounded" style={{ backgroundColor: color }} />

@@ -337,35 +337,35 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           <CardHeader className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">Severity Insights</h3>
           </CardHeader>
-          <CardBody className="pt-0">
-            <InsightsAreaChart
-              isLoading={isLoadingSeverityInsights}
-              data={severityInsights?.series || []}
-              areas={[
-                { key: "low", label: "Low Severity", color: "hsl(var(--heroui-secondary))" },
-                { key: "medium", label: "Medium Severity", color: "hsl(var(--heroui-warning))" },
-                { key: "high", label: "High Severity", color: "hsl(var(--heroui-danger))" }
-              ]}
-            />
-          </CardBody>
+          <CardBody
+            className="pt-0 pb-4"
+            as={InsightsAreaChart}
+            isLoading={isLoadingSeverityInsights}
+            data={severityInsights?.series || []}
+            areas={[
+              { key: "low", label: "Low Severity", color: "hsl(var(--heroui-secondary))" },
+              { key: "medium", label: "Medium Severity", color: "hsl(var(--heroui-warning))" },
+              { key: "high", label: "High Severity", color: "hsl(var(--heroui-danger))" }
+            ]}
+          />
         </Card>
         <Card shadow="none">
           <CardHeader className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">Incident Categories</h3>
           </CardHeader>
-          <CardBody className="pt-0">
-            <InsightsPieChart
-              isLoading={isLoadingCategoryInsights}
-              data={(categoryInsights?.counts || []).map((item) => ({
-                name: item.name,
-                value: item.count,
-                color: getDeterministicMapping(
-                  (categoryInsights?.counts || []).map((_) => _.slug),
-                  pieChartColors
-                )[item.slug]
-              }))}
-            />
-          </CardBody>
+          <CardBody
+              className="pt-0 pb-4"
+            as={InsightsPieChart}
+            isLoading={isLoadingCategoryInsights}
+            data={(categoryInsights?.counts || []).map((item) => ({
+              name: item.name,
+              value: item.count,
+              color: getDeterministicMapping(
+                (categoryInsights?.counts || []).map((_) => _.slug),
+                pieChartColors
+              )[item.slug]
+            }))}
+          />
         </Card>
       </div>
 
