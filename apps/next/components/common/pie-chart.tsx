@@ -112,47 +112,67 @@ export const InsightsPieChart = React.forwardRef<HTMLDivElement, InsightsPieChar
 InsightsPieChart.displayName = "InsightsPieChart";
 
 export const pieChartColors = [
-  "#fdb302",
-  "#f78502",
-  "#f16502",
-  "#cc4a02",
-  "#d93a01",
-  "#ee6a5a",
-  "#d83c42",
-  "#ff4646",
-  "#e2001a",
-  "#e11c55",
-  "#e6008c",
-  "#c20086",
-  "#970d90",
-  "#7f0e86",
-  "#0f63bf",
-  "#005ea3",
-  "#9489d4",
-  "#7d7ad3",
-  "#6f60bf",
-  "#8a2ca8",
-  "#650b84",
-  "#108b9d",
-  "#2d748d",
-  "#0ab1bf",
-  "#0a7f7a",
-  "#00bf7a",
-  "#15cf45",
-  "#1b7036",
-  "#8a8a8a",
-  "#646464",
-  "#737d8b",
-  "#5a636f",
-  "#517067",
-  "#5a5d5a",
-  "#40640f",
-  "#277200",
-  "#848484",
-  "#494949",
-  "#6a737a",
-  "#404647",
-  "#6c6e5d",
-  "#756e45",
-  "#91846f"
+  // Blues & Teals
+  "#1f77b4", // blue
+  "#005ea3", // deep blue
+  "#0b486b", // rich navy
+  "#2c3e50", // midnight blue
+  "#34495e", // wet asphalt
+  "#17becf", // bright cyan
+  "#00876c", // deep teal
+  "#16a085", // green-teal
+
+  // Greens
+  "#2ca02c", // vibrant green
+  "#27ae60", // emerald
+  "#196f3d", // forest green
+  "#145a32", // deep jungle
+  "#1abc9c", // turquoise
+  "#138d75", // dark sea green
+
+  // Reds & Oranges
+  "#d62728", // red
+  "#c0392b", // dark red-orange
+  "#990000", // dark red
+  "#8b0000", // crimson
+  "#e74c3c", // red coral
+  "#e67e22", // carrot orange
+  "#f39c12", // golden orange
+  "#e55934", // tangerine
+  "#ff7f0e", // orange
+
+  // Purples & Pinks
+  "#9467bd", // purple
+  "#7d3c98", // amethyst
+  "#5e4fa2", // indigo
+  "#663399", // rebeccapurple
+  "#8e44ad", // deep purple
+  "#6c3483", // plum
+  "#c71585", // medium violet red
+  "#e377c2", // pink
+
+  // Yellows & Browns
+  "#bcbd22", // olive
+  "#b7950b", // gold-brown
+  "#6e2c00", // burnt brown
+  "#8c564b", // brown
+  "#a04000", // rust orange
+
+  // Grays & Neutrals
+  "#3b3b3b", // dark gray
+  "#1a1a1a", // near-black
+  "#2f2f2f", // charcoal
+  "#7f7f7f", // medium gray
+  "#616a6b", // slate
+  "#4d5656", // steel gray
+  "#5d6d7e", // bluish gray
+  "#212f3d", // navy-gray
+
+  // Bonus Accents
+  "#ff1493", // deep pink
+  "#db7093", // pale violet red
+  "#a93226", // scarlet
+  "#ba4a00", // copper
+  "#873600", // saddle brown
+  "#76448a", // deep mauve
 ];
