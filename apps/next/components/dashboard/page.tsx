@@ -373,7 +373,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       <div className="grid grid-cols-1">
         <Card shadow="none">
           <CardBody>
-            <MapViewer incidents={incidents} style={{ width: "100%", height: 500 }}  />
+            <MapViewer height={512} incidents={incidents}  />
           </CardBody>
         </Card>
       </div>

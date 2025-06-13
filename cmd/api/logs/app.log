@@ -4226,3 +4226,171 @@
 {"level":"warn","ts":1749839735.7443688,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
 {"level":"warn","ts":1749839735.7443688,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
 {"level":"warn","ts":1749839735.7443688,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749839764.048966,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749839764.0515583,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749839764.053757,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749839764.054698,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749839764.0555525,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749839764.0566282,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749839764.0566282,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749839811.4893746,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749839811.4933949,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749839811.4933949,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749839811.4945517,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749839811.4964964,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749839811.4990942,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749839811.5003133,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749839812.8125567,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749850036.282329,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749850036.2942464,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749850036.2948852,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749850036.297626,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749850036.299303,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749850036.299303,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749850036.2998104,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"debug","ts":1749850043.6331089,"caller":"repositories/incident.go:397","msg":"Starting GetIncidentCategoryInsights","startDate":1748736000,"endDate":1751327999.999,"unit":"2"}
+{"level":"debug","ts":1749850043.674342,"caller":"repositories/incident.go:247","msg":"Starting GetIncidentInsights","startDate":1748736000,"endDate":1751327999.999,"unit":"2"}
+{"level":"debug","ts":1749850044.483811,"caller":"repositories/incident.go:429","msg":"Incident category insights retrieved","count":7,"counts":[{"id":"0ccaaf49-ecfb-4f52-8f8a-908d5c2aca32","count":3,"name":"Pothole","slug":"pothole"},{"id":"24402c37-35ad-4dd4-b1a2-f31df9de2423","count":1,"name":"Illegal Parking","slug":"illegal-parking"},{"id":"2c6081f0-d911-4d39-be43-0b1f7bca002c","count":1,"name":"Others","slug":"others"},{"id":"8c140656-0f2a-4b8a-9030-07b5c4b3b3da","count":1,"name":"Vehicle Breakdown","slug":"vehicle-breakdown"},{"id":"a9b48181-4dab-46a3-a86f-831addbe7729","count":1,"name":"Roadworks","slug":"roadworks"},{"id":"be5106a3-89aa-4bb4-a189-774b0863581b","count":1,"name":"Fire on Road","slug":"fire-on-road"},{"id":"fbb58995-b407-4ae2-ab58-5d94a6876ed4","count":1,"name":"Broken Streetlight","slug":"broken-streetlight"}]}
+{"level":"debug","ts":1749850044.503537,"caller":"repositories/incident.go:272","msg":"Incident count retrieved","count":9}
+{"level":"debug","ts":1749850045.7035632,"caller":"repositories/incident.go:344","msg":"Date periods computed","periodsCount":30}
+{"level":"debug","ts":1749850045.7035632,"caller":"repositories/incident.go:384","msg":"Returning insights result","seriesLength":30,"totalCount":9}
+{"level":"warn","ts":1749850209.1606863,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749850209.1606863,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749850209.1625319,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749850209.1625319,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749850209.1625319,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749850209.1630373,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749850209.1630373,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"debug","ts":1749850216.1157875,"caller":"repositories/incident.go:397","msg":"Starting GetIncidentCategoryInsights","startDate":1748736000,"endDate":1751327999.999,"unit":"2"}
+{"level":"debug","ts":1749850216.1157875,"caller":"repositories/incident.go:247","msg":"Starting GetIncidentInsights","startDate":1748736000,"endDate":1751327999.999,"unit":"2"}
+{"level":"debug","ts":1749850216.6881752,"caller":"repositories/incident.go:272","msg":"Incident count retrieved","count":9}
+{"level":"debug","ts":1749850216.6971228,"caller":"repositories/incident.go:429","msg":"Incident category insights retrieved","count":7,"counts":[{"id":"0ccaaf49-ecfb-4f52-8f8a-908d5c2aca32","count":3,"name":"Pothole","slug":"pothole"},{"id":"24402c37-35ad-4dd4-b1a2-f31df9de2423","count":1,"name":"Illegal Parking","slug":"illegal-parking"},{"id":"2c6081f0-d911-4d39-be43-0b1f7bca002c","count":1,"name":"Others","slug":"others"},{"id":"8c140656-0f2a-4b8a-9030-07b5c4b3b3da","count":1,"name":"Vehicle Breakdown","slug":"vehicle-breakdown"},{"id":"a9b48181-4dab-46a3-a86f-831addbe7729","count":1,"name":"Roadworks","slug":"roadworks"},{"id":"be5106a3-89aa-4bb4-a189-774b0863581b","count":1,"name":"Fire on Road","slug":"fire-on-road"},{"id":"fbb58995-b407-4ae2-ab58-5d94a6876ed4","count":1,"name":"Broken Streetlight","slug":"broken-streetlight"}]}
+{"level":"debug","ts":1749850217.824602,"caller":"repositories/incident.go:344","msg":"Date periods computed","periodsCount":30}
+{"level":"debug","ts":1749850217.8252852,"caller":"repositories/incident.go:384","msg":"Returning insights result","seriesLength":30,"totalCount":9}
+{"level":"warn","ts":1749851016.3098586,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851016.3113668,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851016.31191,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851016.31191,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851016.3126447,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851016.314146,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851016.314146,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"debug","ts":1749851026.231149,"caller":"repositories/incident.go:397","msg":"Starting GetIncidentCategoryInsights","startDate":1748736000,"endDate":1751327999.999,"unit":"2"}
+{"level":"debug","ts":1749851026.2383544,"caller":"repositories/incident.go:247","msg":"Starting GetIncidentInsights","startDate":1748736000,"endDate":1751327999.999,"unit":"2"}
+{"level":"debug","ts":1749851027.0022705,"caller":"repositories/incident.go:429","msg":"Incident category insights retrieved","count":7,"counts":[{"id":"0ccaaf49-ecfb-4f52-8f8a-908d5c2aca32","count":3,"name":"Pothole","slug":"pothole"},{"id":"24402c37-35ad-4dd4-b1a2-f31df9de2423","count":1,"name":"Illegal Parking","slug":"illegal-parking"},{"id":"2c6081f0-d911-4d39-be43-0b1f7bca002c","count":1,"name":"Others","slug":"others"},{"id":"8c140656-0f2a-4b8a-9030-07b5c4b3b3da","count":1,"name":"Vehicle Breakdown","slug":"vehicle-breakdown"},{"id":"a9b48181-4dab-46a3-a86f-831addbe7729","count":1,"name":"Roadworks","slug":"roadworks"},{"id":"be5106a3-89aa-4bb4-a189-774b0863581b","count":1,"name":"Fire on Road","slug":"fire-on-road"},{"id":"fbb58995-b407-4ae2-ab58-5d94a6876ed4","count":1,"name":"Broken Streetlight","slug":"broken-streetlight"}]}
+{"level":"debug","ts":1749851027.100741,"caller":"repositories/incident.go:272","msg":"Incident count retrieved","count":9}
+{"level":"debug","ts":1749851028.1451833,"caller":"repositories/incident.go:344","msg":"Date periods computed","periodsCount":30}
+{"level":"debug","ts":1749851028.1451833,"caller":"repositories/incident.go:384","msg":"Returning insights result","seriesLength":30,"totalCount":9}
+{"level":"warn","ts":1749851057.7130344,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851057.714553,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851057.71515,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851057.71515,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851057.7162316,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851057.7162316,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851057.716768,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"debug","ts":1749851063.9164937,"caller":"repositories/incident.go:397","msg":"Starting GetIncidentCategoryInsights","startDate":1748736000,"endDate":1751327999.999,"unit":"2"}
+{"level":"debug","ts":1749851064.4376895,"caller":"repositories/incident.go:429","msg":"Incident category insights retrieved","count":7,"counts":[{"id":"0ccaaf49-ecfb-4f52-8f8a-908d5c2aca32","count":3,"name":"Pothole","slug":"pothole"},{"id":"24402c37-35ad-4dd4-b1a2-f31df9de2423","count":1,"name":"Illegal Parking","slug":"illegal-parking"},{"id":"2c6081f0-d911-4d39-be43-0b1f7bca002c","count":1,"name":"Others","slug":"others"},{"id":"8c140656-0f2a-4b8a-9030-07b5c4b3b3da","count":1,"name":"Vehicle Breakdown","slug":"vehicle-breakdown"},{"id":"a9b48181-4dab-46a3-a86f-831addbe7729","count":1,"name":"Roadworks","slug":"roadworks"},{"id":"be5106a3-89aa-4bb4-a189-774b0863581b","count":1,"name":"Fire on Road","slug":"fire-on-road"},{"id":"fbb58995-b407-4ae2-ab58-5d94a6876ed4","count":1,"name":"Broken Streetlight","slug":"broken-streetlight"}]}
+{"level":"debug","ts":1749851065.399931,"caller":"repositories/incident.go:247","msg":"Starting GetIncidentInsights","startDate":1748736000,"endDate":1751327999.999,"unit":"2"}
+{"level":"debug","ts":1749851066.1362517,"caller":"repositories/incident.go:272","msg":"Incident count retrieved","count":9}
+{"level":"debug","ts":1749851067.3802433,"caller":"repositories/incident.go:344","msg":"Date periods computed","periodsCount":30}
+{"level":"debug","ts":1749851067.3802433,"caller":"repositories/incident.go:384","msg":"Returning insights result","seriesLength":30,"totalCount":9}
+{"level":"warn","ts":1749851138.1659331,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851138.1664398,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851138.1664398,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851138.1682427,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851138.1682427,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851138.1682427,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851138.1692955,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"debug","ts":1749851145.0690024,"caller":"repositories/incident.go:397","msg":"Starting GetIncidentCategoryInsights","startDate":1748736000,"endDate":1751327999.999,"unit":"2"}
+{"level":"debug","ts":1749851145.0690024,"caller":"repositories/incident.go:247","msg":"Starting GetIncidentInsights","startDate":1748736000,"endDate":1751327999.999,"unit":"2"}
+{"level":"debug","ts":1749851145.3296838,"caller":"repositories/incident.go:272","msg":"Incident count retrieved","count":9}
+{"level":"debug","ts":1749851145.5930488,"caller":"repositories/incident.go:429","msg":"Incident category insights retrieved","count":7,"counts":[{"id":"0ccaaf49-ecfb-4f52-8f8a-908d5c2aca32","count":3,"name":"Pothole","slug":"pothole"},{"id":"24402c37-35ad-4dd4-b1a2-f31df9de2423","count":1,"name":"Illegal Parking","slug":"illegal-parking"},{"id":"2c6081f0-d911-4d39-be43-0b1f7bca002c","count":1,"name":"Others","slug":"others"},{"id":"8c140656-0f2a-4b8a-9030-07b5c4b3b3da","count":1,"name":"Vehicle Breakdown","slug":"vehicle-breakdown"},{"id":"a9b48181-4dab-46a3-a86f-831addbe7729","count":1,"name":"Roadworks","slug":"roadworks"},{"id":"be5106a3-89aa-4bb4-a189-774b0863581b","count":1,"name":"Fire on Road","slug":"fire-on-road"},{"id":"fbb58995-b407-4ae2-ab58-5d94a6876ed4","count":1,"name":"Broken Streetlight","slug":"broken-streetlight"}]}
+{"level":"debug","ts":1749851146.369916,"caller":"repositories/incident.go:344","msg":"Date periods computed","periodsCount":30}
+{"level":"debug","ts":1749851146.369916,"caller":"repositories/incident.go:384","msg":"Returning insights result","seriesLength":30,"totalCount":9}
+{"level":"warn","ts":1749851316.0638328,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851316.0654757,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851316.0664227,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851316.0669303,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851316.0669303,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851316.0669303,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851316.0674624,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851317.7332456,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"debug","ts":1749851320.132426,"caller":"repositories/incident.go:397","msg":"Starting GetIncidentCategoryInsights","startDate":1748736000,"endDate":1751327999.999,"unit":"2"}
+{"level":"debug","ts":1749851320.1329446,"caller":"repositories/incident.go:247","msg":"Starting GetIncidentInsights","startDate":1748736000,"endDate":1751327999.999,"unit":"2"}
+{"level":"debug","ts":1749851320.65141,"caller":"repositories/incident.go:272","msg":"Incident count retrieved","count":9}
+{"level":"debug","ts":1749851320.6601655,"caller":"repositories/incident.go:429","msg":"Incident category insights retrieved","count":7,"counts":[{"id":"0ccaaf49-ecfb-4f52-8f8a-908d5c2aca32","count":3,"name":"Pothole","slug":"pothole"},{"id":"24402c37-35ad-4dd4-b1a2-f31df9de2423","count":1,"name":"Illegal Parking","slug":"illegal-parking"},{"id":"2c6081f0-d911-4d39-be43-0b1f7bca002c","count":1,"name":"Others","slug":"others"},{"id":"8c140656-0f2a-4b8a-9030-07b5c4b3b3da","count":1,"name":"Vehicle Breakdown","slug":"vehicle-breakdown"},{"id":"a9b48181-4dab-46a3-a86f-831addbe7729","count":1,"name":"Roadworks","slug":"roadworks"},{"id":"be5106a3-89aa-4bb4-a189-774b0863581b","count":1,"name":"Fire on Road","slug":"fire-on-road"},{"id":"fbb58995-b407-4ae2-ab58-5d94a6876ed4","count":1,"name":"Broken Streetlight","slug":"broken-streetlight"}]}
+{"level":"debug","ts":1749851321.4357593,"caller":"repositories/incident.go:344","msg":"Date periods computed","periodsCount":30}
+{"level":"debug","ts":1749851321.4357593,"caller":"repositories/incident.go:384","msg":"Returning insights result","seriesLength":30,"totalCount":9}
+{"level":"warn","ts":1749851427.0790393,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851427.0790393,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851923.2737134,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851923.2737134,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851975.5805683,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749851975.5820708,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852058.2748137,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852067.3622272,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852070.8646472,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852075.1785386,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852089.6862347,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852098.424107,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852106.3385878,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852119.999706,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852135.8805003,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852143.445451,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852153.5067139,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852161.1107538,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852168.3096318,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852177.338611,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852189.1012523,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852196.5856614,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852205.7308636,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852214.9427361,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852222.2085984,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852271.7898993,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852701.2747316,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852701.2747316,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852732.984015,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749852775.392444,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749853109.8512614,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749853119.7173526,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749853128.9139469,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749853136.0425942,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749853153.6778255,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749853189.5866685,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749853203.8327284,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749853631.658463,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749853644.4849496,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749853692.830375,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749853828.948115,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749853838.2895677,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749853847.4557211,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749853880.4869406,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749854203.817337,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749854272.6011763,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749854358.29594,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749854410.900691,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749854731.1845655,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749854741.354652,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749854770.035544,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749855002.63033,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749855002.63033,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749855049.9171023,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749855058.373337,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749855101.2152402,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749855110.705954,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749855175.958051,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749855190.439757,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749855221.5623436,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749855232.3695478,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749855288.4505317,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749855299.3214915,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749855299.3214915,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749855299.3237646,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749855299.3237646,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749855299.3244898,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"warn","ts":1749855299.325058,"caller":"helpers/jwt.go:363","msg":"Failed to verify token","error":"failed to parse token: token has invalid claims: token is expired"}
+{"level":"debug","ts":1749855305.9560888,"caller":"repositories/incident.go:410","msg":"Starting GetIncidentCategoryInsights","startDate":1748736000,"endDate":1751327999.999,"unit":"2"}
+{"level":"debug","ts":1749855305.9649384,"caller":"repositories/incident.go:260","msg":"Starting GetIncidentInsights","startDate":1748736000,"endDate":1751327999.999,"unit":"2"}
+{"level":"debug","ts":1749855306.8134003,"caller":"repositories/incident.go:285","msg":"Incident count retrieved","count":6}
+{"level":"debug","ts":1749855306.8144627,"caller":"repositories/incident.go:442","msg":"Incident category insights retrieved","count":6,"counts":[{"id":"023c6e86-c3a0-474c-aad1-305ed5938614","count":1,"name":"Accident (Minor Injury)","slug":"accident-minor-injury"},{"id":"0ccaaf49-ecfb-4f52-8f8a-908d5c2aca32","count":1,"name":"Pothole","slug":"pothole"},{"id":"68596e4a-822c-40d0-b5ed-81bfdad7b69b","count":1,"name":"Armed Robbery/Attack","slug":"armed-robberyattack"},{"id":"eba530db-4b06-4e7f-94cf-ca85273f3f58","count":1,"name":"Traffic Jam","slug":"traffic-jam"},{"id":"fb3cbcc0-5de4-4d6c-9bae-576aa24ecc5e","count":1,"name":"Debris on Road","slug":"debris-on-road"},{"id":"fbb58995-b407-4ae2-ab58-5d94a6876ed4","count":1,"name":"Broken Streetlight","slug":"broken-streetlight"}]}
+{"level":"debug","ts":1749855308.2626708,"caller":"repositories/incident.go:357","msg":"Date periods computed","periodsCount":30}
+{"level":"debug","ts":1749855308.2626708,"caller":"repositories/incident.go:397","msg":"Returning insights result","seriesLength":30,"totalCount":6}

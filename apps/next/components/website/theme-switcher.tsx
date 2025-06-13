@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 import { Laptop, Moon, Sun, ChevronDown } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -14,6 +14,11 @@ const options = [
 
 export const ThemeSwitcher: React.FC = () => {
   const { theme = "system", setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const selectedOption = options.find((opt) => opt.key === theme) || options[2];
 
@@ -26,8 +31,8 @@ export const ThemeSwitcher: React.FC = () => {
           endContent={<ChevronDown size={20} />}
           className="capitalize justify-between"
         >
-          {selectedOption.icon}
-          {selectedOption.label}
+          {mounted ? selectedOption.icon : <Laptop size={20} />}
+          {mounted ? selectedOption.label : "System"}
         </Button>
       </DropdownTrigger>
       <DropdownMenu
@@ -35,7 +40,7 @@ export const ThemeSwitcher: React.FC = () => {
         variant="flat"
         disallowEmptySelection
         selectionMode="single"
-        selectedKeys={[theme]}
+        selectedKeys={mounted ? [theme] : []}
         onSelectionChange={(keys) => {
           const selected = Array.from(keys)[0] as string;
           setTheme(selected);

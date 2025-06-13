@@ -33,6 +33,7 @@ export type UpdateIncidentForm = Partial<CreateIncidentForm>;
 
 export type Incident = {
   id: string;
+  code: string;
   summary: string;
   severity: IncidentSeverity;
   status: IncidentStatus;

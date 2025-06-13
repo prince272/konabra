@@ -166,20 +166,6 @@ export function AddEditIncidentModal({
               }`}
             >
               <Controller
-                name="summary"
-                control={form.control}
-                render={({ field }) => (
-                  <Textarea
-                    {...field}
-                    label="Summary"
-                    placeholder="Summarize the incident"
-                    rows={3}
-                    isInvalid={!!form.formState.errors.summary}
-                    errorMessage={form.formState.errors.summary?.message}
-                  />
-                )}
-              />
-              <Controller
                 name="categoryId"
                 control={form.control}
                 render={({ field }) => (
@@ -255,6 +241,20 @@ export function AddEditIncidentModal({
                         form.setValue("latitude", Number(location.lat) || 0);
                       }
                     }}
+                  />
+                )}
+              />
+              <Controller
+                name="summary"
+                control={form.control}
+                render={({ field }) => (
+                  <Textarea
+                    {...field}
+                    label="Summary"
+                    placeholder="Summarize the incident"
+                    rows={3}
+                    isInvalid={!!form.formState.errors.summary}
+                    errorMessage={form.formState.errors.summary?.message}
                   />
                 )}
               />

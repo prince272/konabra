@@ -18,6 +18,7 @@ type Incident struct {
 	CategoryId   string              `json:"categoryId"`
 	Category     *Category           `gorm:"foreignKey:CategoryId;" json:"category"`
 	Id           string              `gorm:"primaryKey" json:"id"`
+	Code         string              `json:"code"`
 	Summary      string              `json:"summary"`
 	Severity     IncidentSeverity    `json:"severity"`
 	Status       IncidentStatus      `json:"status"`

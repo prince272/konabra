@@ -115,6 +115,19 @@ func (repository *IncidentRepository) GetIncidentById(id string) *models.Inciden
 	return incident
 }
 
+func (repository *IncidentRepository) IncidentCodeExists(code string) bool {
+	var count int64
+	result := repository.defaultDB.Model(&models.Incident{}).
+		Where("LOWER(code) = ?", strings.ToLower(code)).
+		Count(&count)
+
+	if result.Error != nil {
+		panic(fmt.Errorf("failed to check incident code existence: %w", result.Error))
+	}
+
+	return count > 0
+}
+
 func (repository *IncidentRepository) GetPaginatedIncidents(filter IncidentPaginatedFilter) (items []models.Incident, count int64) {
 	query := repository.defaultDB.Model(&models.Incident{}).
 		Preload("ReportedBy").

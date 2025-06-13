@@ -11,6 +11,7 @@ import (
 	"github.com/prince272/konabra/internal/problems"
 	"github.com/prince272/konabra/internal/repositories"
 	"github.com/prince272/konabra/pkg/period"
+	"github.com/prince272/konabra/utils"
 	"go.uber.org/zap"
 )
 
@@ -35,6 +36,7 @@ type UpdateIncidentForm struct {
 
 type IncidentModel struct {
 	Id           string                  `json:"id"`
+	Code         string                  `json:"code"`
 	Summary      string                  `json:"summary"`
 	Severity     models.IncidentSeverity `json:"severity"`
 	Status       models.IncidentStatus   `json:"status"`
@@ -74,6 +76,7 @@ func (service *IncidentService) CreateIncident(userId string, form CreateInciden
 	}
 
 	incident.Id = uuid.New().String()
+	incident.Code = utils.GenerateUniqueCode("INC", 5, utils.NumericUniqueCode, "", service.incidentRepository.IncidentCodeExists)
 	incident.ReportedById = userId
 	incident.ReportedAt = time.Now()
 	incident.UpdatedAt = incident.ReportedAt

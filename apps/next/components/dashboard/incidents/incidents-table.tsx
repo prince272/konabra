@@ -53,6 +53,7 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
       className="flex flex-1"
     >
       <TableHeader>
+        <TableColumn>CODE</TableColumn>
         <TableColumn>CATEGORY</TableColumn>
         <TableColumn>TIME</TableColumn>
         <TableColumn>SEVERITY</TableColumn>
@@ -101,6 +102,7 @@ const IncidentsTable: React.FC<IncidentsTableProps> = ({
       >
         {(isError ? [] : incidents).map((incident) => (
           <TableRow key={incident.id}>
+            <TableCell>{incident.code}</TableCell>
             <TableCell className="text-nowrap">{incident.category?.name}</TableCell>
             <TableCell className="text-nowrap">
               <div className="flex items-center gap-2">
