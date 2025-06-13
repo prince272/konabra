@@ -21,6 +21,7 @@ import {
   IncidentStatistics
 } from "@/services/incident-service";
 import { InsightsAreaChart } from "../common/area-chart";
+import MapViewer from "../common/map-viewer";
 import { InsightsPieChart, pieChartColors } from "../common/pie-chart";
 import { StatCard } from "../common/stats-card";
 import IncidentsTable from "./incidents/incidents-table";
@@ -338,7 +339,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             <h3 className="text-lg font-semibold">Severity Insights</h3>
           </CardHeader>
           <CardBody
-            className="pt-0 pb-4"
+            className="pb-4 pt-0"
             as={InsightsAreaChart}
             isLoading={isLoadingSeverityInsights}
             data={severityInsights?.series || []}
@@ -354,7 +355,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             <h3 className="text-lg font-semibold">Incident Categories</h3>
           </CardHeader>
           <CardBody
-              className="pt-0 pb-4"
+            className="pb-4 pt-0"
             as={InsightsPieChart}
             isLoading={isLoadingCategoryInsights}
             data={(categoryInsights?.counts || []).map((item) => ({
@@ -366,6 +367,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               )[item.slug]
             }))}
           />
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1">
+        <Card shadow="none">
+          <CardBody>
+            <MapViewer style={{ width: "100%", height: 500 }}  />
+          </CardBody>
         </Card>
       </div>
 

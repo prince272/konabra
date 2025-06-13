@@ -22,6 +22,7 @@ export const ThemeSwitcher: React.FC = () => {
       <DropdownTrigger>
         <Button
           variant="flat"
+          radius="full"
           endContent={<ChevronDown size={20} />}
           className="capitalize justify-between"
         >
