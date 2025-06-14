@@ -116,7 +116,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         sort: "createdAt",
         order: "desc",
         offset: 0,
-        limit: 5
+        limit: 100
       };
       const [data, problem] = await incidentService.getPaginatedIncidents(query);
       if (!problem) setIncidents(data.items ?? []);

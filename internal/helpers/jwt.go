@@ -119,8 +119,7 @@ func (helper *JwtHelper) RevokeExpiredTokens(subject string) error {
 	currentTime := time.Now()
 	result := helper.defaultDb.
 		Model(&models.JwtToken{}).
-		Where("subject = ? AND (access_token_expires_at < ? OR refresh_token_expires_at < ?)",
-			subject, currentTime, currentTime).
+		Where("subject = ? AND refresh_token_expires_at < ?", subject, currentTime).
 		Delete(&models.JwtToken{})
 	if result.Error != nil {
 		return fmt.Errorf("failed to revoke expired tokens: %w", result.Error)
@@ -131,28 +130,28 @@ func (helper *JwtHelper) RevokeExpiredTokens(subject string) error {
 func (helper *JwtHelper) RevokeToken(subject, tokenString string) error {
 	now := time.Now()
 
-	// 1) Always delete any tokens for this subject that have expired
+	// 1) Delete tokens that are fully expired (both access and refresh expired)
 	if err := helper.defaultDb.
 		Model(&models.JwtToken{}).
-		Where("subject = ? AND (access_token_expires_at < ? OR refresh_token_expires_at < ?)",
-			subject, now, now).
+		Where("subject = ? AND access_token_expires_at < ? AND refresh_token_expires_at < ?", subject, now, now).
 		Delete(&models.JwtToken{}).Error; err != nil {
 		return err
 	}
 
-	// 2) If a tokenString was provided, delete that token (even if not yet expired)
+	// 2) If a tokenString was provided, delete that token (even if not expired)
 	if tokenString == "" {
 		return nil
 	}
+
 	tokenHash := utils.HashToken(tokenString)
 	if tokenHash == "" {
 		// hashing failed or input was empty—nothing more to revoke
 		return nil
 	}
+
 	if err := helper.defaultDb.
 		Model(&models.JwtToken{}).
-		Where("subject = ? AND (access_token_hash = ? OR refresh_token_hash = ?)",
-			subject, tokenHash, tokenHash).
+		Where("subject = ? AND (access_token_hash = ? OR refresh_token_hash = ?)", subject, tokenHash, tokenHash).
 		Delete(&models.JwtToken{}).Error; err != nil {
 		return err
 	}
