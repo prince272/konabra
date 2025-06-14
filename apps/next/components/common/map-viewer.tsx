@@ -114,11 +114,13 @@ const MapViewer = forwardRef<MapRef, MapViewerProps>(
                   value={incident.id}
                   classNames={{
                     base: cn(
-                      "w-full flex flex-col gap-2 m-0 p-4 rounded-xl border-2 border-transparent hover:bg-default-100 transition",
+                      "w-full max-w-full items-start flex flex-col gap-2 m-0 p-0 rounded-xl border-2 border-transparent hover:bg-default-100 transition",
                       selectedIncidentId === incident.id && "border-primary bg-default-100"
                     ),
-                    wrapper: "hidden"
+                    labelWrapper: "w-full p-4 m-0",
+                    wrapper: "hidden",
                   }}
+                  as={"button"}
                 >
                   <div className="flex w-full items-start justify-between gap-4">
                     <div className="flex flex-1 flex-col gap-1">
