@@ -18,6 +18,7 @@ import { useAccountState } from "@/states";
 import { useBreakpoint } from "@/hooks";
 import { useModalRouter } from "@/components/common/modals";
 import { InputPhone } from "../common/input-phone";
+import { LogosFacebook, LogosGoogleIcon } from "../iconts";
 
 export default function SignUpModal({
   isOpen,
@@ -238,14 +239,14 @@ export default function SignUpModal({
                       className="dark dark:light"
                       variant="solid"
                       radius="full"
-                      // startContent={<Google size={20} />}
+                      startContent={<LogosGoogleIcon size={20} />}
                     >
                       Continue with Google
                     </Button>
                     <Button
                       variant="flat"
                       radius="full"
-                      // startContent={<Facebook size={20} />}
+                      startContent={<LogosFacebook size={20} />}
                     >
                       Continue with Facebook
                     </Button>

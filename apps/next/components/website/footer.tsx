@@ -1,14 +1,11 @@
 import React from "react";
 import { Link } from "@heroui/link";
 import {
-  Facebook,
   FileText,
-  Instagram,
-  Linkedin,
   MapPin,
   ShieldCheck,
-  Twitter
 } from "lucide-react";
+import { LogosFacebook, LogosInstagramIcon, LogosLinkedinIcon, LogosX } from "../iconts";
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -44,10 +41,10 @@ export const Footer = () => {
   ];
 
   const socialLinks = [
-    { icon: Facebook, href: "#" },
-    { icon: Twitter, href: "#" },
-    { icon: Instagram, href: "#" },
-    { icon: Linkedin, href: "#" }
+    { icon: LogosFacebook, href: "#" },
+    { icon: LogosX, href: "#" },
+    { icon: LogosInstagramIcon, href: "#" },
+    { icon: LogosLinkedinIcon, href: "#" }
   ];
 
   return (
@@ -73,7 +70,7 @@ export const Footer = () => {
                     key={index}
                     href={link.href}
                     isExternal
-                    className="rounded-full bg-primary p-2 transition-transform hover:scale-110"
+                    className="rounded-full bg-white shadow-sm p-2 transition-transform hover:scale-110"
                   >
                     <IconComponent size={20} />
                   </Link>

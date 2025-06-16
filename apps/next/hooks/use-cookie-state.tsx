@@ -27,6 +27,12 @@ type CookieOptions = {
   sameSite?: "strict" | "lax" | "none";
 };
 
+// ----- DEFAULT OPTIONS -----
+const defaultCookieOptions: CookieOptions = {
+  path: "/",
+  expires: new Date("9999-12-31T23:59:59.999Z"), // Indefinitely persistent
+};
+
 // ----- BROADCAST CHANNEL FOR CROSS-TAB SYNC -----
 const COOKIE_CHANNEL = "cookie-sync-channel";
 const broadcastChannel = typeof window !== "undefined" ? new BroadcastChannel(COOKIE_CHANNEL) : null;
@@ -80,7 +86,7 @@ export function useCookieState<S>(
   options?: CookieOptions
 ): [S, Dispatch<SetStateAction<S>>] {
   const cookies = useCookies();
-  const optionsRef = useRef(options);
+  const optionsRef = useRef<CookieOptions>(options ?? defaultCookieOptions);
   const isMountedRef = useRef(false);
 
   const initial = useRef(() => {
@@ -124,9 +130,8 @@ export function useCookieState<S>(
     if (isMountedRef.current) {
       const serializedState =
         typeof state === "object" && state !== null ? JSON.parse(JSON.stringify(state)) : state;
-      cookies.set(key, serializedState, optionsRef.current || { path: "/" });
+      cookies.set(key, serializedState, optionsRef.current);
       subject.next(serializedState);
-      // Broadcast the change to other tabs
       broadcastChannel?.postMessage({ key, value: serializedState });
     } else {
       isMountedRef.current = true;
@@ -142,9 +147,8 @@ export function useCookieState<S>(
         typeof newValue === "object" && newValue !== null
           ? JSON.parse(JSON.stringify(newValue))
           : newValue;
-      cookies.set(key, serializedValue, optionsRef.current || { path: "/" });
+      cookies.set(key, serializedValue, optionsRef.current);
       subject.next(serializedValue);
-      // Broadcast the change to other tabs
       broadcastChannel?.postMessage({ key, value: serializedValue });
     },
     [subject, key, cookies]
