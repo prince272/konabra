@@ -10,18 +10,31 @@ import Map, {
   NavigationControl
 } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { Button } from "@heroui/button";
+import { Checkbox } from "@heroui/checkbox";
 import { Chip } from "@heroui/chip";
+import { Input } from "@heroui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@heroui/popover";
 import { Radio, RadioGroup } from "@heroui/radio";
+import { Select, SelectItem } from "@heroui/select";
 import { cn } from "@heroui/theme";
 import { formatDistanceToNow } from "date-fns";
 import { upperFirst } from "lodash";
-import { Clock, MapPin, User } from "lucide-react";
-import { Incident, IncidentSeverity } from "@/services/incident-service";
+import { Clock, Filter, Layers, MapPin, Search, User, X } from "lucide-react";
+import { Incident, IncidentSeverity, IncidentStatus } from "@/services/incident-service";
 import { Remount } from "./remount";
 
 const MAPBOX_TOKEN =
   "pk.eyJ1IjoicHJpbmNlb3d1c3UyNzIiLCJhIjoiY21ibmJ1Z2pyMWI2NDJzcXdsZjB4NnFqbCJ9.75HATZVp3DMj5lzWmuvI-w";
+
+// Map style options
+const MAP_STYLES = [
+  { id: "streets", name: "Streets", url: "mapbox://styles/mapbox/streets-v11" },
+  { id: "satellite", name: "Satellite", url: "mapbox://styles/mapbox/satellite-streets-v11" },
+  { id: "light", name: "Light", url: "mapbox://styles/mapbox/light-v10" },
+  { id: "dark", name: "Dark", url: "mapbox://styles/mapbox/dark-v10" },
+  { id: "outdoors", name: "Outdoors", url: "mapbox://styles/mapbox/outdoors-v11" }
+];
 
 interface MapViewerProps extends MapProps {
   incidents?: Incident[];
@@ -30,6 +43,7 @@ interface MapViewerProps extends MapProps {
 
 const MapViewer = forwardRef<MapRef, MapViewerProps>(
   ({ incidents = [], height = "100%", ...props }, externalRef) => {
+    const [mapStyle, setMapStyle] = useState(MAP_STYLES[0].url);
     const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
     const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
 
@@ -118,7 +132,7 @@ const MapViewer = forwardRef<MapRef, MapViewerProps>(
                       selectedIncidentId === incident.id && "border-primary bg-default-100"
                     ),
                     labelWrapper: "w-full p-4 m-0",
-                    wrapper: "hidden",
+                    wrapper: "hidden"
                   }}
                   as={"button"}
                 >
@@ -201,12 +215,12 @@ const MapViewer = forwardRef<MapRef, MapViewerProps>(
           </div>
         </div>
 
-        <div className="flex-1">
+        <div className="relative flex-1">
           <Map
             ref={mapRef}
             mapboxAccessToken={MAPBOX_TOKEN}
             initialViewState={initialViewState}
-            mapStyle="mapbox://styles/mapbox/streets-v9"
+            mapStyle={mapStyle}
             reuseMaps
             {...props}
           >
@@ -284,11 +298,11 @@ const MapViewer = forwardRef<MapRef, MapViewerProps>(
                         </div>
                         <div className="flex">
                           <span className="w-20 shrink-0 text-default-500">Category</span>
-                          <span className="text-default-800">{incident.category.name}</span>
+                          <span className="text-default-800">{incident.category?.name}</span>
                         </div>
                         <div className="flex">
                           <span className="w-20 shrink-0 text-default-500">Reported by</span>
-                          <span className="text-default-800">{incident.reportedBy.fullName}</span>
+                          <span className="text-default-800">{incident.reportedBy?.fullName}</span>
                         </div>
                         <div className="flex">
                           <span className="w-20 shrink-0 text-default-500">Reported at</span>
@@ -313,6 +327,28 @@ const MapViewer = forwardRef<MapRef, MapViewerProps>(
             <NavigationControl position="top-left" />
             <FullscreenControl position="top-left" />
           </Map>
+
+          {/* Map Style Switcher */}
+          <div className="absolute right-3 top-3 z-10 rounded-lg shadow-md">
+            <Select
+              size="sm"
+              selectedKeys={[mapStyle]}
+              onSelectionChange={(selection) => {
+                if (selection instanceof Set && selection.size > 0) {
+                  const value = Array.from(selection)[0];
+                  setMapStyle(String(value));
+                }
+              }}
+              placeholder="Select map style"
+              startContent={<Layers size={16} className="text-default-500" />}
+              className="w-32"
+              aria-label="Map style"
+            >
+              {MAP_STYLES.map((style) => (
+                <SelectItem key={style.url}>{style.name}</SelectItem>
+              ))}
+            </Select>
+          </div>
         </div>
       </div>
     );

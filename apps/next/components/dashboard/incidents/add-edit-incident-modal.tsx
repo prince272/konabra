@@ -172,8 +172,13 @@ export function AddEditIncidentModal({
                   <Select
                     {...field}
                     label="Category"
-                    selectedKeys={new Set([field.value])}
-                    onChange={(e) => field.onChange(e.target.value)}
+                    selectedKeys={[field.value]}
+                    onSelectionChange={(selection) => {
+                      if (selection instanceof Set && selection.size > 0) {
+                        const value = Array.from(selection)[0];
+                        field.onChange(String(value));
+                      }
+                    }}
                     isInvalid={!!form.formState.errors.categoryId}
                     aria-label="Category"
                   >
