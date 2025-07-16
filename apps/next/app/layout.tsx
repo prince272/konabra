@@ -35,7 +35,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     acc[name] = value;
     return acc;
   }, {});
-
+  
   return (
     <html suppressHydrationWarning lang="en">
       <head />

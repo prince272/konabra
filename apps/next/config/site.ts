@@ -1,8 +1,8 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-  name: "Next.js + HeroUI",
-  description: "Make beautiful websites regardless of your design experience.",
+  name: "Konabra",
+  description: "Konabra is a community-powered platform that helps make roads safer in Ghana through real-time reporting, alerts, and data-driven insights.",
   navItems: [
     {
       label: "Home",
